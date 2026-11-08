@@ -244,7 +244,8 @@ public class NotificationCenterController {
                     ),
                     "Phù hợp cho ứng viên đang tìm cơ hội online linh hoạt và muốn tìm hiểu rõ hơn trước khi đăng ký.",
                     "* Tùy thuộc vào mức độ tham gia và hiệu quả công việc.",
-                    "https://topcv.vn/viec-lam/game-tester"
+                    "https://topcv.vn/viec-lam/game-tester",
+                    "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80"
             ));
 
             jobCards.add(new EmailCenterService.JobCardItem(
@@ -263,7 +264,8 @@ public class NotificationCenterController {
                     ),
                     "Dành cho các bạn trẻ đam mê game, có thời gian rảnh rỗi muốn vừa giải trí vừa có thêm thu nhập.",
                     "* Thù lao thanh toán theo tuần dựa trên số lượng nhiệm vụ kiểm thử hoàn thành.",
-                    "https://gamehub.vn/tuyen-dung-game/"
+                    "https://gamehub.vn/tuyen-dung-game/",
+                    "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80"
             ));
 
             jobCards.add(new EmailCenterService.JobCardItem(
@@ -282,7 +284,8 @@ public class NotificationCenterController {
                     ),
                     "Phù hợp cho ứng viên cần việc làm thêm ổn định tại nhà không gò bó thời gian.",
                     "* Mức thu nhập lũy tiến theo khối lượng dữ liệu xử lý thực tế.",
-                    "https://www.topcv.vn/viec-lam-remote"
+                    "https://www.topcv.vn/viec-lam-remote",
+                    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80"
             ));
 
             jobCards.add(new EmailCenterService.JobCardItem(
@@ -300,7 +303,8 @@ public class NotificationCenterController {
                     ),
                     "Dành cho sinh viên CNTT hoặc người mới học lập trình muốn trải nghiệm môi trường thực tế.",
                     "* Yêu cầu tinh thần chủ động học hỏi và tư duy logic cơ bản.",
-                    "https://itviec.com/it-jobs/intern"
+                    "https://itviec.com/it-jobs/intern",
+                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop&q=80"
             ));
 
             // Persist jobs to live_articles in PostgreSQL

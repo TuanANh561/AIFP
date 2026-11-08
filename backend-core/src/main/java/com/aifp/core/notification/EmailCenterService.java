@@ -170,8 +170,25 @@ public class EmailCenterService {
             java.util.List<String> bulletPoints,
             String description,
             String note,
-            String applyUrl
-    ) {}
+            String applyUrl,
+            String imageUrl
+    ) {
+        public JobCardItem(
+                String sourceName,
+                String sourceBadge,
+                String title,
+                String subtitle,
+                String locationPill,
+                String employmentType,
+                String salaryRange,
+                java.util.List<String> bulletPoints,
+                String description,
+                String note,
+                String applyUrl
+        ) {
+            this(sourceName, sourceBadge, title, subtitle, locationPill, employmentType, salaryRange, bulletPoints, description, note, applyUrl, "");
+        }
+    }
 
     public String renderCardBasedDigestHtml(String digestTitle, java.util.List<DigestArticleCard> articles) {
         StringBuilder html = new StringBuilder();
@@ -259,8 +276,11 @@ public class EmailCenterService {
 
         if (jobs != null) {
             for (JobCardItem job : jobs) {
-                html.append("<div class='job-card'>")
-                        .append("<div class='job-header'>")
+                html.append("<div class='job-card'>");
+                if (job.imageUrl() != null && !job.imageUrl().isBlank()) {
+                    html.append("<img src='").append(job.imageUrl()).append("' alt='").append(job.title()).append("' style='width:100%;height:140px;object-fit:cover;border-radius:10px;margin-bottom:14px;display:block;' />");
+                }
+                html.append("<div class='job-header'>")
                         .append("<div class='job-source'>")
                         .append("<span>").append(job.sourceName()).append("</span>")
                         .append("<span class='job-tag-sponsored'>&bull; ").append(job.sourceBadge()).append("</span>")

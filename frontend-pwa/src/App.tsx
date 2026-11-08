@@ -1362,213 +1362,303 @@ export default function App() {
         {/* TAB 1: ASSISTANT (TRỢ LÝ CÁ NHÂN & TƯƠNG TÁC THÔNG MINH)                  */}
         {/* ========================================================================= */}
         {activeTab === 'assistant' && (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: 920, margin: '0 auto', width: '100%' }}>
-            {/* Top Assistant Status Strip */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 14px',
-                marginBottom: 16,
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                flexWrap: 'wrap',
-                gap: 10,
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
-                <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Trợ lý</span>
-                <span className="mono-pill" style={{ fontSize: 11 }}>{profile.personaTitle}</span>
-                <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>
-                  {profile.scheduledTimes[0]} · {profile.deliveryEmail}
-                </span>
-              </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <button
-                  className="btn btn-secondary"
-                  onClick={handleOpenPreferencesModal}
-                  style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
-                >
-                  <IconSliders />
-                  <span>Tùy biến</span>
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  onClick={handleSendTestEmail}
-                  disabled={isSendingTestEmail}
-                  style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
-                >
-                  <IconSend />
-                  <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi mail'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Action Suggestion Pills (Crisp, High-Signal) */}
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-              {[
-                { label: 'Điểm tin', query: 'Điểm tin công nghệ hôm nay', icon: <IconSearch /> },
-                { label: 'Việc làm IT', query: 'Tìm việc làm Flutter và Java mới nhất', icon: <IconSearch /> },
-                { label: 'Giá Keychron', query: 'Kiểm tra giá bàn phím Keychron K2 Pro', icon: <IconSliders /> },
-                { label: 'Quét hóa đơn', query: 'Quét hóa đơn chi tiêu cà phê', icon: <IconCamera /> },
-              ].map((p, idx) => (
-                <div
-                  key={idx}
-                  className="quick-prompt-pill"
-                  onClick={() => setChatInput(p.query)}
-                >
-                  {p.icon}
-                  <span>{p.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Chat Messages Feed */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto', marginBottom: 16, paddingRight: 4 }}>
-              {chatMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                    maxWidth: msg.role === 'user' ? '80%' : '92%',
-                    gap: 6,
-                  }}
-                >
-                  <div
-                    style={{
-                      background: msg.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-surface)',
-                      color: msg.role === 'user' ? '#FFFFFF' : 'var(--text-primary)',
-                      padding: '14px 18px',
-                      borderRadius: 'var(--radius-md)',
-                      border: msg.role === 'user' ? 'none' : '1px solid var(--border-subtle)',
-                      boxShadow: msg.role === 'user' ? '0 2px 6px rgba(15, 118, 110, 0.25)' : '0 1px 3px rgba(0, 0, 0, 0.03)',
-                      fontSize: 14,
-                      lineHeight: 1.6,
-                      whiteSpace: 'pre-wrap',
-                    }}
-                  >
-                    {msg.text}
-                  </div>
-
-                  {/* Grounded Citations */}
-                  {msg.citations && msg.citations.length > 0 && (
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 2 }}>
-                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)', alignSelf: 'center' }}>
-                        Nguồn xác thực:
-                      </span>
-                      {msg.citations.map((c, i) => (
-                        <a
-                          key={i}
-                          href={c.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{
-                            fontSize: 11,
-                            color: 'var(--text-secondary)',
-                            background: 'var(--bg-surface)',
-                            padding: '4px 10px',
-                            borderRadius: 'var(--radius-sm)',
-                            textDecoration: 'none',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 5,
-                            border: '1px solid var(--border-subtle)',
-                          }}
-                        >
-                          <span>{c.label}</span>
-                          <IconExternalLink />
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-
-              {isChatGenerating && (
-                <div
-                  style={{
-                    alignSelf: 'flex-start',
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '12px 18px',
-                    fontSize: 13,
-                    color: 'var(--text-secondary)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 8,
-                  }}
-                >
-                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent-primary)' }} />
-                  <span>Trợ lý AI đang rà soát nguồn tin & đối chiếu liên kết...</span>
-                </div>
-              )}
-            </div>
-
-            {/* Chat Input Box: Perfectly Centered Unified Flex Container */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                padding: '4px 6px 4px 16px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
-                gap: 10,
-                minHeight: 48,
-                boxSizing: 'border-box',
-                transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
-              }}
-            >
-              <input
-                type="text"
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleSendMessage();
-                  }
-                }}
-                placeholder="Hỏi trợ lý hoặc yêu cầu tìm kiếm, tổng hợp tin tức..."
+          <div className="desktop-split-container">
+            {/* Left / Main Workspace: Chat Stream */}
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', flex: 1, minWidth: 0 }}>
+              {/* Top Assistant Status Strip */}
+              <div
                 style={{
-                  flex: 1,
-                  border: 'none',
-                  background: 'transparent',
-                  outline: 'none',
-                  fontSize: 14,
-                  color: 'var(--text-primary)',
-                  padding: '8px 0',
-                  lineHeight: 1.4,
-                  height: 36,
-                  boxSizing: 'border-box',
-                }}
-              />
-              <button
-                className="btn btn-primary"
-                onClick={handleSendMessage}
-                disabled={!chatInput.trim() || isChatGenerating}
-                style={{
-                  height: 36,
-                  padding: '0 16px',
-                  fontSize: 13,
-                  gap: 6,
-                  borderRadius: 'var(--radius-sm)',
-                  flexShrink: 0,
-                  opacity: !chatInput.trim() || isChatGenerating ? 0.6 : 1,
-                  cursor: !chatInput.trim() || isChatGenerating ? 'not-allowed' : 'pointer',
-                  boxSizing: 'border-box',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 14px',
+                  marginBottom: 16,
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  flexWrap: 'wrap',
+                  gap: 10,
                 }}
               >
-                <IconSend />
-                <span>Gửi</span>
-              </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                  <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Trợ lý</span>
+                  <span className="mono-pill" style={{ fontSize: 11 }}>{profile.personaTitle}</span>
+                  <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>
+                    {profile.scheduledTimes[0]} · {profile.deliveryEmail}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleOpenPreferencesModal}
+                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
+                  >
+                    <IconSliders />
+                    <span>Tùy biến</span>
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={handleSendTestEmail}
+                    disabled={isSendingTestEmail}
+                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
+                  >
+                    <IconSend />
+                    <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi mail'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Action Suggestion Pills (Crisp, High-Signal) */}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+                {[
+                  { label: 'Điểm tin', query: 'Điểm tin công nghệ hôm nay', icon: <IconSearch /> },
+                  { label: 'Việc làm IT', query: 'Tìm việc làm Flutter và Java mới nhất', icon: <IconSearch /> },
+                  { label: 'Giá Keychron', query: 'Kiểm tra giá bàn phím Keychron K2 Pro', icon: <IconSliders /> },
+                  { label: 'Quét hóa đơn', query: 'Quét hóa đơn chi tiêu cà phê', icon: <IconCamera /> },
+                ].map((p, idx) => (
+                  <div
+                    key={idx}
+                    className="quick-prompt-pill"
+                    onClick={() => setChatInput(p.query)}
+                  >
+                    {p.icon}
+                    <span>{p.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Chat Messages Feed */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto', marginBottom: 16, paddingRight: 4 }}>
+                {chatMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                      maxWidth: msg.role === 'user' ? '80%' : '92%',
+                      gap: 6,
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: msg.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-surface)',
+                        color: msg.role === 'user' ? '#FFFFFF' : 'var(--text-primary)',
+                        padding: '14px 18px',
+                        borderRadius: 'var(--radius-md)',
+                        border: msg.role === 'user' ? 'none' : '1px solid var(--border-subtle)',
+                        boxShadow: msg.role === 'user' ? '0 2px 6px rgba(15, 118, 110, 0.25)' : '0 1px 3px rgba(0, 0, 0, 0.03)',
+                        fontSize: 14,
+                        lineHeight: 1.6,
+                        whiteSpace: 'pre-wrap',
+                      }}
+                    >
+                      {msg.text}
+                    </div>
+
+                    {/* Grounded Citations */}
+                    {msg.citations && msg.citations.length > 0 && (
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 2 }}>
+                        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', alignSelf: 'center' }}>
+                          Nguồn xác thực:
+                        </span>
+                        {msg.citations.map((c, i) => (
+                          <a
+                            key={i}
+                            href={c.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              fontSize: 11,
+                              color: 'var(--text-secondary)',
+                              background: 'var(--bg-surface)',
+                              padding: '4px 10px',
+                              borderRadius: 'var(--radius-sm)',
+                              textDecoration: 'none',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 5,
+                              border: '1px solid var(--border-subtle)',
+                            }}
+                          >
+                            <span>{c.label}</span>
+                            <IconExternalLink />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {isChatGenerating && (
+                  <div
+                    style={{
+                      alignSelf: 'flex-start',
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '12px 18px',
+                      fontSize: 13,
+                      color: 'var(--text-secondary)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent-primary)' }} />
+                    <span>Trợ lý AI đang rà soát nguồn tin & đối chiếu liên kết...</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Chat Input Box: Perfectly Centered Unified Flex Container */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '4px 6px 4px 16px',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                  gap: 10,
+                  minHeight: 48,
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+                }}
+              >
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  placeholder="Hỏi trợ lý hoặc yêu cầu tìm kiếm, tổng hợp tin tức..."
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    background: 'transparent',
+                    outline: 'none',
+                    fontSize: 14,
+                    color: 'var(--text-primary)',
+                    padding: '8px 0',
+                    lineHeight: 1.4,
+                    height: 36,
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <button
+                  className="btn btn-primary"
+                  onClick={handleSendMessage}
+                  disabled={!chatInput.trim() || isChatGenerating}
+                  style={{
+                    height: 36,
+                    padding: '0 16px',
+                    fontSize: 13,
+                    gap: 6,
+                    borderRadius: 'var(--radius-sm)',
+                    flexShrink: 0,
+                    opacity: !chatInput.trim() || isChatGenerating ? 0.6 : 1,
+                    cursor: !chatInput.trim() || isChatGenerating ? 'not-allowed' : 'pointer',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <IconSend />
+                  <span>Gửi</span>
+                </button>
+              </div>
             </div>
+
+            {/* Desktop Companion Drawer: Fills the right side on desktop */}
+            <aside className="desktop-companion-drawer">
+              {/* Active Channels Quick Status & Toggles */}
+              <div className="card-surface" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>
+                    <IconBell />
+                    <span>Kênh tự động</span>
+                  </div>
+                  <span className="mono-pill" style={{ fontSize: 10.5 }}>
+                    {topicChannels.filter((c) => c.isActive).length}/{topicChannels.length} bật
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {topicChannels.slice(0, 4).map((ch) => (
+                    <div
+                      key={ch.id}
+                      onClick={() => handleToggleChannel(ch.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '6px 10px',
+                        borderRadius: 'var(--radius-sm)',
+                        background: ch.isActive ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+                        border: '1px solid var(--border-subtle)',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {ch.title}
+                      </span>
+                      <div className={`toggle-switch-track sm ${ch.isActive ? 'active' : ''}`}>
+                        <div className="toggle-switch-thumb" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Real CSDL News Highlights */}
+              <div className="card-surface" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1, minHeight: 220 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
+                    <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>Tin mới CSDL</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSyncLiveNews}
+                    disabled={isSyncingNews}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 2, color: 'var(--text-secondary)' }}
+                    title="Cập nhật tin mới"
+                  >
+                    <IconRefresh spinning={isSyncingNews} />
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto' }}>
+                  {liveNews.slice(0, 5).map((item) => (
+                    <a
+                      key={item.id}
+                      href={item.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                        padding: '7px 9px',
+                        borderRadius: 'var(--radius-sm)',
+                        background: 'var(--bg-subtle)',
+                        textDecoration: 'none',
+                        color: 'inherit',
+                      }}
+                    >
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {item.title}
+                      </span>
+                      <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                        {item.source} · {formatRelativeTime(item.publishedAt)}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </aside>
           </div>
         )}
 
@@ -1745,7 +1835,6 @@ export default function App() {
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 12,
-                        borderLeft: `4px solid ${channel.isActive ? channel.badgeColor : 'var(--border-subtle)'}`,
                         opacity: channel.isActive ? 1 : 0.65,
                         transition: 'all 0.15s ease',
                         height: '100%',
@@ -2169,7 +2258,7 @@ export default function App() {
         {/* TAB 3: ZERO-APP AUTOMATIONS (CÁC TÁC VỤ CHẠY NGẦM KHÔNG CẦN MỞ ỨNG DỤNG)     */}
         {/* ========================================================================= */}
         {activeTab === 'automations' && (
-          <div style={{ maxWidth: 960, margin: '0 auto', width: '100%' }}>
+          <div style={{ width: '100%' }}>
             <div style={{ marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.3, margin: 0 }}>
                 Tác vụ
@@ -2179,9 +2268,9 @@ export default function App() {
               </span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="desktop-2col-grid">
               {tasks.map((task) => (
-                <div key={task.id} className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div key={task.id} className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', boxSizing: 'border-box' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -2240,7 +2329,7 @@ export default function App() {
         {/* TAB 4: TOOLS (BỘ CÔNG CỤ THIẾT THỰC)                                      */}
         {/* ========================================================================= */}
         {activeTab === 'tools' && (
-          <div style={{ maxWidth: 960, margin: '0 auto', width: '100%' }}>
+          <div style={{ width: '100%' }}>
             <div style={{ marginBottom: 16 }}>
               <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.3, margin: 0 }}>
                 Công cụ
@@ -2607,8 +2696,8 @@ export default function App() {
         {/* TAB 5: SETTINGS & ACCOUNT CONTROL CENTER                                  */}
         {/* ========================================================================= */}
         {activeTab === 'settings' && (
-          <div style={{ maxWidth: 960, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.3, margin: 0 }}>
                 Cài đặt
               </h1>
@@ -2617,8 +2706,9 @@ export default function App() {
               </span>
             </div>
 
-            {/* 1. Profile Overview Card */}
-            <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="desktop-2col-grid">
+              {/* 1. Profile Overview Card */}
+              <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -2709,7 +2799,7 @@ export default function App() {
             </div>
 
             {/* 5. Emergency Kill Switch */}
-            <div className="card-surface" style={{ borderColor: 'rgba(239, 68, 68, 0.3)' }}>
+            <div className="card-surface" style={{ borderColor: 'rgba(239, 68, 68, 0.3)', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ fontWeight: 700, fontSize: 14.5, color: 'var(--status-danger)' }}>
                   Khóa khẩn cấp
@@ -2728,7 +2818,8 @@ export default function App() {
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
       </main>
 
       {/* 3. MOBILE BOTTOM NAVIGATION BAR */}

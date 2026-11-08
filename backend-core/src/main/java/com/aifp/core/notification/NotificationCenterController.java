@@ -176,7 +176,7 @@ public class NotificationCenterController {
                 "delivered", delivered,
                 "recipientEmail", request.recipientEmail(),
                 "articlesCount", sampleArticles.size(),
-                "fromSystemEmail", "nguyentuananh11a1.lhpt@gmail.com",
+                "fromSystemEmail", "smtp.service@aifp.local",
                 "message", delivered
                         ? "Đã gửi bản tin dạng thẻ thành công vào hộp thư " + request.recipientEmail() + " qua hệ thống SMTP Gmail!"
                         : "Hệ thống đã tạo bản tin mẫu. Nếu Gmail SMTP chưa kết nối, bản tin được lưu vào nhật ký."
@@ -485,7 +485,7 @@ public class NotificationCenterController {
                 "channelId", channel,
                 "channelTitle", headerTitle,
                 "articlesCount", articles.size(),
-                "fromSystemEmail", "nguyentuananh11a1.lhpt@gmail.com",
+                "fromSystemEmail", "smtp.service@aifp.local",
                 "message", delivered
                         ? "Đã gửi bản tin riêng [" + headerTitle + "] thành công vào hộp thư " + request.recipientEmail() + " qua hệ thống SMTP Gmail!"
                         : "Bản tin đã được tạo mẫu thành công."

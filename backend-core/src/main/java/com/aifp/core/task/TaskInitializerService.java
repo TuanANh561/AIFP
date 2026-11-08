@@ -19,7 +19,7 @@ public class TaskInitializerService implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(TaskInitializerService.class);
     public static final UUID DEFAULT_SYSTEM_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
-    public static final String DEFAULT_SYSTEM_EMAIL = "nguyentuananh11a1.lhpt@gmail.com";
+    public static final String DEFAULT_SYSTEM_EMAIL = "alex.dev@aifp.local";
 
     private final UserRepository userRepository;
     private final UserProfileRepository profileRepository;

@@ -27,7 +27,7 @@
 Triết lý cốt lõi của AIFP là **"Zero-App-Open"**: Người dùng **không cần phải mở ứng dụng hàng ngày**. Hệ thống định thời ngầm sẽ tự động quét thông tin từ các nguồn tin tức uy tín, việc làm IT, deal mua sắm Shopee giảm giá sâu, bóc tách dữ liệu sạch, kiểm tra trùng lặp thông minh và gửi bản tin tóm tắt dạng thẻ trực quan thẳng vào email của bạn đúng theo khung giờ bạn đã chọn.
 
 ### 💡 Điểm Khác Biệt Độc Bản
-1. **Hoạt Động Tự Động Ngầm (Autonomous Background Engine)**: Worker định thời kiểm tra CSDL mỗi 60 giây, tự động phát hiện tin tức sốt dẻo và phân phát email qua máy chủ Gmail SMTP (`nguyentuananh11a1.lhpt@gmail.com`).
+1. **Hoạt Động Tự Động Ngầm (Autonomous Background Engine)**: Worker định thời kiểm tra CSDL mỗi 60 giây, tự động phát hiện tin tức sốt dẻo và phân phát email qua máy chủ Gmail SMTP bảo mật.
 2. **Dữ Liệu Thực Tế 100% (Zero Mock / Zero Fallback Policy)**: Hoàn toàn không dùng dữ liệu ảo. Toàn bộ bài viết được crawl trực tiếp từ VnExpress, ITViec, Shopee và lưu trữ trong bảng CSDL `live_articles` với tem thời gian thực tế.
 3. **Bảo Mật Zero-Trust & Cổng Phân Quyền 4 Cấp (4-Level Tool Gate)**: Cô lập dữ liệu triệt để theo `user_id` từ JWT, cách ly nội dung bên ngoài bằng thẻ `<untrusted_external_content>`, xác minh trích dẫn thật (Citation Grounding) và nút Dừng Khẩn Cấp (Emergency Kill Switch).
 4. **Giao Diện Tối Giản Cao Cấp (Anti-AI-Slop Editorial Design)**: Không dùng gradient neon sặc sỡ hay biểu tượng màu mè. Thiết kế tinh tế lấy cảm hứng từ Linear, Raycast, Things 3 với hệ biến Design Tokens đồng nhất và chuẩn công thái học iOS Safari PWA.
@@ -36,7 +36,32 @@ Triết lý cốt lõi của AIFP là **"Zero-App-Open"**: Người dùng **khô
 
 ---
 
-## 🏛️ 2. Sơ Đồ Kiến Trúc Hệ Thống (Architecture)
+## 📸 2. Giao Diện Thực Tế Hệ Thống (Visual Showcase)
+
+Hệ thống được thiết kế theo trường phái **Editorial Minimalism** (lấy cảm hứng từ Linear, Raycast, Things 3) — hoàn toàn không có hiệu ứng màu mè, hiển thị mật độ thông tin cao và tối ưu trải nghiệm trên mọi kích thước màn hình.
+
+| Giao Diện Web PWA (Desktop Workspace) | Giao Diện Di Động (Mobile PWA) |
+| :---: | :---: |
+| ![AIFP Web Dashboard](./docs/assets/web_app_dashboard.png) | <img src="./docs/assets/mobile_pwa_preview.png" width="320" alt="AIFP Mobile PWA" /> |
+
+### 🎴 Cấu Trúc Thẻ Thông Tin Chuẩn Mực
+* **Thẻ Tin Tức Tổng Hợp**: Tự động chuẩn hóa đầy đủ 5 trường thông tin:
+  1. *Ảnh minh họa (Image)*: Tỷ lệ 16:9 sắc nét, có xử lý nền dự phòng chống lỗi ảnh vỡ, gắn nhãn nguồn và mốc `Mới`.
+  2. *Tiêu đề (Title)*: Chữ đậm, giới hạn 2 dòng rõ ràng.
+  3. *Mô tả ngắn (Description)*: Giới hạn 3 dòng súc tích, dễ đọc.
+  4. *Thời gian (Time)*: Hiển thị thời điểm đăng kèm biểu tượng đồng hồ.
+  5. *Liên kết nguồn (Link)*: Tên miền xác thực kèm nút `Đọc tiếp →` mở thẳng bài viết gốc.
+* **Thẻ Cơ Hội Việc Làm & Remote**: Định dạng chuẩn thẻ tuyển dụng di động:
+  * Banner ảnh việc làm + Nhãn `Đã xác thực` + Nút lưu tin (Bookmark).
+  * Tiêu đề in hoa đậm nét (`TESTER GAME`, `CÀY GAME`, `NHẬP LIỆU ONLINE`, `DEV INTERN`).
+  * Phụ đề cơ hội linh hoạt + Nhãn địa điểm xanh lá (`Việt Nam · Remote 100%`).
+  * Thu nhập tham khảo rõ ràng theo ngày/tuần/tháng.
+  * 4 gạch đầu dòng quyền lợi (không kinh nghiệm, không tiếng Anh, thiết bị cơ bản, hướng dẫn từ A-Z).
+  * Nút ứng tuyển toàn chiều ngang dẫn thẳng đến trang tuyển dụng chính xác.
+
+---
+
+## 🏛️ 3. Sơ Đồ Kiến Trúc Hệ Thống (Architecture)
 
 ```mermaid
 flowchart TD
@@ -62,7 +87,7 @@ flowchart TD
     subgraph StorageInfra["💾 Infrastructure & Persistence"]
         Postgres[("PostgreSQL 16 + pgvector\n(16 Multi-Tenant Tables · HNSW Vector Index)")]
         Redis[("Redis 7 Cache & Distributed Lock")]
-        SMTP[("Gmail SMTP Server\n(nguyentuananh11a1.lhpt@gmail.com)")]
+        SMTP[("Gmail SMTP Server\n(Bảo mật SSL/TLS)")]
     end
 
     PWA -->|REST API / JWT| BackendMonolith
@@ -76,7 +101,7 @@ flowchart TD
 
 ---
 
-## ✨ 3. Tính Năng Chi Tiết (Core Modules)
+## ✨ 4. Tính Năng Chi Tiết (Core Modules)
 
 ### 📬 A. Kênh Bản Tin & Gửi Email Tự Động (Digests & Delivery)
 * **Tùy biến nhóm đối tượng (Persona Wizard)**: 6 mẫu hồ sơ thiết kế sẵn (Kỹ sư & Lập trình viên, Nhân viên văn phòng, Nhà đầu tư tài chính, Săn deal mua sắm, Sáng tạo nội dung, Sinh viên học tập).
@@ -97,10 +122,17 @@ flowchart TD
   * `LEVEL_4_RESTRICTED`: Chặn tuyệt đối mặc định.
 * **Nút dừng khẩn cấp (Emergency Kill Switch)**: Vô hiệu hóa toàn bộ phiên làm việc của Agent trong `< 1 giây` khi phát hiện dấu hiệu bất thường.
 
-### 📱 C. Ứng Dụng Flutter Mobile Companion
+### 📱 C. Ứng Dụng Flutter Mobile Companion & On-screen Assistant
 * **Đồng bộ 100% Design Tokens**: Giao diện bản quyền đồng nhất màu giấy ấm `#F8F7F4`, mực đen `#141413`, đường viền `1px` sắc nét.
 * **5 Tab chức năng di động**: Trợ lý trò chuyện, Bản tin dạng thẻ, Quản lý tác vụ ngầm, Bộ công cụ AI, Cài đặt & Kill Switch.
 * **Lưu trữ mã hóa cục bộ**: Lưu trữ JWT và Refresh Token qua `flutter_secure_storage`.
+* **Trợ lý Nổi Trên Màn Hình (Assistive Floating Bubble)**: Mô hình tiện ích nổi (Accessibility / Overlay Tool) sẵn sàng trên thiết bị di động, hỗ trợ quét nhanh nội dung màn hình và tóm tắt ngay tức thì.
+
+### 🎬 D. Xử Lý Video & Shorts Đa Nền Tảng (Video Intelligence Studio)
+* **Bóc tách tri thức video YouTube / TikTok**: Nhận diện URL, trích xuất phụ đề, bóc tách cấu trúc video đa tầng.
+* **Tóm tắt 30s cốt lõi**: Nắm bắt nhanh toàn bộ nội dung chính yếu trong vòng 30 giây đọc.
+* **Phân đoạn mốc thời gian (Key Chapters)**: Đánh dấu các mốc phát và chủ đề chi tiết.
+* **Hành động áp dụng đời thực (Life Action Items)**: Rút ra bài học thực tiễn để ứng dụng ngay vào cuộc sống và công việc, lưu vào bộ nhớ cá nhân hóa chỉ với 1 cú click.
 
 ---
 
@@ -213,5 +245,5 @@ Mọi chức năng trong hệ thống đều phải vượt qua chuỗi kiểm t
 
 ## 📄 7. Giấy Phép & Tác Giả (License)
 
-Dự án được xây dựng và phát triển bởi **Nguyễn Tuấn Anh** (`nguyentuananh11a1.lhpt@gmail.com`).  
+Dự án được xây dựng và phát triển bởi **AIFP Core Architecture Team**.  
 Phát hành theo giấy phép mã nguồn mở **MIT License**. Mọi quyền được bảo lưu.

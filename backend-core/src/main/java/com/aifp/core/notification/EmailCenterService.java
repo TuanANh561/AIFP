@@ -32,7 +32,7 @@ public class EmailCenterService {
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
-    @Value("${spring.mail.username:nguyentuananh11a1.lhpt@gmail.com}")
+    @Value("${spring.mail.username:assistant@aifp.local}")
     private String fromEmail;
 
     @Value("${aifp.mail.from-name:AIFP Personal Assistant}")
@@ -117,7 +117,7 @@ public class EmailCenterService {
                 </tr>
                 <tr>
                   <td style="padding:16px 24px;background:#F8FAFC;border-top:1px solid #E2E8F0;font-size:12px;color:#64748B;text-align:center;">
-                    Bản tin tự động gửi từ Trợ lý Cá nhân AIFP &middot; nguyentuananh11a1.lhpt@gmail.com
+                    Bản tin tự động gửi từ Trợ lý Cá nhân AIFP &middot; Bảo mật đa tầng
                   </td>
                 </tr>
               </table>

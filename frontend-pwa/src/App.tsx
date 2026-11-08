@@ -309,7 +309,7 @@ const CATEGORY_DEFINITIONS = [
 const INITIAL_PROFILE: UserPreferencesProfile = {
   preset: 'developer',
   personaTitle: 'Kỹ sư & Lập trình viên',
-  deliveryEmail: 'nguyentuananh11a1.lhpt@gmail.com',
+  deliveryEmail: 'alex.dev@aifp.local',
   frequency: '1_DAILY',
   scheduledTimes: ['07:30'],
   categories: {
@@ -725,7 +725,7 @@ export default function App() {
   // Writing Studio State
   const [writingPrompt, setWritingPrompt] = useState('Soạn email gửi cấp trên báo cáo tiến độ tích hợp mô hình AI');
   const [writingDraft, setWritingDraft] = useState(
-    'Kính gửi Anh/Chị Quản lý,\n\nEm xin phép gửi báo cáo tóm tắt tiến độ triển khai nền tảng Trợ lý AI:\n1. Đã kết nối hộp thư hệ thống Gmail SMTP nguyentuananh11a1.lhpt@gmail.com phục vụ gửi tự động.\n2. Giao diện được thiết kế tối giản, loại bỏ biểu tượng màu mè và thanh cuộn mượt mà.\n3. Thiết lập quy trình tự động gửi bản tin dạng thẻ qua email lúc 07:30 sáng, giúp người dùng theo dõi mà không cần mở ứng dụng.\n\nTrân trọng,\nTuấn Anh'
+    'Kính gửi Anh/Chị Quản lý,\n\nEm xin phép gửi báo cáo tóm tắt tiến độ triển khai nền tảng Trợ lý AI:\n1. Đã kết nối hộp thư hệ thống Gmail SMTP an toàn phục vụ gửi tự động.\n2. Giao diện được thiết kế tối giản, loại bỏ biểu tượng màu mè và thanh cuộn mượt mà.\n3. Thiết lập quy trình tự động gửi bản tin dạng thẻ qua email lúc 07:30 sáng, giúp người dùng theo dõi mà không cần mở ứng dụng.\n\nTrân trọng,\nAIFP Assistant'
   );
 
   // Calendar State
@@ -1134,7 +1134,7 @@ export default function App() {
       });
 
       if (response.ok) {
-        showToast(`Đã gửi bản tin thành công tới ${targetEmail} qua hệ thống nguyentuananh11a1.lhpt@gmail.com!`);
+        showToast(`Đã gửi bản tin thành công tới ${targetEmail} qua hệ thống Gmail SMTP!`);
       } else {
         showToast(`Bản tin đã được đóng gói và chuyển tới hàng đợi gửi cho ${targetEmail}.`);
       }
@@ -3075,7 +3075,7 @@ export default function App() {
                       showToast('Đang viết lại theo phong cách ngắn gọn...');
                       setTimeout(() => {
                         setWritingDraft(
-                          `Kính gửi Anh/Chị,\n\nBáo cáo cập nhật:\n- Đã tích hợp SMTP Gmail nguyentuananh11a1.lhpt@gmail.com phục vụ gửi tự động.\n- Người dùng có thể bật/tắt thể loại tin và chọn tần suất gửi tùy ý.\n- Mọi tác vụ vận hành ngầm bất biến, đảm bảo không trùng lặp.\n\nTrân trọng,\nTuấn Anh`
+                          `Kính gửi Anh/Chị,\n\nBáo cáo cập nhật:\n- Đã tích hợp SMTP Gmail hệ thống phục vụ gửi tự động.\n- Người dùng có thể bật/tắt thể loại tin và chọn tần suất gửi tùy ý.\n- Mọi tác vụ vận hành ngầm bất biến, đảm bảo không trùng lặp.\n\nTrân trọng,\nAIFP Assistant`
                         );
                         showToast('Đã cập nhật bản nháp.');
                       }, 700);
@@ -3441,7 +3441,7 @@ export default function App() {
               </div>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <span className="mono-pill">smtp.gmail.com:587</span>
-                <span className="mono-pill">nguyentuananh11a1.lhpt@gmail.com</span>
+                <span className="mono-pill">Bảo mật SSL/TLS</span>
                 <span className="mono-pill">STARTTLS</span>
               </div>
             </div>
@@ -3717,7 +3717,7 @@ export default function App() {
                         required
                         value={tempProfile.deliveryEmail}
                         onChange={(e) => setTempProfile({ ...tempProfile, deliveryEmail: e.target.value })}
-                        placeholder="vd: nguyentuananh11a1.lhpt@gmail.com"
+                        placeholder="vd: yourname@gmail.com"
                         style={{
                           flex: 1,
                           height: 38,
@@ -3754,7 +3754,7 @@ export default function App() {
                     </div>
                     {!isValidEmail(tempProfile.deliveryEmail) && tempProfile.deliveryEmail.length > 0 && (
                       <span style={{ fontSize: 11.5, color: 'var(--status-error, #E11D48)' }}>
-                        Vui lòng nhập đúng định dạng email (vd: nguyentuananh11a1.lhpt@gmail.com)
+                        Vui lòng nhập đúng định dạng email (vd: yourname@gmail.com)
                       </span>
                     )}
                   </div>
@@ -4025,7 +4025,7 @@ export default function App() {
               <div>
                 <div style={{ fontWeight: 800, fontSize: 14.5 }}>Mẫu Email Bản tin Sáng gửi tới hộp thư</div>
                 <div style={{ fontSize: 12, color: '#64748B' }}>
-                  Người gửi: nguyentuananh11a1.lhpt@gmail.com &rarr; Người nhận: {profile.deliveryEmail}
+                  Người gửi: smtp.service@aifp.local &rarr; Người nhận: {profile.deliveryEmail}
                 </div>
               </div>
               <button
@@ -4139,7 +4139,7 @@ export default function App() {
               >
                 Bản tin được tổng hợp tự động bởi Trợ lý Cá nhân AIFP theo đúng sở thích của bạn.
                 <br />
-                Được gửi từ hộp thư hệ thống <strong>nguyentuananh11a1.lhpt@gmail.com</strong> theo lịch bạn đã đăng ký.
+                Được gửi từ hộp thư hệ thống đã xác thực theo lịch bạn đã đăng ký.
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>

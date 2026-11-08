@@ -121,6 +121,9 @@ class SecurityAndTenantIsolationTest {
     @Autowired
     private com.aifp.core.pccompanion.PcCompanionController pcCompanionController;
 
+    @Autowired
+    private com.aifp.core.notification.LinkValidationService linkValidationService;
+
     @Test
     @DisplayName("1. Refresh Token Rotation & Reuse Detection revokes compromised token family")
     void testRefreshTokenRotationAndReuseDetection() {
@@ -717,6 +720,58 @@ class SecurityAndTenantIsolationTest {
 
         pcCompanionController.revokeDevice(principalA, paired.deviceId());
         assertTrue(pcCompanionController.listDevices(principalA).getBody().data().isEmpty());
+    }
+
+    @Test
+    @DisplayName("16. Link Validation & Dead Link Prevention Gate: Verify URL liveness and automatic 404 fallback")
+    void test16_LinkValidationAndDeadLinkPreventionGate() {
+        // 1. Invalid, null, and non-existent URLs return false
+        assertFalse(linkValidationService.isUrlLive(null));
+        assertFalse(linkValidationService.isUrlLive(""));
+        assertFalse(linkValidationService.isUrlLive("   "));
+        assertFalse(linkValidationService.isUrlLive("not_a_valid_url_at_all"));
+        assertFalse(linkValidationService.isUrlLive("https://this-non-existent-domain-99999999999.org/page"));
+
+        // 2. Localhost internal routes are recognized as valid
+        assertTrue(linkValidationService.isUrlLive("http://localhost:5173/"));
+        assertTrue(linkValidationService.isUrlLive("/dashboard"));
+
+        // 3. Fallback resolution for dead job links
+        String deadJobUrl = "https://gamehub.vn/tuyen-dung-game/"; // 404 URL that previously caused issues
+        String resolvedJobUrl = linkValidationService.getVerifiedOrFallbackJobUrl(deadJobUrl, "Tuyển dụng Tester Game Mobile");
+        assertNotEquals(deadJobUrl, resolvedJobUrl);
+        assertTrue(resolvedJobUrl.contains("itviec.com") || resolvedJobUrl.contains("vieclam24h.vn"));
+
+        // 4. Job list sanitization replaces broken links with verified portals
+        EmailCenterService.JobCardItem brokenJob = new EmailCenterService.JobCardItem(
+                "Game Hub", "Được tài trợ", "Tester Game", "Cơ hội linh hoạt", "Việt Nam",
+                "Part-time", "1.000.000 VNĐ", List.of("Chơi game"), "Mô tả", "Ghi chú",
+                deadJobUrl, ""
+        );
+        EmailCenterService.JobCardItem liveJob = new EmailCenterService.JobCardItem(
+                "ITViec", "Cơ hội", "Intern Dev", "Hybrid", "Hà Nội",
+                "Full-time", "5.000.000 VNĐ", List.of("Lập trình"), "Mô tả", "Ghi chú",
+                "https://itviec.com/it-jobs/intern", ""
+        );
+
+        List<EmailCenterService.JobCardItem> sanitizedJobs = linkValidationService.sanitizeJobs(List.of(brokenJob, liveJob));
+        assertEquals(2, sanitizedJobs.size());
+        assertNotEquals(deadJobUrl, sanitizedJobs.get(0).applyUrl());
+        assertEquals("https://itviec.com/it-jobs/intern", sanitizedJobs.get(1).applyUrl());
+
+        // 5. Article list sanitization prunes dead articles
+        EmailCenterService.DigestArticleCard deadArticle = new EmailCenterService.DigestArticleCard(
+                "Fake News", "fake", "Fake Title", "Summary",
+                "https://this-non-existent-domain-99999999999.org/article-404", "", "Hôm nay"
+        );
+        EmailCenterService.DigestArticleCard liveArticle = new EmailCenterService.DigestArticleCard(
+                "VnExpress", "news", "Tin tức", "Summary",
+                "https://vnexpress.net/so-hoa", "", "Hôm nay"
+        );
+
+        List<EmailCenterService.DigestArticleCard> sanitizedArticles = linkValidationService.sanitizeArticles(List.of(deadArticle, liveArticle));
+        assertEquals(1, sanitizedArticles.size());
+        assertEquals("https://vnexpress.net/so-hoa", sanitizedArticles.get(0).url());
     }
 }
 

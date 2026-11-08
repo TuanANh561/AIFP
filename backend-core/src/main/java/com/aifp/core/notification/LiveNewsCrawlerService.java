@@ -31,6 +31,7 @@ public class LiveNewsCrawlerService {
     private static final Logger log = LoggerFactory.getLogger(LiveNewsCrawlerService.class);
 
     private final LiveArticleRepository liveArticleRepository;
+    private final LinkValidationService linkValidationService;
 
     private static final Pattern IMG_SRC_PATTERN = Pattern.compile("src=[\"'](https?://[^\"']+)[\"']", Pattern.CASE_INSENSITIVE);
     private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<[^>]+>");
@@ -43,8 +44,12 @@ public class LiveNewsCrawlerService {
             new FeedSourceConfig("https://vnexpress.net/rss/tin-moi-nhat.rss", "news", "VnExpress", "vn", "Thời sự & Đời sống")
     );
 
-    public LiveNewsCrawlerService(LiveArticleRepository liveArticleRepository) {
+    public LiveNewsCrawlerService(
+            LiveArticleRepository liveArticleRepository,
+            LinkValidationService linkValidationService
+    ) {
         this.liveArticleRepository = liveArticleRepository;
+        this.linkValidationService = linkValidationService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -113,6 +118,12 @@ public class LiveNewsCrawlerService {
 
                     link = link.trim();
                     if (liveArticleRepository.existsByUrl(link)) {
+                        continue;
+                    }
+
+                    // Rigorous check: verify URL is live (200..399) before persisting
+                    if (!linkValidationService.isUrlLive(link)) {
+                        log.debug("[LiveNewsCrawler] Skipped non-live link from RSS: {}", link);
                         continue;
                     }
 
@@ -196,8 +207,8 @@ public class LiveNewsCrawlerService {
             added++;
         }
 
-        // Job 1: Game Tester Mobile (No experience)
-        String gameTesterUrl = "https://topcv.vn/viec-lam/game-tester";
+        // Job 1: Game Tester Mobile (No experience) - Verified 200 OK
+        String gameTesterUrl = "https://itviec.com/it-jobs/tester";
         if (!liveArticleRepository.existsByUrl(gameTesterUrl)) {
             liveArticleRepository.save(new LiveArticleEntity(
                     UUID.randomUUID(),
@@ -214,8 +225,8 @@ public class LiveNewsCrawlerService {
             added++;
         }
 
-        // Job 2: Game Grinder / Cộng tác viên Cày Game
-        String gameGrinderUrl = "https://vieclam24h.vn/tim-kiem/tuyen-dung-game";
+        // Job 2: Game Grinder / Cộng tác viên Cày Game - Verified 200 OK
+        String gameGrinderUrl = "https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?tu_khoa=game";
         if (!liveArticleRepository.existsByUrl(gameGrinderUrl)) {
             liveArticleRepository.save(new LiveArticleEntity(
                     UUID.randomUUID(),
@@ -232,8 +243,8 @@ public class LiveNewsCrawlerService {
             added++;
         }
 
-        // Job 3: Remote Data Entry & Online Support (No exp, no English)
-        String remoteDataEntryUrl = "https://www.topcv.vn/viec-lam-remote";
+        // Job 3: Remote Data Entry & Online Support (No exp, no English) - Verified 200 OK
+        String remoteDataEntryUrl = "https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?tu_khoa=nhap+lieu";
         if (!liveArticleRepository.existsByUrl(remoteDataEntryUrl)) {
             liveArticleRepository.save(new LiveArticleEntity(
                     UUID.randomUUID(),

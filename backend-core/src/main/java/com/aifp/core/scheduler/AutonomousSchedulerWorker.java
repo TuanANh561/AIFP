@@ -32,6 +32,7 @@ public class AutonomousSchedulerWorker {
     private final IdempotentTaskSchedulerService schedulerService;
     private final AiOrchestratorClient aiOrchestratorClient;
     private final com.aifp.core.notification.LiveNewsCrawlerService liveNewsCrawlerService;
+    private final com.aifp.core.notification.LinkValidationService linkValidationService;
     private final boolean schedulerEnabled;
 
     public AutonomousSchedulerWorker(
@@ -40,6 +41,7 @@ public class AutonomousSchedulerWorker {
             IdempotentTaskSchedulerService schedulerService,
             AiOrchestratorClient aiOrchestratorClient,
             com.aifp.core.notification.LiveNewsCrawlerService liveNewsCrawlerService,
+            com.aifp.core.notification.LinkValidationService linkValidationService,
             @Value("${aifp.scheduler.enabled:true}") boolean schedulerEnabled
     ) {
         this.taskRepository = taskRepository;
@@ -47,6 +49,7 @@ public class AutonomousSchedulerWorker {
         this.schedulerService = schedulerService;
         this.aiOrchestratorClient = aiOrchestratorClient;
         this.liveNewsCrawlerService = liveNewsCrawlerService;
+        this.linkValidationService = linkValidationService;
         this.schedulerEnabled = schedulerEnabled;
     }
 
@@ -97,14 +100,18 @@ public class AutonomousSchedulerWorker {
                 List<IdempotentTaskSchedulerService.DiscoveredItem> discoveredItems = new ArrayList<>();
                 if (execResult.verifiedCitations() != null && !execResult.verifiedCitations().isEmpty()) {
                     for (String url : execResult.verifiedCitations()) {
-                        String title = url.replace("https://", "").replace("http://", "").split("/")[0];
-                        discoveredItems.add(new IdempotentTaskSchedulerService.DiscoveredItem(title, url));
+                        if (linkValidationService.isUrlLive(url)) {
+                            String title = url.replace("https://", "").replace("http://", "").split("/")[0];
+                            discoveredItems.add(new IdempotentTaskSchedulerService.DiscoveredItem(title, url));
+                        } else {
+                            log.warn("[AutonomousWorker] Filtered dead citation URL: {}", url);
+                        }
                     }
                 }
                 if (discoveredItems.isEmpty()) {
                     discoveredItems.add(new IdempotentTaskSchedulerService.DiscoveredItem(
                             task.getTitle(),
-                            "https://vnexpress.net/tin-moi-nhat"
+                            "https://vnexpress.net/tin-tuc-24h"
                     ));
                 }
 

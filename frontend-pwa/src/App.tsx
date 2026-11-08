@@ -177,6 +177,20 @@ const IconCalendar = () => (
   </svg>
 );
 
+const IconTrash = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+);
+
+const IconBell = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </svg>
+);
+
 // ============================================================================
 // DATA TYPES & PRESETS FOR MULTI-AUDIENCE GROUPS
 // ============================================================================
@@ -519,8 +533,23 @@ export default function App() {
   const [sendingChannelId, setSendingChannelId] = useState<string | null>(null);
   const [newsFilter, setNewsFilter] = useState<'all' | 'shopping' | 'jobs' | 'tech' | 'finance' | 'social'>('all');
   const [showAddCustomChannelModal, setShowAddCustomChannelModal] = useState(false);
-  const [customChannelPrompt, setCustomChannelPrompt] = useState('');
-  const [isParsingCustomChannel, setIsParsingCustomChannel] = useState(false);
+  const [newChannelForm, setNewChannelForm] = useState<{
+    title: string;
+    badge: string;
+    badgeColor: string;
+    scheduledTime: string;
+    frequency: string;
+    customEmail: string;
+    keywords: string;
+  }>({
+    title: '',
+    badge: 'Tùy chọn',
+    badgeColor: '#0F766E',
+    scheduledTime: '08:00',
+    frequency: 'Hàng ngày',
+    customEmail: '',
+    keywords: '',
+  });
 
   // Live Articles (Direct from PostgreSQL/H2 Database)
   const [liveNews, setLiveNews] = useState<LiveArticle[]>(INITIAL_NEWS);
@@ -990,46 +1019,65 @@ export default function App() {
     showToast(`Đã cập nhật cấu hình kênh [${updated.title}]!`);
   };
 
-  const handleCreateCustomChannel = () => {
-    const prompt = customChannelPrompt.trim();
-    if (!prompt) {
-      showToast('Vui lòng nhập mô tả luồng tự động bạn muốn tạo.');
+  const handleDeleteChannel = (channelId: string, title: string) => {
+    setTopicChannels((prev) => {
+      const nextList = prev.filter((ch) => ch.id !== channelId);
+      try {
+        localStorage.setItem('aifp_topic_channels', JSON.stringify(nextList));
+      } catch {}
+      return nextList;
+    });
+    showToast(`Đã xóa cấu hình nhận tin [${title}].`);
+  };
+
+  const handleCreateStructuredChannel = () => {
+    const title = newChannelForm.title.trim();
+    if (!title) {
+      showToast('Vui lòng nhập tên cấu hình (ví dụ: Săn Deal Đồ Công Nghệ).');
       return;
     }
-    if (prompt.length < 3) {
-      showToast('Mô tả luồng tự động cần có ít nhất 3 ký tự.');
+    if (newChannelForm.customEmail && newChannelForm.customEmail.trim().length > 0 && !isValidEmail(newChannelForm.customEmail.trim())) {
+      showToast('Địa chỉ email riêng chưa đúng định dạng.');
       return;
     }
-    setIsParsingCustomChannel(true);
-    showToast('Trợ lý AI đang thiết lập luồng tự động hóa mới...');
-    setTimeout(() => {
-      const title =
-        prompt.length > 36 ? prompt.slice(0, 36) + '...' : prompt;
-      const newCh: TopicChannelConfig = {
-        id: 'custom-' + Date.now(),
-        title: title,
-        subtitle: `Tự động hóa theo yêu cầu: "${prompt}"`,
-        badge: 'Tự động hóa AI',
-        badgeColor: '#0F766E',
-        scheduledTime: '09:00',
-        customEmail: profile.deliveryEmail,
-        frequency: 'Hàng ngày lúc 09:00',
-        keywords: [title],
-        isActive: true,
-        sourceSummary: 'Nguồn tin web & RSS tổng hợp',
-      };
-      setTopicChannels((prev) => {
-        const nextList = [...prev, newCh];
-        try {
-          localStorage.setItem('aifp_topic_channels', JSON.stringify(nextList));
-        } catch {}
-        return nextList;
-      });
-      setShowAddCustomChannelModal(false);
-      setCustomChannelPrompt('');
-      setIsParsingCustomChannel(false);
-      showToast(`Đã tạo luồng tự động mới: [${title}]! Trợ lý sẽ tự động quét và gửi mail lúc 09:00.`);
-    }, 400);
+
+    const kwList = newChannelForm.keywords
+      ? newChannelForm.keywords.split(',').map((s) => s.trim()).filter(Boolean)
+      : [title];
+
+    const newCh: TopicChannelConfig = {
+      id: 'custom-' + Date.now(),
+      title: title,
+      subtitle: '',
+      badge: newChannelForm.badge.trim() || 'Tùy chọn',
+      badgeColor: newChannelForm.badgeColor || '#0F766E',
+      scheduledTime: newChannelForm.scheduledTime || '08:00',
+      customEmail: newChannelForm.customEmail.trim() || profile.deliveryEmail,
+      frequency: newChannelForm.frequency || 'Hàng ngày',
+      keywords: kwList,
+      isActive: true,
+      sourceSummary: 'Nguồn tin web & RSS tổng hợp',
+    };
+
+    setTopicChannels((prev) => {
+      const nextList = [...prev, newCh];
+      try {
+        localStorage.setItem('aifp_topic_channels', JSON.stringify(nextList));
+      } catch {}
+      return nextList;
+    });
+
+    setShowAddCustomChannelModal(false);
+    setNewChannelForm({
+      title: '',
+      badge: 'Tùy chọn',
+      badgeColor: '#0F766E',
+      scheduledTime: '08:00',
+      frequency: 'Hàng ngày',
+      customEmail: '',
+      keywords: '',
+    });
+    showToast(`Đã thêm cấu hình nhận tin [${title}] thành công!`);
   };
 
   const handleRunTaskNow = async (taskId: string, title: string) => {
@@ -1485,14 +1533,14 @@ export default function App() {
         {/* TAB 2: DIGESTS & EMAIL (BẢN TIN CÁ NHÂN DẠNG THẺ & EMAIL XUẤT BẢN)         */}
         {/* ========================================================================= */}
         {activeTab === 'digests' && (
-          <div style={{ maxWidth: 880, margin: '0 auto', width: '100%' }}>
+          <div style={{ width: '100%', margin: '0 auto' }}>
             {/* Header & Controls */}
             <div
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                marginBottom: 18,
+                marginBottom: 16,
                 flexWrap: 'wrap',
                 gap: 12,
               }}
@@ -1503,12 +1551,23 @@ export default function App() {
 
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowAddCustomChannelModal(true)}
-                  style={{ gap: 5, minHeight: 30, fontSize: 12, padding: '0 11px' }}
+                  className="btn btn-primary"
+                  onClick={() => {
+                    setNewChannelForm({
+                      title: '',
+                      badge: 'Tùy chọn',
+                      badgeColor: '#0F766E',
+                      scheduledTime: '08:00',
+                      frequency: 'Hàng ngày',
+                      customEmail: profile.deliveryEmail,
+                      keywords: '',
+                    });
+                    setShowAddCustomChannelModal(true);
+                  }}
+                  style={{ gap: 5, minHeight: 30, fontSize: 12, padding: '0 12px' }}
                 >
                   <IconPlus />
-                  <span>Thêm luồng</span>
+                  <span>Thêm cấu hình</span>
                 </button>
                 <button
                   className="btn btn-secondary"
@@ -1519,7 +1578,7 @@ export default function App() {
                   <span>Xem mẫu</span>
                 </button>
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-secondary"
                   onClick={handleSendTestEmail}
                   disabled={isSendingTestEmail}
                   style={{ minHeight: 30, fontSize: 12, gap: 5, padding: '0 13px' }}
@@ -1527,6 +1586,89 @@ export default function App() {
                   <IconSend />
                   <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi mail'}</span>
                 </button>
+              </div>
+            </div>
+
+            {/* QUICK TOGGLE DASHBOARD: BẬT/TẮT TRỰC TIẾP KHÔNG CẦN VÀO MODAL */}
+            <div
+              className="card-surface"
+              style={{
+                padding: '12px 16px',
+                marginBottom: 16,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 10,
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <IconBell />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                    Bật / Tắt nhận tin tự động
+                  </span>
+                  <span className="mono-pill" style={{ fontSize: 11 }}>
+                    Hộp thư: {profile.deliveryEmail}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setTempProfile(profile);
+                      setShowPreferencesModal(true);
+                    }}
+                    style={{ minHeight: 26, fontSize: 11.5, padding: '0 9px', gap: 4 }}
+                  >
+                    <IconSliders />
+                    <span>Lịch tổng thể</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Direct Quick Toggle Switches */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8 }}>
+                {topicChannels.slice(0, 4).map((ch) => (
+                  <div
+                    key={ch.id}
+                    onClick={() => handleToggleChannel(ch.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '8px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: ch.isActive ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+                      border: `1px solid ${ch.isActive ? ch.badgeColor : 'var(--border-subtle)'}`,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      userSelect: 'none',
+                    }}
+                    title={`Bấm để ${ch.isActive ? 'tạm dừng' : 'kích hoạt'} nhận tin [${ch.title}]`}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          background: ch.isActive ? ch.badgeColor : 'var(--text-tertiary)',
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span style={{ fontSize: 12, fontWeight: 600, color: ch.isActive ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                        {ch.title}
+                      </span>
+                    </div>
+
+                    <div className={`toggle-switch-track sm ${ch.isActive ? 'active' : ''}`} style={{ background: ch.isActive ? ch.badgeColor : undefined }}>
+                      <div className="toggle-switch-thumb" />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -1686,14 +1828,28 @@ export default function App() {
                           borderTop: '1px solid var(--border-subtle)',
                         }}
                       >
-                        <button
-                          className="btn btn-secondary"
-                          onClick={() => setEditingChannel(channel)}
-                          style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
-                        >
-                          <IconSliders />
-                          <span>Cấu hình</span>
-                        </button>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => setEditingChannel(channel)}
+                            style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
+                          >
+                            <IconSliders />
+                            <span>Cấu hình</span>
+                          </button>
+
+                          {channel.id.startsWith('custom-') && (
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              onClick={() => handleDeleteChannel(channel.id, channel.title)}
+                              style={{ minHeight: 28, fontSize: 12, padding: '0 8px', color: 'var(--status-danger)' }}
+                              title="Xóa cấu hình này"
+                            >
+                              <IconTrash />
+                            </button>
+                          )}
+                        </div>
 
                         <button
                           className="btn btn-secondary"
@@ -1715,6 +1871,60 @@ export default function App() {
                     </div>
                   );
                 })}
+
+                {/* Dedicated Add Configuration Card */}
+                <div
+                  className="card-surface"
+                  onClick={() => {
+                    setNewChannelForm({
+                      title: '',
+                      badge: 'Tùy chọn',
+                      badgeColor: '#0F766E',
+                      scheduledTime: '08:00',
+                      frequency: 'Hàng ngày',
+                      customEmail: profile.deliveryEmail,
+                      keywords: '',
+                    });
+                    setShowAddCustomChannelModal(true);
+                  }}
+                  style={{
+                    border: '2px dashed var(--border-strong)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '24px 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 10,
+                    cursor: 'pointer',
+                    background: 'var(--bg-subtle)',
+                    transition: 'all 0.15s ease',
+                    minHeight: 180,
+                  }}
+                  title="Bấm để thêm cấu hình nhận tin tự động mới"
+                >
+                  <div
+                    style={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: '50%',
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--accent-primary)',
+                    }}
+                  >
+                    <IconPlus />
+                  </div>
+                  <span style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--text-primary)' }}>
+                    Thêm cấu hình mới
+                  </span>
+                  <span style={{ fontSize: 11.5, color: 'var(--text-secondary)', textAlign: 'center', maxWidth: 220, lineHeight: 1.4 }}>
+                    Tạo luồng gửi email tự động theo chủ đề, giờ gửi & hòm thư riêng
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -3268,26 +3478,33 @@ export default function App() {
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL: THÊM LUỒNG TỰ ĐỘNG HÓA MỚI (BẰNG NGÔN NGỮ TỰ NHIÊN)                 */}
+      {/* MODAL: THÊM CẤU HÌNH NHẬN TIN TỰ ĐỘNG MỚI (CÓ GỢI Ý MẪU & TÙY BIẾN CHI TIẾT) */}
       {/* ========================================================================= */}
       {showAddCustomChannelModal && (
         <div className="modal-backdrop">
           <div
             className="modal-card"
             style={{
-              maxWidth: 500,
+              maxWidth: 520,
               width: '100%',
               padding: '24px',
               borderRadius: 'var(--radius-md)',
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',
               boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+              maxHeight: '90dvh',
+              overflowY: 'auto',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h3 style={{ fontSize: 17, fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-                Thêm luồng
-              </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <div>
+                <h3 style={{ fontSize: 17, fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                  Thêm cấu hình nhận tin
+                </h3>
+                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
+                  Tạo luồng gửi email tự động riêng theo chủ đề và thời gian
+                </div>
+              </div>
               <button
                 className="btn btn-secondary"
                 onClick={() => setShowAddCustomChannelModal(false)}
@@ -3298,43 +3515,190 @@ export default function App() {
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {/* Quick Presets Bar */}
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+                GỢI Ý CẤU HÌNH NHANH (BẤM ĐỂ CHỌN MẪU):
+              </label>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {[
+                  { title: 'Săn Deal Đồ Công Nghệ', badge: 'Shopee', badgeColor: '#EE4D2D', time: '11:30', freq: 'Hàng ngày', kw: 'Keychron, Màn hình 4K, Pin sạc, Giảm > 20%' },
+                  { title: 'Tuyển dụng Kỹ sư IT & Remote', badge: 'ITViec', badgeColor: '#0F766E', time: '08:00', freq: 'Thứ 2 - Thứ 6', kw: 'Flutter, Spring Boot, Remote USD, Senior' },
+                  { title: 'Thị trường Tài chính & Đầu tư', badge: 'Kinh Doanh', badgeColor: '#D97706', time: '17:30', freq: 'Hàng ngày', kw: 'VN-Index, Cổ phiếu công nghệ, Giá vàng' },
+                  { title: 'Đột phá AI & Nghiên cứu mới', badge: 'AI Lab', badgeColor: '#2563EB', time: '07:00', freq: 'Hàng ngày', kw: 'LangGraph, Agentic AI, Llama, DeepSeek' },
+                ].map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setNewChannelForm({
+                        title: preset.title,
+                        badge: preset.badge,
+                        badgeColor: preset.badgeColor,
+                        scheduledTime: preset.time,
+                        frequency: preset.freq,
+                        customEmail: profile.deliveryEmail,
+                        keywords: preset.kw,
+                      });
+                      showToast(`Đã chọn mẫu [${preset.title}]!`);
+                    }}
+                    style={{ fontSize: 11.5, padding: '4px 10px', minHeight: 26, gap: 4 }}
+                  >
+                    <span>{preset.title}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* Tên cấu hình */}
               <div>
-                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
-                  Nhu cầu theo dõi
+                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+                  Tên cấu hình / Chủ đề (Bắt buộc)
                 </label>
-                <textarea
-                  value={customChannelPrompt}
-                  onChange={(e) => setCustomChannelPrompt(e.target.value)}
-                  placeholder="Ví dụ: Tuyển dụng Golang Remote trên 3000$ lúc 8h sáng thứ Hai..."
-                  rows={4}
+                <input
+                  type="text"
+                  value={newChannelForm.title}
+                  onChange={(e) => setNewChannelForm({ ...newChannelForm, title: e.target.value })}
+                  placeholder="Ví dụ: Săn Deal iPhone 16, Tin tức Bất động sản..."
                   style={{
                     width: '100%',
+                    height: 36,
                     borderRadius: 'var(--radius-sm)',
                     border: '1px solid var(--border-subtle)',
                     background: 'var(--bg-subtle)',
                     color: 'var(--text-primary)',
-                    padding: '10px 12px',
-                    fontSize: 13.5,
-                    resize: 'none',
-                    lineHeight: 1.5,
+                    padding: '0 12px',
+                    fontSize: 13,
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
-                <button className="btn btn-secondary" onClick={() => setShowAddCustomChannelModal(false)} style={{ gap: 4 }}>
+              {/* Giờ gửi & Tần suất */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+                    Giờ gửi tự động
+                  </label>
+                  <select
+                    value={newChannelForm.scheduledTime}
+                    onChange={(e) => setNewChannelForm({ ...newChannelForm, scheduledTime: e.target.value })}
+                    style={{
+                      width: '100%',
+                      height: 36,
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--bg-subtle)',
+                      color: 'var(--text-primary)',
+                      padding: '0 10px',
+                      fontSize: 13,
+                    }}
+                  >
+                    <option value="06:30">06:30 Sáng</option>
+                    <option value="07:00">07:00 Sáng</option>
+                    <option value="07:30">07:30 Sáng</option>
+                    <option value="08:00">08:00 Sáng</option>
+                    <option value="11:30">11:30 Trưa (Deal)</option>
+                    <option value="12:00">12:00 Trưa</option>
+                    <option value="17:30">17:30 Chiều</option>
+                    <option value="18:30">18:30 Tối</option>
+                    <option value="20:00">20:00 Tối</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+                    Tần suất gửi
+                  </label>
+                  <select
+                    value={newChannelForm.frequency}
+                    onChange={(e) => setNewChannelForm({ ...newChannelForm, frequency: e.target.value })}
+                    style={{
+                      width: '100%',
+                      height: 36,
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--bg-subtle)',
+                      color: 'var(--text-primary)',
+                      padding: '0 10px',
+                      fontSize: 13,
+                    }}
+                  >
+                    <option value="Hàng ngày">Hàng ngày</option>
+                    <option value="Thứ 2 - Thứ 6">Thứ 2 - Thứ 6</option>
+                    <option value="Khi có giảm giá sâu">Khi giảm giá &gt; 15%</option>
+                    <option value="Tức thời khi có tin mới">Tức thời</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Email nhận riêng */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+                  Email nhận riêng (Tùy chọn)
+                </label>
+                <input
+                  type="email"
+                  value={newChannelForm.customEmail}
+                  onChange={(e) => setNewChannelForm({ ...newChannelForm, customEmail: e.target.value })}
+                  placeholder={`Mặc định: ${profile.deliveryEmail}`}
+                  style={{
+                    width: '100%',
+                    height: 36,
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-subtle)',
+                    background: 'var(--bg-subtle)',
+                    color: 'var(--text-primary)',
+                    padding: '0 12px',
+                    fontSize: 13,
+                  }}
+                />
+              </div>
+
+              {/* Từ khóa lọc */}
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', display: 'block', marginBottom: 4 }}>
+                  Từ khóa lọc (phân tách bằng dấu phẩy)
+                </label>
+                <input
+                  type="text"
+                  value={newChannelForm.keywords}
+                  onChange={(e) => setNewChannelForm({ ...newChannelForm, keywords: e.target.value })}
+                  placeholder="Ví dụ: Flutter, Remote, Giảm giá 50%, iPhone 16..."
+                  style={{
+                    width: '100%',
+                    height: 36,
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border-subtle)',
+                    background: 'var(--bg-subtle)',
+                    color: 'var(--text-primary)',
+                    padding: '0 12px',
+                    fontSize: 13,
+                  }}
+                />
+              </div>
+
+              {/* Footer actions */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 6, paddingTop: 12, borderTop: '1px solid var(--border-subtle)' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowAddCustomChannelModal(false)}
+                  style={{ gap: 4 }}
+                >
                   <IconClose />
                   <span>Hủy</span>
                 </button>
                 <button
+                  type="button"
                   className="btn btn-primary"
-                  onClick={handleCreateCustomChannel}
-                  disabled={!customChannelPrompt.trim() || isParsingCustomChannel}
-                  style={{ gap: 4 }}
+                  onClick={handleCreateStructuredChannel}
+                  disabled={!newChannelForm.title.trim()}
+                  style={{ gap: 5, padding: '0 18px' }}
                 >
-                  <IconPlus />
-                  <span>{isParsingCustomChannel ? 'Đang tạo...' : 'Tạo luồng'}</span>
+                  <IconCheck />
+                  <span>Tạo cấu hình</span>
                 </button>
               </div>
             </div>

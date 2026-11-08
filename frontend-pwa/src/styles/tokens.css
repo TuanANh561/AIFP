@@ -580,3 +580,19 @@ input, textarea, select {
 .toggle-switch-track.active .toggle-switch-thumb {
   left: 21px;
 }
+
+.toggle-switch-track.sm {
+  width: 32px;
+  height: 18px;
+}
+
+.toggle-switch-track.sm .toggle-switch-thumb {
+  width: 14px;
+  height: 14px;
+  top: 2px;
+  left: 2px;
+}
+
+.toggle-switch-track.sm.active .toggle-switch-thumb {
+  left: 16px;
+}

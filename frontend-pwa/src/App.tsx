@@ -200,11 +200,25 @@ const IconBell = () => (
   </svg>
 );
 
+const IconVideo = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="23 7 16 12 23 17 23 7" />
+    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+  </svg>
+);
+
+const IconClock = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+);
+
 // ============================================================================
 // DATA TYPES & PRESETS FOR MULTI-AUDIENCE GROUPS
 // ============================================================================
 type NavTab = 'assistant' | 'digests' | 'automations' | 'tools' | 'settings';
-type ToolSubTab = 'vision' | 'shopping' | 'writing' | 'docs' | 'calendar';
+type ToolSubTab = 'video' | 'vision' | 'shopping' | 'writing' | 'docs' | 'calendar';
 
 export type UserPersonaPreset = 'developer' | 'office' | 'investor' | 'shopper' | 'creator' | 'student';
 
@@ -718,6 +732,76 @@ export default function App() {
   const [calendarTitle, setCalendarTitle] = useState('Họp rà soát quy trình triển khai Trợ lý AI');
   const [calendarDate, setCalendarDate] = useState('2026-11-09T09:00');
   const [calendarSuccess, setCalendarSuccess] = useState(false);
+
+  // Video Intelligence State (YouTube & TikTok Summarizer)
+  const [videoUrlInput, setVideoUrlInput] = useState('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+  const [isAnalyzingVideo, setIsAnalyzingVideo] = useState(false);
+  const [videoAnalysisResult, setVideoAnalysisResult] = useState<{
+    title: string;
+    channel: string;
+    duration: string;
+    platform: 'youtube' | 'tiktok';
+    thumbnailUrl: string;
+    summary30s: string[];
+    keyMoments: { time: string; note: string }[];
+    lifeActionItems: string[];
+  } | null>({
+    title: '5 Kỹ năng tự học và ứng dụng AI thực tế vào công việc hàng ngày',
+    channel: 'Công nghệ & Năng suất 4.0',
+    duration: '14:28',
+    platform: 'youtube',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
+    summary30s: [
+      'Thay vì cố học thuộc prompt, hãy xây dựng quy trình tư duy theo từng bước (Step-by-step reasoning).',
+      'Tập trung tự động hóa các tác vụ lặp lại 15-30 phút mỗi ngày: tóm tắt email, lọc tin tức, phân loại ghi chú.',
+      'Sử dụng AI như một người đồng nghiệp phản biện (Peer reviewer) chứ không phải cỗ máy sao chép.',
+    ],
+    keyMoments: [
+      { time: '01:15', note: 'Sai lầm phổ biến khi học AI: Quá phụ thuộc vào câu lệnh có sẵn' },
+      { time: '04:30', note: 'Quy tắc 3 bước xây dựng trợ lý tự động hóa cá nhân' },
+      { time: '08:50', note: 'Phân tích case study tiết kiệm 2 tiếng mỗi ngày trong công việc văn phòng' },
+      { time: '12:20', note: 'Lộ trình phát triển tư duy làm chủ công nghệ trong tương lai' },
+    ],
+    lifeActionItems: [
+      'Chọn ra 1 công việc lặp đi lặp lại tốn thời gian nhất hôm nay và thử giao cho AI làm thử nghiệm.',
+      'Tập thói quen kiểm chứng nguồn tin (Fact-check) thay vì tin tưởng 100% kết quả đầu tiên.',
+      'Ghi chép lại các prompt hiệu quả vào sổ tay hoặc bộ nhớ của trợ lý.',
+    ],
+  });
+
+  const handleAnalyzeVideo = () => {
+    if (!videoUrlInput.trim()) return;
+    setIsAnalyzingVideo(true);
+    setTimeout(() => {
+      setIsAnalyzingVideo(false);
+      const isTikTok = videoUrlInput.includes('tiktok.com');
+      setVideoAnalysisResult({
+        title: isTikTok ? 'Mẹo quản lý chi tiêu và tiết kiệm 30% thu nhập mỗi tháng' : 'Tối ưu hóa quy trình làm việc với Trợ lý AI và Tự động hóa ngầm',
+        channel: isTikTok ? '@taichinhthongminh' : 'Tech Insights VN',
+        duration: isTikTok ? '01:45' : '12:10',
+        platform: isTikTok ? 'tiktok' : 'youtube',
+        thumbnailUrl: isTikTok
+          ? 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&auto=format&fit=crop&q=80'
+          : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop&q=80',
+        summary30s: [
+          'Phân biệt rõ ràng giữa chi tiêu thiết yếu và chi tiêu theo cảm xúc tức thời.',
+          'Ứng dụng công nghệ để tự động ghi chép và phân loại mọi khoản chi ngay sau khi thanh toán.',
+          'Duy trì quỹ khẩn cấp tương đương 3-6 tháng sinh hoạt phí trước khi nghĩ đến đầu tư mạo hiểm.',
+        ],
+        keyMoments: [
+          { time: '00:30', note: 'Sai lầm: Không kiểm soát các khoản chi nhỏ phát sinh hàng ngày' },
+          { time: '02:15', note: 'Phương pháp phân bổ tài chính thông minh 50/30/20' },
+          { time: '06:40', note: 'Tự động hóa trích tiền tiết kiệm ngay khi nhận lương' },
+        ],
+        lifeActionItems: [
+          'Kiểm tra lại sao kê ngân hàng tuần qua và gạch bỏ 2 khoản chi không thực sự cần thiết.',
+          'Đặt lịch tự động trích 10% thu nhập vào tài khoản tích lũy ngày đầu tháng.',
+          'Sử dụng Trợ lý AIFP quét hóa đơn mỗi khi mua sắm để tự động tổng hợp chi phí.',
+        ],
+      });
+      showToast('Đã tóm tắt và trích xuất bài học đời sống từ video thành công!');
+    }, 700);
+  };
 
   // Toast Helper
   const showToast = (msg: string) => {
@@ -2337,7 +2421,7 @@ export default function App() {
                       key={item.id}
                       className="card-surface"
                       style={{
-                        padding: '22px 20px',
+                        padding: item.imageUrl ? '0 0 18px 0' : '20px 20px',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 12,
@@ -2347,137 +2431,203 @@ export default function App() {
                         boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
                         boxSizing: 'border-box',
                         height: '100%',
+                        overflow: 'hidden',
                       }}
                     >
-                      {/* Top Row: Source, Verified & Bookmark */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
-                          <span>{item.source}</span>
-                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 400 }}>• Đã xác thực</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleToggleBookmark(item.id)}
+                      {/* Job Header Cover Image (if available) */}
+                      {item.imageUrl ? (
+                        <div
                           style={{
-                            background: 'none',
-                            border: 'none',
-                            cursor: 'pointer',
-                            padding: 4,
-                            color: isBookmarked ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+                            width: '100%',
+                            height: 135,
+                            overflow: 'hidden',
+                            position: 'relative',
+                            background: 'var(--bg-subtle)',
+                          }}
+                        >
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={(e) => {
+                              (e.currentTarget as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                          <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 6 }}>
+                            <span className="source-badge-pill source-badge-tech">{item.source}</span>
+                            <span
+                              style={{
+                                fontSize: 10.5,
+                                fontWeight: 700,
+                                padding: '2px 7px',
+                                borderRadius: 4,
+                                background: '#0F766E',
+                                color: '#FFFFFF',
+                              }}
+                            >
+                              Đã xác thực
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleBookmark(item.id)}
+                            style={{
+                              position: 'absolute',
+                              top: 10,
+                              right: 10,
+                              background: 'rgba(255, 255, 255, 0.94)',
+                              border: 'none',
+                              borderRadius: 6,
+                              padding: '5px 7px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              color: isBookmarked ? 'var(--accent-primary)' : '#64748B',
+                              boxShadow: '0 2px 5px rgba(0,0,0,0.12)',
+                            }}
+                            title={isBookmarked ? 'Bỏ lưu việc làm này' : 'Lưu tin tuyển dụng này'}
+                          >
+                            <IconBookmark filled={isBookmarked} />
+                          </button>
+                        </div>
+                      ) : (
+                        /* Top Row: Source, Verified & Bookmark */
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                            <span>{item.source}</span>
+                            <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 400 }}>• Đã xác thực</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleBookmark(item.id)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              padding: 4,
+                              color: isBookmarked ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}
+                            title={isBookmarked ? 'Bỏ lưu việc làm này' : 'Lưu tin tuyển dụng này'}
+                          >
+                            <IconBookmark filled={isBookmarked} />
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Inner Content Padding when image exists */}
+                      <div style={{ padding: item.imageUrl ? '0 18px' : '0', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
+                        {/* Job Title */}
+                        <h3
+                          style={{
+                            fontSize: 16,
+                            fontWeight: 800,
+                            textTransform: 'uppercase',
+                            letterSpacing: -0.2,
+                            lineHeight: 1.35,
+                            margin: '2px 0 0 0',
+                            color: '#1E3A8A',
+                          }}
+                        >
+                          {item.title}
+                        </h3>
+
+                        {/* Subtitle */}
+                        <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>
+                          {subtitlePart}
+                        </div>
+
+                        {/* Location Pill & Time */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              padding: '3px 9px',
+                              borderRadius: 6,
+                              background: 'var(--status-running-bg)',
+                              color: 'var(--status-running)',
+                              fontSize: 11.5,
+                              fontWeight: 700,
+                            }}
+                          >
+                            Việt Nam · Remote 100%
+                          </span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11.5, color: 'var(--text-tertiary)' }}>
+                            <IconClock />
+                            <span>Đăng {formatRelativeTime(item.publishedAt)}</span>
+                          </span>
+                        </div>
+
+                        {/* Type & Salary */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <span style={{ fontSize: 12.5, color: 'var(--text-secondary)', fontWeight: 600 }}>
+                            Part-time / Full-time (Tự do chọn giờ)
+                          </span>
+                          <strong style={{ fontSize: 13.5, color: 'var(--text-primary)' }}>
+                            {salaryPart}
+                          </strong>
+                        </div>
+
+                        {/* Bullet points */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, margin: '2px 0' }}>
+                          {(bulletLines.length > 0
+                            ? bulletLines
+                            : [
+                                'Hỗ trợ chơi thử và báo cáo lỗi game mobile (casual, nhập vai MMO)',
+                                'Không yêu cầu kinh nghiệm, có hướng dẫn chi tiết từ A-Z cho người mới',
+                                'Không yêu cầu tiếng Anh (giao diện và hướng dẫn 100% tiếng Việt)',
+                                'Thiết bị: Điện thoại smartphone (Android/iOS) hoặc máy tính cơ bản',
+                              ]
+                          ).map((b, bIdx) => (
+                            <div key={bIdx} style={{ display: 'flex', gap: 7, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                              <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>•</span>
+                              <span>{b}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Description & Note */}
+                        <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.45 }}>
+                          Phù hợp cho học sinh, sinh viên, người tìm việc làm online linh hoạt tại nhà.
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+                          * Tùy thuộc vào mức độ tham gia và hiệu quả công việc.
+                        </div>
+
+                        {/* Bottom Full-Width CTA Bar */}
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
                             display: 'flex',
                             alignItems: 'center',
-                          }}
-                          title={isBookmarked ? 'Bỏ lưu việc làm này' : 'Lưu tin tuyển dụng này'}
-                        >
-                          <IconBookmark filled={isBookmarked} />
-                        </button>
-                      </div>
-
-                      {/* Job Title */}
-                      <h3
-                        style={{
-                          fontSize: 16,
-                          fontWeight: 800,
-                          textTransform: 'uppercase',
-                          letterSpacing: -0.2,
-                          lineHeight: 1.35,
-                          margin: '2px 0 0 0',
-                          color: '#1E3A8A',
-                        }}
-                      >
-                        {item.title}
-                      </h3>
-
-                      {/* Subtitle */}
-                      <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>
-                        {subtitlePart}
-                      </div>
-
-                      {/* Location Pill */}
-                      <div>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            padding: '3px 9px',
-                            borderRadius: 6,
-                            background: 'var(--status-running-bg)',
-                            color: 'var(--status-running)',
-                            fontSize: 11.5,
+                            justifyContent: 'center',
+                            gap: 6,
+                            background: '#0F172A',
+                            color: '#FFFFFF',
+                            padding: '11px 16px',
+                            borderRadius: 'var(--radius-sm)',
+                            textDecoration: 'none',
                             fontWeight: 700,
+                            fontSize: 13,
+                            letterSpacing: 0.2,
+                            marginTop: 'auto',
+                            boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
                           }}
                         >
-                          Việt Nam · Remote
-                        </span>
+                          <span>Tìm hiểu thêm & Ứng tuyển ngay</span>
+                          <span>&gt;</span>
+                        </a>
                       </div>
-
-                      {/* Type & Salary */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        <span style={{ fontSize: 12.5, color: 'var(--text-secondary)', fontWeight: 600 }}>
-                          Part-time / Full-time (Tự do chọn giờ)
-                        </span>
-                        <strong style={{ fontSize: 13.5, color: 'var(--text-primary)' }}>
-                          {salaryPart}
-                        </strong>
-                      </div>
-
-                      {/* Bullet points */}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, margin: '2px 0' }}>
-                        {(bulletLines.length > 0
-                          ? bulletLines
-                          : [
-                              'Chơi thử và báo cáo lỗi game mobile (casual, nhập vai MMO)',
-                              'Có hướng dẫn chi tiết từ A-Z cho người mới bắt đầu',
-                              'Không yêu cầu tiếng Anh (giao diện và hướng dẫn 100% tiếng Việt)',
-                              'Thiết bị: Smartphone Android/iOS hoặc PC cơ bản',
-                            ]
-                        ).map((b, bIdx) => (
-                          <div key={bIdx} style={{ display: 'flex', gap: 7, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                            <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>•</span>
-                            <span>{b}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Description & Note */}
-                      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.45 }}>
-                        Phù hợp cho học sinh, sinh viên, game thủ và người tìm cơ hội online linh hoạt tại nhà.
-                      </div>
-                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
-                        * Tùy thuộc vào mức độ tham gia và hiệu quả công việc.
-                      </div>
-
-                      {/* Bottom Full-Width CTA Bar */}
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: 6,
-                          background: '#0F172A',
-                          color: '#FFFFFF',
-                          padding: '11px 16px',
-                          borderRadius: 'var(--radius-sm)',
-                          textDecoration: 'none',
-                          fontWeight: 700,
-                          fontSize: 13,
-                          letterSpacing: 0.2,
-                          marginTop: 'auto',
-                          boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
-                        }}
-                      >
-                        <span>Tìm hiểu thêm & Ứng tuyển ngay</span>
-                        <span>&gt;</span>
-                      </a>
                     </div>
                   );
                 }
 
                 return (
                 <div key={item.id} className="news-digest-card">
-                  {/* Thumbnail Image */}
+                  {/* 1. Image Thumbnail */}
                   <div className="news-thumb-wrapper">
                     <img
                       src={item.imageUrl}
@@ -2485,6 +2635,10 @@ export default function App() {
                       className="news-thumb-img"
                       onError={(e) => {
                         (e.currentTarget as HTMLElement).style.display = 'none';
+                        const parent = (e.currentTarget as HTMLElement).parentElement;
+                        if (parent) {
+                          parent.style.background = 'linear-gradient(135deg, var(--bg-subtle) 0%, rgba(15, 118, 110, 0.08) 100%)';
+                        }
                       }}
                     />
                     <div
@@ -2525,32 +2679,64 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Card Content */}
+                  {/* 2. Card Content */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+                    {/* Time & Category Row */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>{item.category}</span>
-                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                        {formatRelativeTime(item.publishedAt)}
+                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontWeight: 600 }}>{item.category}</span>
+                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <IconClock />
+                        <span>{formatRelativeTime(item.publishedAt)}</span>
                       </span>
                     </div>
 
-                    <h3 style={{ fontSize: 15.5, fontWeight: 700, lineHeight: 1.4, margin: 0, color: 'var(--text-primary)' }}>
+                    {/* Title */}
+                    <h3
+                      style={{
+                        fontSize: 15.5,
+                        fontWeight: 700,
+                        lineHeight: 1.4,
+                        margin: 0,
+                        color: 'var(--text-primary)',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
                       {item.title}
                     </h3>
 
-                    <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.55, margin: 0, flex: 1 }}>
+                    {/* Short Description */}
+                    <p
+                      style={{
+                        fontSize: 13,
+                        color: 'var(--text-secondary)',
+                        lineHeight: 1.55,
+                        margin: 0,
+                        flex: 1,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
                       {item.summary}
                     </p>
 
+                    {/* Link đến (Source Link & Domain) */}
                     <div
                       style={{
-                        paddingTop: 12,
+                        paddingTop: 10,
                         borderTop: '1px solid var(--border-subtle)',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
                       }}
                     >
+                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                        {item.url.replace(/^https?:\/\//, '').split('/')[0]}
+                      </span>
                       <a
                         href={item.url}
                         target="_blank"
@@ -2562,10 +2748,10 @@ export default function App() {
                           textDecoration: 'none',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: 5,
+                          gap: 4,
                         }}
                       >
-                        <span>Xem nguồn</span>
+                        <span>Đọc tiếp</span>
                         <IconArrowRight />
                       </a>
                     </div>
@@ -2662,6 +2848,7 @@ export default function App() {
             {/* Sub-Tabs (Clean Pills) */}
             <div style={{ display: 'flex', gap: 6, marginBottom: 18, flexWrap: 'wrap' }}>
               {[
+                { id: 'video', label: 'Video & Shorts' },
                 { id: 'vision', label: 'Hóa đơn' },
                 { id: 'shopping', label: 'Mua sắm' },
                 { id: 'writing', label: 'Soạn thảo' },
@@ -3008,6 +3195,174 @@ export default function App() {
                     }}
                   >
                     Đã lên lịch cho &ldquo;{calendarTitle}&rdquo; vào {calendarDate.replace('T', ' ')}.
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TOOL 6: VIDEO & SHORTS INTELLIGENCE STUDIO */}
+            {toolSubTab === 'video' && (
+              <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Trợ lý Tóm tắt Video YouTube & TikTok</h3>
+                  <span className="mono-pill" style={{ fontSize: 11 }}>Trích xuất 30 giây</span>
+                </div>
+
+                {/* Input row */}
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    value={videoUrlInput}
+                    onChange={(e) => setVideoUrlInput(e.target.value)}
+                    placeholder="Dán liên kết YouTube hoặc TikTok vào đây..."
+                    style={{
+                      flex: 1,
+                      minWidth: 260,
+                      padding: '10px 14px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--bg-surface)',
+                      color: 'var(--text-primary)',
+                      fontSize: 13.5,
+                    }}
+                  />
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleAnalyzeVideo}
+                    disabled={isAnalyzingVideo}
+                    style={{ gap: 6, minHeight: 38 }}
+                  >
+                    <IconVideo />
+                    <span>{isAnalyzingVideo ? 'Đang trích xuất...' : 'Tóm tắt ngay'}</span>
+                  </button>
+                </div>
+
+                {/* Sample quick buttons */}
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>Gợi ý mẫu:</span>
+                  {[
+                    { label: 'YouTube: Kỹ năng AI 2026', url: 'https://youtube.com/watch?v=ai-skills-2026' },
+                    { label: 'TikTok: Quản lý chi tiêu 50/30/20', url: 'https://tiktok.com/@taichinhthongminh/video/1' },
+                    { label: 'YouTube: 5 Thói quen buổi sáng', url: 'https://youtube.com/watch?v=morning-habits' },
+                  ].map((s, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setVideoUrlInput(s.url);
+                        handleAnalyzeVideo();
+                      }}
+                      style={{ fontSize: 11.5, padding: '0 8px', minHeight: 24 }}
+                    >
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Analysis Result */}
+                {videoAnalysisResult && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 14,
+                      padding: '16px 18px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-subtle)',
+                      border: '1px solid var(--border-subtle)',
+                    }}
+                  >
+                    {/* Header: Thumbnail + Title + Channel */}
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <img
+                        src={videoAnalysisResult.thumbnailUrl}
+                        alt={videoAnalysisResult.title}
+                        style={{ width: 120, height: 75, objectFit: 'cover', borderRadius: 'var(--radius-sm)' }}
+                      />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: 1, minWidth: 200 }}>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <span
+                            className="source-badge-pill"
+                            style={{
+                              background: videoAnalysisResult.platform === 'youtube' ? '#EF4444' : '#0F172A',
+                              color: '#FFFFFF',
+                            }}
+                          >
+                            {videoAnalysisResult.platform === 'youtube' ? 'YouTube' : 'TikTok'}
+                          </span>
+                          <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                            Thời lượng: {videoAnalysisResult.duration}
+                          </span>
+                        </div>
+                        <h4 style={{ fontSize: 14.5, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                          {videoAnalysisResult.title}
+                        </h4>
+                        <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                          Kênh: {videoAnalysisResult.channel}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Section 1: 30s Core Summary */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>Tóm tắt 30 giây (Ý chính cốt lõi):</strong>
+                      {videoAnalysisResult.summary30s.map((pt, pIdx) => (
+                        <div key={pIdx} style={{ display: 'flex', gap: 7, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                          <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>•</span>
+                          <span>{pt}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Section 2: Key Moments */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>Dòng thời gian & Mốc quan trọng:</strong>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                        {videoAnalysisResult.keyMoments.map((km, kIdx) => (
+                          <div key={kIdx} style={{ display: 'flex', gap: 8, fontSize: 12, alignItems: 'center' }}>
+                            <span className="mono-pill" style={{ fontSize: 11, background: 'var(--bg-surface)' }}>
+                              {km.time}
+                            </span>
+                            <span style={{ color: 'var(--text-secondary)' }}>{km.note}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Section 3: Life Action Items */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <strong style={{ fontSize: 13, color: 'var(--accent-primary)' }}>Bài học ứng dụng vào đời sống:</strong>
+                      {videoAnalysisResult.lifeActionItems.map((act, aIdx) => (
+                        <div key={aIdx} style={{ display: 'flex', gap: 7, fontSize: 12.5, color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                          <span style={{ color: '#10B981', fontWeight: 800 }}>✓</span>
+                          <span>{act}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Action buttons */}
+                    <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => showToast('Đã lưu bài học cốt lõi từ video vào Bộ nhớ Trợ lý!')}
+                        style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5 }}
+                      >
+                        <IconBookmark filled />
+                        <span>Lưu vào Bộ nhớ</span>
+                      </button>
+                      <a
+                        href={videoUrlInput}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-secondary"
+                        style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5, textDecoration: 'none' }}
+                      >
+                        <IconExternalLink />
+                        <span>Mở video gốc</span>
+                      </a>
+                    </div>
                   </div>
                 )}
               </div>

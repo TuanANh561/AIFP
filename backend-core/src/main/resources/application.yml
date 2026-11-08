@@ -40,6 +40,7 @@ spring:
           writetimeout: 5000
 
 aifp:
+  owner-email: ${AIFP_OWNER_EMAIL:}
   security:
     jwt-secret: ${JWT_SIGNING_SECRET:aifp_default_dev_only_jwt_signing_secret_minimum_64_bytes_long_2026_key}
     access-token-ttl-seconds: 900       # 15 minutes

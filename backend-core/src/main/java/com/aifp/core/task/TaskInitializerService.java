@@ -24,15 +24,18 @@ public class TaskInitializerService implements ApplicationRunner {
     private final UserRepository userRepository;
     private final UserProfileRepository profileRepository;
     private final AiTaskRepository taskRepository;
+    private final String ownerNotificationEmail;
 
     public TaskInitializerService(
             UserRepository userRepository,
             UserProfileRepository profileRepository,
-            AiTaskRepository taskRepository
+            AiTaskRepository taskRepository,
+            @org.springframework.beans.factory.annotation.Value("${aifp.owner-email:}") String ownerNotificationEmail
     ) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
         this.taskRepository = taskRepository;
+        this.ownerNotificationEmail = ownerNotificationEmail == null ? "" : ownerNotificationEmail.trim();
     }
 
     @Override
@@ -53,8 +56,16 @@ public class TaskInitializerService implements ApplicationRunner {
             // 2. Ensure profile exists
             if (!profileRepository.existsById(user.getId())) {
                 UserProfileEntity profile = new UserProfileEntity(user.getId(), "Tuấn Anh (Kỹ sư)", "DEVELOPER");
-                profile.setNotificationEmail(DEFAULT_SYSTEM_EMAIL);
+                profile.setNotificationEmail(ownerNotificationEmail.isEmpty() ? DEFAULT_SYSTEM_EMAIL : ownerNotificationEmail);
                 profileRepository.save(profile);
+            } else if (!ownerNotificationEmail.isEmpty()) {
+                // Deployment: AIFP_OWNER_EMAIL always wins so scheduled digests reach the real inbox
+                profileRepository.findById(user.getId()).ifPresent(p -> {
+                    if (!ownerNotificationEmail.equals(p.getNotificationEmail())) {
+                        p.setNotificationEmail(ownerNotificationEmail);
+                        profileRepository.save(p);
+                    }
+                });
             }
 
             // 3. Seed default topic channels as persistent autonomous tasks if none exist

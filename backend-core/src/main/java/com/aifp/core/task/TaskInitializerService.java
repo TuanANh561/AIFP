@@ -127,6 +127,19 @@ public class TaskInitializerService implements ApplicationRunner {
                     taskRepository.save(taskAiEvolution);
                     log.info("[TaskInitializer] Seeded AI Evolution autonomous task for existing database.");
                 }
+
+                UUID creatorIdeasId = UUID.fromString("33333333-3333-3333-3333-333333333307");
+                if (!taskRepository.existsById(creatorIdeasId)) {
+                    AiTaskEntity taskCreatorIdeas = new AiTaskEntity(
+                            creatorIdeasId,
+                            user.getId(),
+                            "Ý Tưởng Kiếm Tiền, Làm Game & Sáng Tạo Video Đa Nền Tảng (Aura)",
+                            "Tự động gửi email phân tích các ý tưởng kiếm tiền thực tế: phát triển game indie mini bằng Godot, kịch bản video YouTube Gaming thử thách kết hợp đòn bẩy AI, và chiến lược phân bổ đa nền tảng tối đa hóa doanh thu.",
+                            "DELTA_ONLY"
+                    );
+                    taskRepository.save(taskCreatorIdeas);
+                    log.info("[TaskInitializer] Seeded Creator Ideas autonomous task for existing database.");
+                }
             }
         } catch (Exception ex) {
             log.warn("[TaskInitializer] Initial seeding skipped or already present: {}", ex.getMessage());

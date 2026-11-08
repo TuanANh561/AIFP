@@ -93,8 +93,8 @@ public class ChatService {
         String rawContent = request.content().trim();
         String lowerQuery = rawContent.toLowerCase();
 
-        boolean isAutomationIntent = (lowerQuery.contains("mail") || lowerQuery.contains("email") || lowerQuery.contains("tự động") || lowerQuery.contains("luồng") || lowerQuery.contains("lên lịch") || lowerQuery.contains("cấu hình") || lowerQuery.contains("đề xuất") || lowerQuery.contains("phát triển") || lowerQuery.contains("tự học") || lowerQuery.contains("học hỏi"))
-                && (lowerQuery.contains("việc") || lowerQuery.contains("job") || lowerQuery.contains("game") || lowerQuery.contains("remote") || lowerQuery.contains("shopee") || lowerQuery.contains("deal") || lowerQuery.contains("công nghệ") || lowerQuery.contains("tiến hóa") || lowerQuery.contains("mã nguồn mở") || lowerQuery.contains("open source") || lowerQuery.contains("phát triển") || lowerQuery.contains("gửi") || lowerQuery.contains("học") || lowerQuery.contains("hệ thống"));
+        boolean isAutomationIntent = (lowerQuery.contains("mail") || lowerQuery.contains("email") || lowerQuery.contains("tự động") || lowerQuery.contains("luồng") || lowerQuery.contains("lên lịch") || lowerQuery.contains("cấu hình") || lowerQuery.contains("đề xuất") || lowerQuery.contains("phát triển") || lowerQuery.contains("tự học") || lowerQuery.contains("học hỏi") || lowerQuery.contains("ý tưởng") || lowerQuery.contains("kiếm tiền") || lowerQuery.contains("kịch bản") || lowerQuery.contains("làm game") || lowerQuery.contains("làm video"))
+                && (lowerQuery.contains("việc") || lowerQuery.contains("job") || lowerQuery.contains("game") || lowerQuery.contains("remote") || lowerQuery.contains("shopee") || lowerQuery.contains("deal") || lowerQuery.contains("công nghệ") || lowerQuery.contains("tiến hóa") || lowerQuery.contains("mã nguồn mở") || lowerQuery.contains("open source") || lowerQuery.contains("phát triển") || lowerQuery.contains("gửi") || lowerQuery.contains("học") || lowerQuery.contains("hệ thống") || lowerQuery.contains("kiếm tiền") || lowerQuery.contains("video") || lowerQuery.contains("youtube") || lowerQuery.contains("tiktok") || lowerQuery.contains("short"));
 
         String selectedModel = "gemini-2.5-flash";
         String replyContent;
@@ -115,7 +115,12 @@ public class ChatService {
             String frequency = "Hàng ngày";
             List<String> keywords;
 
-            if (lowerQuery.contains("mã nguồn mở") || lowerQuery.contains("open source") || lowerQuery.contains("tự học") || lowerQuery.contains("tự phát triển") || lowerQuery.contains("tiến hóa") || lowerQuery.contains("lộ trình") || lowerQuery.contains("nâng cấp")) {
+            if (lowerQuery.contains("kiếm tiền") || lowerQuery.contains("làm game") || lowerQuery.contains("làm video") || lowerQuery.contains("kịch bản") || lowerQuery.contains("youtube") || lowerQuery.contains("tiktok") || lowerQuery.contains("short") || lowerQuery.contains("ý tưởng")) {
+                channelId = "creator-ideas";
+                title = "Ý Tưởng Kiếm Tiền & Hiện Thực Hóa Sáng Tạo (Game, Video)";
+                keywords = List.of("Game Indie Godot", "YouTube Gaming Hybrid", "Kịch bản AI", "TikTok Shorts", "Kiếm tiền Online");
+                scheduledTime = "20:00";
+            } else if (lowerQuery.contains("mã nguồn mở") || lowerQuery.contains("open source") || lowerQuery.contains("tự học") || lowerQuery.contains("tự phát triển") || lowerQuery.contains("tiến hóa") || lowerQuery.contains("lộ trình") || lowerQuery.contains("nâng cấp")) {
                 channelId = "ai-evolution";
                 title = "Tự Học Hỏi Hàng Ngày & Đề Xuất Tự Phát Triển (Mã Nguồn Mở)";
                 keywords = List.of("Crawl4AI", "Model Context Protocol", "Mem0", "Ollama SLM", "LiveKit");
@@ -142,6 +147,7 @@ public class ChatService {
             if (lowerQuery.contains("8h") || lowerQuery.contains("08:00")) scheduledTime = "08:00";
             if (lowerQuery.contains("11h") || lowerQuery.contains("11:30")) scheduledTime = "11:30";
             if (lowerQuery.contains("12h") || lowerQuery.contains("12:00")) scheduledTime = "12:00";
+            if (lowerQuery.contains("20h") || lowerQuery.contains("20:00")) scheduledTime = "20:00";
 
             // Persist the autonomous task in CSDL (PostgreSQL)
             AiTaskEntity newTask = new AiTaskEntity(
@@ -153,7 +159,14 @@ public class ChatService {
             );
             taskRepository.save(newTask);
 
-            if ("ai-evolution".equals(channelId)) {
+            if ("creator-ideas".equals(channelId)) {
+                replyContent = "Đã kích hoạt và lên lịch luồng **Ý Tưởng Kiếm Tiền & Hiện Thực Hóa Sáng Tạo (Game & Video)** cho bạn:\n\n" +
+                        "• **Bài học thực tế từ trải nghiệm của bạn:** Giải mã lý do video 100% AI ít view (thiếu cảm xúc, tụt retention) và công thức chiến thắng **Gameplay thật của BẠN (Linh hồn) + AI làm đòn bẩy hậu cần** (hook 3s, kịch bản, thumbnail, SEO).\n" +
+                        "• **3 Lộ trình kiếm tiền cụ thể:** (1) Kênh YouTube Gaming thử thách kết hợp đa nền tảng, (2) Solo Indie Game bằng Godot 4 & AI bán trên Steam/Itch.io, (3) Dịch vụ Narrative Designer kịch bản game quốc tế.\n" +
+                        "• **Lịch gửi email:** " + scheduledTime + " (" + frequency + ") tới `" + recipientEmail + "`.\n" +
+                        "• **Không giới hạn Token AI:** Hệ thống phục vụ riêng cho bạn, sẵn sàng sinh kịch bản chi tiết và code mẫu từng bước bất cứ khi nào bạn yêu cầu.\n\n" +
+                        "Bạn có thể bấm **'Gửi email thử ngay'** bên dưới để nhận ngay bản kế hoạch chi tiết vào hòm thư!";
+            } else if ("ai-evolution".equals(channelId)) {
                 replyContent = "Đã kích hoạt và lên lịch luồng **Tự Học Hỏi & Đề Xuất Nâng Cấp Hệ Thống Hàng Ngày**:\n\n" +
                         "• **Cơ chế tự vận hành:** Hệ thống sẽ tự động đối chiếu các mã nguồn mở tinh hoa (Crawl4AI, MCP Standard, Mem0, Ollama SLM, LiveKit) với kiến trúc hiện tại của AIFP.\n" +
                         "• **Báo cáo đề xuất:** Tự động tạo bản đề xuất kỹ thuật (RFC/ADR) gồm: bài toán giải quyết, kiến trúc tích hợp, ước tính chi phí tiết kiệm và code mẫu.\n" +

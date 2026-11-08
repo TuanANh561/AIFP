@@ -201,6 +201,17 @@ public class EmailCenterService {
             String sampleSnippet
     ) {}
 
+    public record MonetizationIdeaItem(
+            String category,
+            String title,
+            String targetPlatform,
+            String monetizationPotential,
+            String whyAiFailedVsRealHuman,
+            java.util.List<String> executionSteps,
+            String toolstackRecommended,
+            String immediateActionTonight
+    ) {}
+
     public String renderCardBasedDigestHtml(String digestTitle, java.util.List<DigestArticleCard> articles) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html><html><head><meta charset='utf-8'/><style>")
@@ -510,6 +521,137 @@ public class EmailCenterService {
                 .append("<div class='footer'>")
                 .append("Bản tin Tự Tiến Hóa được tổng hợp & đối chiếu tự động bởi AIFP Continuous Self-Evolution Engine.<br/>")
                 .append("Gửi tự động theo dõi lịch trình phát triển hệ thống hàng ngày.")
+                .append("</div>")
+                .append("</div></body></html>");
+
+        return html.toString();
+    }
+
+    public String renderMonetizationIdeaDigestHtml(
+            String reportTitle,
+            String reportDate,
+            String recipientEmail,
+            String algorithmInsight,
+            List<MonetizationIdeaItem> ideas,
+            String webActionUrl
+    ) {
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html><html lang='vi'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1.0'/><style>")
+                .append("body{margin:0;padding:24px;background:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0F172A;}")
+                .append(".container{max-width:700px;margin:0 auto;background:#FFFFFF;border-radius:16px;overflow:hidden;border:1px solid #CBD5E1;box-shadow:0 8px 24px rgba(0,0,0,0.06);}")
+                .append(".header{background:#0F172A;color:#FFFFFF;padding:32px 28px;text-align:left;}")
+                .append(".badge{display:inline-block;padding:4px 10px;border-radius:9999px;background:#C026D3;color:#FFFFFF;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;}")
+                .append(".header h1{margin:12px 0 6px 0;font-size:22px;font-weight:800;letter-spacing:-0.4px;line-height:1.3;}")
+                .append(".header p{margin:0;font-size:13.5px;color:#94A3B8;line-height:1.5;}")
+                .append(".section{padding:24px 28px;border-bottom:1px solid #E2E8F0;}")
+                .append(".section-title{font-size:13.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#0F172A;margin-bottom:16px;display:flex;align-items:center;gap:8px;}")
+                .append(".insight-box{background:#FAF5FF;border:1px solid #E9D5FF;border-radius:12px;padding:20px;margin-bottom:16px;}")
+                .append(".insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}")
+                .append(".card-fail{background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:12px 14px;font-size:12.5px;color:#991B1B;line-height:1.5;}")
+                .append(".card-win{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px 14px;font-size:12.5px;color:#166534;line-height:1.5;}")
+                .append(".idea-card{border:1px solid #CBD5E1;border-radius:14px;padding:22px;background:#FFFFFF;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.03);}")
+                .append(".idea-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px;}")
+                .append(".idea-title{font-size:17px;font-weight:800;color:#0F172A;margin:0;line-height:1.35;}")
+                .append(".pill-platform{display:inline-block;padding:3px 8px;border-radius:4px;background:#DBEAFE;color:#1D4ED8;font-size:11.5px;font-weight:700;}")
+                .append(".pill-money{display:inline-block;padding:3px 8px;border-radius:4px;background:#DCFCE7;color:#15803D;font-size:11.5px;font-weight:700;}")
+                .append(".why-box{background:#F8FAFC;border-left:3px solid #7C3AED;padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;font-size:13px;line-height:1.5;color:#334155;}")
+                .append(".steps-title{font-size:12.5px;font-weight:800;text-transform:uppercase;color:#475569;margin:14px 0 8px 0;}")
+                .append(".step-item{display:flex;gap:10px;margin-bottom:8px;font-size:13px;color:#1E293B;line-height:1.5;}")
+                .append(".step-badge{background:#0F172A;color:#FFFFFF;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}")
+                .append(".action-tonight{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12.5px;color:#92400E;line-height:1.5;}")
+                .append(".table-platform{width:100%;border-collapse:collapse;margin-top:12px;font-size:12.5px;}")
+                .append(".table-platform th{background:#F8FAFC;padding:10px 12px;border:1px solid #E2E8F0;text-align:left;font-weight:700;color:#0F172A;}")
+                .append(".table-platform td{padding:10px 12px;border:1px solid #E2E8F0;color:#334155;line-height:1.45;}")
+                .append(".cta-box{background:#0F172A;color:#FFFFFF;border-radius:12px;padding:22px;text-align:center;margin-top:10px;}")
+                .append(".cta-btn{display:inline-block;padding:12px 22px;background:#FFFFFF;color:#0F172A;border-radius:8px;font-weight:700;font-size:13.5px;text-decoration:none;margin:6px;}")
+                .append(".footer{background:#F8FAFC;padding:20px 28px;text-align:center;font-size:12px;color:#94A3B8;line-height:1.5;border-top:1px solid #E2E8F0;}")
+                .append("</style></head><body>")
+                .append("<div class='container'>")
+                .append("<div class='header'>")
+                .append("<span class='badge'>Chiến Lược Kiếm Tiền & Sáng Tạo Độc Quyền</span>")
+                .append("<h1>").append(reportTitle).append("</h1>")
+                .append("<p>").append(reportDate).append(" &middot; Bản tin tự động phân tích ý tưởng làm Game & Video có doanh thu thực tế cho bạn</p>")
+                .append("</div>")
+
+                // Section 1: Algorithm Reality Check
+                .append("<div class='section'>")
+                .append("<div class='section-title'>1. Giải Mã Thuật Toán: Vì Sao Video Thuần AI Ít View Hơn Video Bạn Tự Quay?</div>")
+                .append("<div class='insight-box'>")
+                .append("<div style='font-size:13.5px;line-height:1.6;color:#4A044E;'><strong>Bài học từ trải nghiệm thực tế của bạn:</strong> ").append(algorithmInsight).append("</div>")
+                .append("<div class='insight-grid'>")
+                .append("<div class='card-fail'><strong>🔴 100% Video AI (Bẫy nội dung rác)</strong><br/>Giọng đọc máy đều đều, hình ảnh chung chung, không có cảm xúc. Người xem vuốt đi sau 1.5 giây. Thuật toán YouTube & TikTok lập tức đánh tụt đề xuất.</div>")
+                .append("<div class='card-win'><strong>🟢 Công thức Hybrid Creator (Thắng thế 2026)</strong><br/>Gameplay thực tế + Phản xạ tự nhiên của BẠN (Linh hồn) KẾT HỢP với AI (Lên ý tưởng hook 3 giây đầu, kịch bản thử thách, thumbnail và SEO).</div>")
+                .append("</div>")
+                .append("</div>")
+                .append("</div>")
+
+                // Section 2: Actionable Monetization Ideas & Step-by-Step
+                .append("<div class='section'>")
+                .append("<div class='section-title'>2. Các Ý Tưởng Kiếm Tiền Cụ Thể & Từng Bước Triển Khai Từ A-Z</div>");
+
+        if (ideas != null) {
+            int i = 1;
+            for (MonetizationIdeaItem idea : ideas) {
+                html.append("<div class='idea-card'>")
+                        .append("<div class='idea-header'>")
+                        .append("<h3 class='idea-title'>").append(i++).append(". ").append(idea.title()).append("</h3>")
+                        .append("<div style='display:flex;gap:6px;'>")
+                        .append("<span class='pill-platform'>").append(idea.targetPlatform()).append("</span>")
+                        .append("<span class='pill-money'>").append(idea.monetizationPotential()).append("</span>")
+                        .append("</div>")
+                        .append("</div>")
+
+                        .append("<div class='why-box'><strong>💡 Điểm khác biệt mấu chốt:</strong> ").append(idea.whyAiFailedVsRealHuman()).append("</div>")
+
+                        .append("<div class='steps-title'>Các bước hiện thực hóa từ A-Z:</div>");
+
+                if (idea.executionSteps() != null) {
+                    int sIdx = 1;
+                    for (String step : idea.executionSteps()) {
+                        html.append("<div class='step-item'>")
+                                .append("<span class='step-badge'>").append(sIdx++).append("</span>")
+                                .append("<div>").append(step).append("</div>")
+                                .append("</div>");
+                    }
+                }
+
+                html.append("<div style='margin-top:12px;font-size:12px;color:#64748B;'><strong>Công cụ khuyên dùng:</strong> ").append(idea.toolstackRecommended()).append("</div>")
+                        .append("<div class='action-tonight'><strong>🚀 Hành động làm ngay tối nay (30 phút):</strong> ").append(idea.immediateActionTonight()).append("</div>")
+                        .append("</div>");
+            }
+        }
+
+        html.append("</div>")
+
+                // Section 3: Platform Matrix
+                .append("<div class='section'>")
+                .append("<div class='section-title'>3. Bảng Phân Bổ Nền Tảng: Đăng Gì Ở Đâu Để Tối Đa Hóa Doanh Thu?</div>")
+                .append("<table class='table-platform'>")
+                .append("<thead><tr><th>Nền tảng</th><th>Định dạng nội dung phù hợp nhất</th><th>Mô hình kiếm tiền cốt lõi</th></tr></thead>")
+                .append("<tbody>")
+                .append("<tr><td><strong>YouTube Dài (8–15p)</strong></td><td>Gameplay thử thách lạ, Devlog tự làm game, chia sẻ mẹo chơi game thực tế</td><td>AdSense (RPM cao $2–$6), Nhà phát hành tài trợ, Link tiếp thị gear</td></tr>")
+                .append("<tr><td><strong>TikTok & Shorts (30–60s)</strong></td><td>Cắt 1 khoảnh khắc 'Fail' hài hước hoặc 'Clutch' nghẹt thở từ video dài</td><td>Kéo fan về kênh YouTube chính, Quỹ nhà sáng tạo TikTok, Nhận quảng cáo</td></tr>")
+                .append("<tr><td><strong>Steam & Itch.io</strong></td><td>Game Indie 2D hoặc 3D ngắn gọn (Vampire Survivors-like, Escape Room)</td><td>Bán game trả phí ($2.99 – $4.99/bản) thu ngoại tệ USD toàn cầu</td></tr>")
+                .append("<tr><td><strong>Roblox</strong></td><td>Minigame hành động hoặc Tycoon vui nhộn cho cộng đồng trẻ</td><td>Bán vật phẩm bằng Robux &rarr; Rút tiền thật qua chương trình DevEx</td></tr>")
+                .append("</tbody></table>")
+                .append("</div>")
+
+                // Section 4: Aura Interactive Action CTA
+                .append("<div class='section'>")
+                .append("<div class='cta-box'>")
+                .append("<div style='font-size:17px;font-weight:800;margin-bottom:6px;'>Hiện Thực Hóa Ý Tưởng Này Ngay Hôm Nay</div>")
+                .append("<div style='font-size:13px;color:#CBD5E1;max-width:520px;margin:0 auto 16px auto;line-height:1.5;'>Aura AI không giới hạn token cho bạn. Hãy mở Trợ lý để yêu cầu AI sinh kịch bản chi tiết, soạn code game mẫu hoặc phác thảo thumbnail ngay tức thì.</div>")
+                .append("<div>")
+                .append("<a class='cta-btn' href='").append(webActionUrl != null ? webActionUrl : "http://localhost:5173/").append("' target='_blank'>Soạn Kịch Bản Video Này Cùng Aura →</a>")
+                .append("<a class='cta-btn' href='").append(webActionUrl != null ? webActionUrl : "http://localhost:5173/").append("' target='_blank'>Sinh Code Game Mẫu Bằng Godot</a>")
+                .append("</div>")
+                .append("</div>")
+                .append("</div>")
+
+                // Footer
+                .append("<div class='footer'>")
+                .append("Bản tin Chiến lược Kiếm tiền được tổng hợp riêng biệt cho bạn bởi Aura AI Life Assistant.<br/>")
+                .append("Gửi tự động tới <strong>").append(recipientEmail).append("</strong> theo cấu hình tư vấn ý tưởng.")
                 .append("</div>")
                 .append("</div></body></html>");
 

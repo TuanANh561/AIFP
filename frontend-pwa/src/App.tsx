@@ -559,6 +559,19 @@ const INITIAL_TOPIC_CHANNELS: TopicChannelConfig[] = [
     isActive: true,
     sourceSummary: 'arXiv, Hugging Face, DeepMind, Anthropic',
   },
+  {
+    id: 'creator-ideas',
+    title: 'Ý tưởng Kiếm tiền & Game/Video',
+    subtitle: '',
+    badge: 'Creator',
+    badgeColor: '#C026D3',
+    scheduledTime: '20:00',
+    customEmail: '',
+    frequency: 'Hàng ngày',
+    keywords: ['Làm Game Godot', 'YouTube Gameplay', 'TikTok Shorts', 'Kịch bản AI', 'Kiếm tiền Online'],
+    isActive: true,
+    sourceSummary: 'YouTube Gaming, Steam, IndieDev, Upwork',
+  },
 ];
 
 export default function App() {
@@ -632,7 +645,7 @@ export default function App() {
   });
   const [editingChannel, setEditingChannel] = useState<TopicChannelConfig | null>(null);
   const [sendingChannelId, setSendingChannelId] = useState<string | null>(null);
-  const [newsFilter, setNewsFilter] = useState<'all' | 'shopping' | 'jobs' | 'tech' | 'finance' | 'social' | 'ai-evolution'>('all');
+  const [newsFilter, setNewsFilter] = useState<'all' | 'shopping' | 'jobs' | 'tech' | 'finance' | 'social' | 'ai-evolution' | 'creator-ideas'>('all');
   const [bookmarkedJobIds, setBookmarkedJobIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('aifp_bookmarked_jobs');
@@ -1373,6 +1386,7 @@ export default function App() {
   const filteredNews = (liveNews && liveNews.length > 0 ? liveNews : INITIAL_NEWS).filter((item) => {
     if (newsFilter === 'all') return true;
     if (newsFilter === 'ai-evolution') return item.channelId === 'ai-evolution' || item.title.includes('AI') || item.title.includes('DeepSeek') || item.title.includes('MCP') || item.summary.includes('AI') || item.category.includes('AI');
+    if (newsFilter === 'creator-ideas') return item.channelId === 'creator-ideas' || item.title.includes('Game') || item.title.includes('Video') || item.title.includes('YouTube') || item.title.includes('Kiếm tiền') || item.summary.includes('Game');
     if (newsFilter === 'shopping') return item.sourceType === 'shop' || item.channelId === 'shopping';
     if (newsFilter === 'jobs') return (item.sourceType === 'tech' && (item.category.includes('việc') || item.title.includes('Tuyển'))) || item.channelId === 'jobs';
     if (newsFilter === 'tech') return (item.sourceType === 'vn' || item.sourceType === 'tech') && !item.title.includes('Tuyển') && (item.channelId === 'tech' || item.category.includes('nghệ'));
@@ -2402,6 +2416,7 @@ export default function App() {
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                   {[
                     { id: 'all', label: 'Tất cả' },
+                    { id: 'creator-ideas', label: 'Ý tưởng kiếm tiền' },
                     { id: 'ai-evolution', label: 'Tiến hóa AI' },
                     { id: 'shopping', label: 'Shopee' },
                     { id: 'jobs', label: 'Việc làm' },

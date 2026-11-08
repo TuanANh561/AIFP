@@ -192,6 +192,7 @@ public class NotificationCenterController {
         String channel = (request.channelId() != null) ? request.channelId().toLowerCase().trim() : "shopping";
         List<EmailCenterService.DigestArticleCard> articles = new ArrayList<>();
         List<EmailCenterService.JobCardItem> jobCards = new ArrayList<>();
+        List<EmailCenterService.MonetizationIdeaItem> monetizationIdeas = new ArrayList<>();
         String emailSubject;
         String headerTitle;
 
@@ -429,6 +430,61 @@ public class NotificationCenterController {
                     "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&auto=format&fit=crop&q=80",
                     "06:00 Sáng nay"
             ));
+        } else if ("creator-ideas".equals(channel) || "monetization-ideas".equals(channel) || "creator".equals(channel)) {
+            emailSubject = "[Aura Ý Tưởng] Chiến lược Kiếm tiền, Làm Game & Sáng tạo Video Đa nền tảng";
+            headerTitle = "Chiến Lược Kiếm Tiền & Hiện Thực Hóa Ý Tưởng Sáng Tạo";
+
+            monetizationIdeas.add(new EmailCenterService.MonetizationIdeaItem(
+                    "HYBRID_GAMING_VIDEO",
+                    "Kênh YouTube Gameplay Thử Thách & Lỗi Game Hài Hước (Đòn bẩy AI)",
+                    "YouTube Dài (8–12p) + TikTok/Shorts (30s)",
+                    "$600 – $2,500 / tháng (AdSense + Tài trợ)",
+                    "Khán giả xem video game là vì 'con người thật' (phản xạ giật mình, pha xử lý lỗi hài hước, cảm xúc thật). Video 100% bằng AI dùng giọng đọc đều đều và ảnh ghép khiến người xem vuốt đi ngay sau 1.5 giây, kéo tụt retention. Thay vào đó, hãy lấy chính footage bạn chơi game làm TRỌNG TÂM, và dùng AI để: lên ý tưởng thử thách lạ, viết hook 3 giây đầu, viết mô tả SEO và thiết kế thumbnail bắt mắt.",
+                    List.of(
+                            "Bước 1 - Lên ý tưởng thử thách độc đáo bằng AI: Dùng prompt: 'Gợi ý 5 thử thách oái oăm trong tựa game X khiến người xem tò mò ngay từ 3 giây đầu tiên'.",
+                            "Bước 2 - Bật OBS ghi hình 45–60 phút bạn tự chơi: Đừng diễn, hãy giữ micro thu lại mọi cảm xúc tự nhiên, tiếng cười, tiếng thất vọng thật nhất.",
+                            "Bước 3 - Nhận diện điểm cao trào (The Story Arc): Chọn ra 1 pha thất bại thảm hại ở đầu video và 1 pha vượt qua nghẹt thở ở cuối video.",
+                            "Bước 4 - Dựng nhịp nhanh bằng CapCut / Premiere: Cắt bỏ các đoạn đi bộ im lặng, chèn meme sound effect và phụ đề động tại những câu nói đắt giá.",
+                            "Bước 5 - Đăng đa nền tảng tối ưu phễu người xem: Đăng video dài đầy đủ lên YouTube. Cắt đoạn hài hước nhất (30s) đăng lên TikTok và YouTube Shorts kèm lời kêu gọi 'Xem pha xử lý full tại link trên bio'."
+                    ),
+                    "OBS Studio (Quay hình) · CapCut Pro (Dựng nhanh) · Claude / Gemini (Soạn Hook & Title) · Canva / Photoshop (Thumbnail)",
+                    "Mở OBS lên, vào tựa game bạn thích nhất, chơi 1 trận với mục tiêu làm một điều kỳ quặc và ghi lại 15 phút video thô."
+            ));
+
+            monetizationIdeas.add(new EmailCenterService.MonetizationIdeaItem(
+                    "SOLO_INDIE_GAME",
+                    "Phát Triển Game Độc Lập Mini Bằng Godot 4 & AI (Solo Indie Game)",
+                    "Steam ($2.99–$4.99) · Itch.io · Roblox",
+                    "$1,000 – $5,000 / dự án hoàn thiện",
+                    "Rất nhiều người mơ làm game nhưng bỏ cuộc vì code khó và thiếu đồ họa. Với AI hiện tại, bạn không cần studio lớn. Bạn chỉ cần tư duy Gameplay Loop thật cuốn hút, còn AI sẽ viết code GDScript/C# cho từng hàm di chuyển, sinh quái, tính điểm và tạo cốt truyện nhiệm vụ.",
+                    List.of(
+                            "Bước 1 - Chọn thể loại game nhỏ gọn đã chứng minh thành công: Vampire Survivors-like (sinh tồn 2D), Roguelike thẻ bài hoặc Escape Room giải đố.",
+                            "Bước 2 - Dựng bản chơi thử (Prototype) trong 48 giờ: Tải Godot Engine 4 (nhẹ 50MB). Nhờ AI viết script GDScript cho Player Movement và Enemy Spawner.",
+                            "Bước 3 - Lấy Asset đồ họa bản quyền miễn phí: Sử dụng kho Kenney.nl hoặc OpenGameArt (đầy đủ sprite 2D, tilemap, sound effect 100% miễn phí thương mại).",
+                            "Bước 4 - Đưa cơ chế tạo nhiệm vụ / lời thoại bằng AI: Dùng AI viết 20 câu thoại trêu chọc người chơi khi chết để tạo nét hài hước độc bản.",
+                            "Bước 5 - Đăng bản Demo lên Itch.io & Steam: Mở trang Steam Wishlist sớm trước khi game ra mắt để gom người theo dõi.",
+                            "Bước 6 - Dùng chính video làm game (Devlog) để bán game: Quay lại những khoảnh khắc fix bug dở khóc dở cười đăng lên TikTok. Đây là cách các solo dev thu hút hàng trăm nghìn lượt tải mà không tốn tiền quảng cáo!"
+                    ),
+                    "Godot 4.3 (Game Engine miễn phí) · Kenney.nl (Kho Asset 2D) · Claude 3.5 Sonnet (Viết code logic GDScript) · Audacity (Xử lý âm thanh)",
+                    "Tải Godot Engine 4 về máy, copy đoạn code di chuyển 8 hướng do AI tạo và bấm Play để nhìn thấy nhân vật đầu tiên di chuyển trên màn hình!"
+            ));
+
+            monetizationIdeas.add(new EmailCenterService.MonetizationIdeaItem(
+                    "AI_CREATIVE_SERVICES",
+                    "Dịch Vụ Thiết Kế Kịch Bản & Cốt Truyện Game Cho Khách Hàng Nước Ngoài",
+                    "Upwork · Fiverr · Ybox · Diễn đàn Game Dev",
+                    "$50 – $300 / kịch bản cốt truyện & chuỗi nhiệm vụ",
+                    "Các lập trình viên game thường rất giỏi kỹ thuật nhưng lại rất yếu về khoản viết văn, xây dựng thế giới (World-building) và hội thoại nhân vật. Bạn có thể đóng vai trò 'Narrative Designer' sử dụng AI để tạo ra các kịch bản chi tiết, phân nhánh lựa chọn và lời thoại NPC chuẩn văn phong bản ngữ.",
+                    List.of(
+                            "Bước 1 - Tạo Profile chuyên về Narrative Design / Scriptwriting trên Fiverr và Upwork.",
+                            "Bước 2 - Xây dựng Portfolio mẫu gồm 3 cốt truyện game: 1 game kinh dị sinh tồn, 1 game nhập vai fantasy, 1 kịch bản video YouTube triệu view.",
+                            "Bước 3 - Nhận yêu cầu từ khách và dùng AI tạo khung xương (Story Arc): Thiết lập tiểu sử nhân vật, động lực, biến cố và các nhánh kết thúc.",
+                            "Bước 4 - Tinh chỉnh bằng trải nghiệm game thực tế của bạn: Thêm các câu đùa, thuật ngữ game thực tế để kịch bản không bị cảm giác máy móc.",
+                            "Bước 5 - Đóng gói file PDF chuyên nghiệp và bàn giao cho khách kèm gợi ý góc quay hoặc nhạc nền."
+                    ),
+                    "Gemini 2.5 Flash · Notion (Lưu trữ kịch bản) · Twine (Thiết kế hội thoại phân nhánh game)",
+                    "Viết thử 1 kịch bản cốt truyện ngắn 500 từ về một tựa game nhập vai giả tưởng và lưu vào kho portfolio của bạn."
+            ));
         } else {
             emailSubject = "[AIFP Cộng Đồng] Thảo luận & Bài viết chuyên sâu nổi bật";
             headerTitle = "Bản tin Cộng đồng & Thảo luận Xã hội";
@@ -528,6 +584,16 @@ public class NotificationCenterController {
                     presentSummary,
                     futureRoadmap,
                     suggestedImprovements,
+                    "http://localhost:5173/"
+            );
+        } else if ("creator-ideas".equals(channel) || "monetization-ideas".equals(channel) || "creator".equals(channel)) {
+            String algorithmInsight = "Khi bạn đăng video thuần AI (chữ chạy, giọng máy, hình stock), khán giả lập tức nhận ra đây là nội dung tự động sản xuất hàng loạt và lướt qua ngay. Thuật toán YouTube Shorts & TikTok trừng phạt nặng nề nội dung có tỷ lệ giữ chân (Retention) thấp dưới 60%. Ngược lại, video bạn tự quay khi chơi game mang cảm xúc con người thật (Human Soul) — tiếng cười, pha xử lý lỗi hay khoảnh khắc bất ngờ — đây chính là thứ giữ chân người xem. Công thức chiến thắng là BẠN làm nhân vật chính, và AI là trợ lý hậu cần (soạn kịch bản, làm thumbnail, tối ưu từ khóa).";
+            htmlBody = emailCenterService.renderMonetizationIdeaDigestHtml(
+                    headerTitle,
+                    "Hôm nay, 08/11/2026",
+                    request.recipientEmail(),
+                    algorithmInsight,
+                    monetizationIdeas,
                     "http://localhost:5173/"
             );
         } else {

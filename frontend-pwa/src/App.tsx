@@ -1006,14 +1006,14 @@ export default function App() {
 
   const handleSyncLiveNews = async () => {
     setIsSyncingNews(true);
-    showToast('Đang kết nối CSDL và quét bài viết mới nhất từ RSS...');
+    showToast('Đang cập nhật bài viết mới...');
     try {
       const result = await aifpApi.syncLiveNews();
       await loadLiveNews(newsFilter);
       if (result) {
-        showToast(`Đã lưu ${result.newAddedCount} bài mới vào CSDL! Tổng cộng: ${result.totalInDatabase} bài viết thực tế.`);
+        showToast(`Đã cập nhật ${result.newAddedCount} bài mới!`);
       } else {
-        showToast('Đã đồng bộ dữ liệu tin tức mới nhất từ CSDL.');
+        showToast('Đã đồng bộ tin mới.');
       }
     } catch {
       showToast('Không thể kết nối máy chủ để đồng bộ tin tức.');
@@ -1786,7 +1786,7 @@ export default function App() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
-                    <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>Tin mới CSDL</span>
+                    <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>Tin mới</span>
                   </div>
                   <button
                     type="button"
@@ -2263,10 +2263,10 @@ export default function App() {
                     fontWeight: 700,
                     border: '1px solid rgba(16, 185, 129, 0.28)',
                   }}
-                  title="Dữ liệu bài viết thực tế được lưu trong CSDL"
+                  title="Tổng số bài viết cập nhật"
                 >
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
-                  <span>CSDL: {liveNews.length} bài</span>
+                  <span>{liveNews.length} bài viết</span>
                 </span>
                 {lastSyncTime && (
                   <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
@@ -2282,10 +2282,10 @@ export default function App() {
                   onClick={handleSyncLiveNews}
                   disabled={isSyncingNews}
                   style={{ minHeight: 26, fontSize: 11.5, padding: '0 10px', gap: 5 }}
-                  title="Quét RSS trực tiếp và lưu bài viết mới vào CSDL"
+                  title="Cập nhật tin mới"
                 >
                   <IconRefresh spinning={isSyncingNews} />
-                  <span>{isSyncingNews ? 'Đang lưu...' : 'Cập nhật'}</span>
+                  <span>{isSyncingNews ? 'Đang tải...' : 'Cập nhật'}</span>
                 </button>
 
                 {/* Sub Filter Pills */}
@@ -2520,7 +2520,7 @@ export default function App() {
                           letterSpacing: 0.3,
                         }}
                       >
-                        CSDL
+                        Mới
                       </span>
                     </div>
                   </div>
@@ -3456,7 +3456,7 @@ export default function App() {
                     >
                       <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-primary)', flexShrink: 0 }} />
                       <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                        <strong style={{ color: 'var(--text-primary)' }}>Chế độ Tức thì:</strong> Trợ lý tự động rà soát CSDL và gửi email/thông báo ngay khi phát hiện tin tức sốt dẻo hoặc deal hời mới, không cố định khung giờ.
+                        <strong style={{ color: 'var(--text-primary)' }}>Chế độ Tức thì:</strong> Trợ lý tự động kiểm tra và gửi email ngay khi có tin tức hoặc ưu đãi mới.
                       </div>
                     </div>
                   ) : (

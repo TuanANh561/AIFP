@@ -153,16 +153,12 @@ public class ChatService {
             );
             taskRepository.save(newTask);
 
-            replyContent = "Trợ lý AI đã ghi nhận yêu cầu và tự động thiết lập luồng vận hành ngầm cho bạn!\n\n" +
-                    "🛡️ **Quyền thực thi tự động (Level 3 HITL Gate):** Đã kích hoạt quyền gửi email tự động và lưu trữ cấu hình trực tiếp vào CSDL hệ thống.\n\n" +
-                    "📋 **Thông tin luồng đã tạo:**\n" +
-                    "- **Chủ đề:** " + title + "\n" +
-                    "- **Khung giờ gửi:** " + scheduledTime + " (" + frequency + ")\n" +
-                    "- **Hòm thư nhận:** " + recipientEmail + "\n" +
-                    "- **Tiêu chí lọc:** " + String.join(", ", keywords) + "\n" +
-                    "- **Định dạng hiển thị:** Chuẩn Job Card (Thu nhập tham khảo, Địa điểm, Gạch đầu dòng quyền lợi, Nút ứng tuyển trực tiếp)\n" +
-                    "- **Trạng thái:** ĐÃ LƯU CSDL & SẴN SÀNG CHẠY NGẦM\n\n" +
-                    "Bạn có thể bấm **'Gửi thử 1 email ngay'** bên dưới để kiểm tra hộp thư hoặc bấm **'Xem trong Bản tin'** để xem danh sách bài đăng đã lưu.";
+            replyContent = "Đã thiết lập luồng gửi email tự động cho bạn:\n\n" +
+                    "• **Chủ đề:** " + title + "\n" +
+                    "• **Lịch gửi:** " + scheduledTime + " (" + frequency + ")\n" +
+                    "• **Email nhận:** " + recipientEmail + "\n" +
+                    "• **Từ khóa:** " + String.join(", ", keywords) + "\n\n" +
+                    "Bạn có thể bấm nút bên dưới để nhận email thử ngay hoặc xem danh sách bài mới.";
 
             String kwJson = "[\"" + String.join("\",\"", keywords) + "\"]";
             replyContent += "\n\n<!-- AUTOMATION_ACTION: {\"action\":\"SETUP_CHANNEL\",\"channelId\":\"" + channelId + "\",\"title\":\"" + title + "\",\"scheduledTime\":\"" + scheduledTime + "\",\"frequency\":\"" + frequency + "\",\"customEmail\":\"" + recipientEmail + "\",\"keywords\":" + kwJson + "} -->";

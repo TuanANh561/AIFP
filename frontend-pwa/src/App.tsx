@@ -134,6 +134,49 @@ const IconArrowRight = () => (
   </svg>
 );
 
+const IconPlus = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
+const IconEye = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+
+const IconPlay = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="5 3 19 12 5 21 5 3" />
+  </svg>
+);
+
+const IconSend = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="22" y1="2" x2="11" y2="13" />
+    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </svg>
+);
+
+const IconFile = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+  </svg>
+);
+
+const IconCalendar = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
 // ============================================================================
 // DATA TYPES & PRESETS FOR MULTI-AUDIENCE GROUPS
 // ============================================================================
@@ -1273,17 +1316,19 @@ export default function App() {
                     setTempProfile(profile);
                     setShowPreferencesModal(true);
                   }}
-                  style={{ minHeight: 28, fontSize: 12, padding: '0 10px' }}
+                  style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
                 >
-                  Tùy biến
+                  <IconSliders />
+                  <span>Tùy biến</span>
                 </button>
                 <button
                   className="btn btn-secondary"
                   onClick={handleSendTestEmail}
                   disabled={isSendingTestEmail}
-                  style={{ minHeight: 28, fontSize: 12, padding: '0 10px' }}
+                  style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
                 >
-                  {isSendingTestEmail ? 'Đang gửi...' : 'Gửi mail'}
+                  <IconSend />
+                  <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi mail'}</span>
                 </button>
               </div>
             </div>
@@ -1460,32 +1505,33 @@ export default function App() {
                 <button
                   className="btn btn-secondary"
                   onClick={() => setShowAddCustomChannelModal(true)}
-                  style={{ gap: 4, minHeight: 30, fontSize: 12 }}
+                  style={{ gap: 5, minHeight: 30, fontSize: 12, padding: '0 11px' }}
                 >
-                  <IconSliders />
-                  <span>+ Thêm luồng</span>
+                  <IconPlus />
+                  <span>Thêm luồng</span>
                 </button>
                 <button
                   className="btn btn-secondary"
                   onClick={() => setShowEmailModal(true)}
-                  style={{ gap: 4, minHeight: 30, fontSize: 12 }}
+                  style={{ gap: 5, minHeight: 30, fontSize: 12, padding: '0 11px' }}
                 >
-                  <IconMail />
+                  <IconEye />
                   <span>Xem mẫu</span>
                 </button>
                 <button
                   className="btn btn-primary"
                   onClick={handleSendTestEmail}
                   disabled={isSendingTestEmail}
-                  style={{ minHeight: 30, fontSize: 12 }}
+                  style={{ minHeight: 30, fontSize: 12, gap: 5, padding: '0 13px' }}
                 >
-                  {isSendingTestEmail ? 'Đang gửi...' : 'Gửi mail'}
+                  <IconSend />
+                  <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi mail'}</span>
                 </button>
               </div>
             </div>
 
             {/* SECTION 1: TOPIC CHANNELS AUTOMATION */}
-            <div style={{ marginBottom: 22 }}>
+            <div style={{ marginBottom: 18 }}>
               <div
                 style={{
                   display: 'flex',
@@ -1503,7 +1549,7 @@ export default function App() {
               </div>
 
               {/* Grid of Topic Channels */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(410px, 1fr))', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
                 {topicChannels.map((channel) => {
                   const targetEmail = channel.customEmail.trim() || profile.deliveryEmail;
                   const isSendingThis = sendingChannelId === channel.id;
@@ -1662,7 +1708,7 @@ export default function App() {
                             borderColor: channel.isActive ? 'var(--accent-primary)' : 'var(--border-subtle)',
                           }}
                         >
-                          <IconMail />
+                          <IconSend />
                           <span>{isSendingThis ? 'Đang gửi...' : 'Gửi thử'}</span>
                         </button>
                       </div>
@@ -1713,7 +1759,7 @@ export default function App() {
                   title="Quét RSS trực tiếp và lưu bài viết mới vào CSDL"
                 >
                   <IconRefresh spinning={isSyncingNews} />
-                  <span>{isSyncingNews ? 'Đang lưu CSDL...' : 'Cập nhật trực tiếp'}</span>
+                  <span>{isSyncingNews ? 'Đang lưu...' : 'Cập nhật'}</span>
                 </button>
 
                 {/* Sub Filter Pills */}
@@ -1748,7 +1794,7 @@ export default function App() {
             </div>
 
             {/* Card-Based News Feed */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(390px, 1fr))', gap: 18 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 14 }}>
               {filteredNews.map((item) => (
                 <div key={item.id} className="news-digest-card">
                   {/* Thumbnail Image */}
@@ -1882,18 +1928,20 @@ export default function App() {
                       <button
                         className="btn btn-secondary"
                         onClick={() => handleToggleTaskActive(task.id)}
-                        style={{ fontSize: 12, minHeight: 30, padding: '0 10px' }}
+                        style={{ fontSize: 12, minHeight: 30, padding: '0 10px', gap: 4 }}
                       >
-                        {task.active ? 'Tạm dừng' : 'Bật'}
+                        <IconSliders />
+                        <span>{task.active ? 'Tạm dừng' : 'Bật'}</span>
                       </button>
 
                       <button
                         className="btn btn-primary"
                         onClick={() => handleRunTaskNow(task.id, task.title)}
                         disabled={runningTaskId === task.id}
-                        style={{ fontSize: 12, minHeight: 30, padding: '0 12px' }}
+                        style={{ fontSize: 12, minHeight: 30, padding: '0 12px', gap: 4 }}
                       >
-                        {runningTaskId === task.id ? 'Đang chạy...' : 'Chạy ngay'}
+                        <IconPlay />
+                        <span>{runningTaskId === task.id ? 'Đang chạy...' : 'Chạy ngay'}</span>
                       </button>
                     </div>
                   </div>
@@ -1969,8 +2017,9 @@ export default function App() {
                       <img src={visionImagePreview} alt="Hóa đơn" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                     <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                      <label className="btn btn-secondary" style={{ fontSize: 12.5, flex: 1, cursor: 'pointer' }}>
-                        Chọn ảnh
+                      <label className="btn btn-secondary" style={{ fontSize: 12.5, flex: 1, cursor: 'pointer', gap: 5 }}>
+                        <IconCamera />
+                        <span>Chọn ảnh</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -2001,9 +2050,10 @@ export default function App() {
                             showToast('Đã trích xuất thông tin hóa đơn.');
                           }, 600);
                         }}
-                        style={{ fontSize: 12.5 }}
+                        style={{ fontSize: 12.5, gap: 5 }}
                       >
-                        Quét
+                        <IconSearch />
+                        <span>Quét</span>
                       </button>
                     </div>
                   </div>
@@ -2056,8 +2106,9 @@ export default function App() {
                       fontSize: 13.5,
                     }}
                   />
-                  <button className="btn btn-primary" onClick={() => showToast('Đang cập nhật giá mới nhất...')}>
-                    Tìm
+                  <button className="btn btn-primary" onClick={() => showToast('Đang cập nhật giá mới nhất...')} style={{ gap: 5 }}>
+                    <IconSearch />
+                    <span>Tìm</span>
                   </button>
                 </div>
 
@@ -2088,9 +2139,10 @@ export default function App() {
                           target="_blank"
                           rel="noreferrer"
                           className="btn btn-secondary"
-                          style={{ fontSize: 12, minHeight: 28, padding: '0 10px' }}
+                          style={{ fontSize: 12, minHeight: 28, padding: '0 10px', gap: 4 }}
                         >
-                          Xem giá
+                          <span>Xem giá</span>
+                          <IconArrowRight />
                         </a>
                       </div>
                     </div>
@@ -2144,8 +2196,10 @@ export default function App() {
                       navigator.clipboard.writeText(writingDraft);
                       showToast('Đã sao chép vào khay nhớ tạm.');
                     }}
+                    style={{ gap: 5 }}
                   >
-                    Sao chép
+                    <IconFile />
+                    <span>Sao chép</span>
                   </button>
                   <button
                     className="btn btn-primary"
@@ -2158,8 +2212,10 @@ export default function App() {
                         showToast('Đã cập nhật bản nháp.');
                       }, 700);
                     }}
+                    style={{ gap: 5 }}
                   >
-                    Viết lại
+                    <IconRefresh />
+                    <span>Viết lại</span>
                   </button>
                 </div>
               </div>
@@ -2202,8 +2258,10 @@ export default function App() {
                   <button
                     className="btn btn-primary"
                     onClick={() => showToast('Trích dẫn: [Trang 6] Quy định 4 cấp độ phân quyền và cô lập người dùng.')}
+                    style={{ gap: 5 }}
                   >
-                    Tìm kiếm
+                    <IconSearch />
+                    <span>Tìm kiếm</span>
                   </button>
                 </div>
               </div>
@@ -2251,8 +2309,10 @@ export default function App() {
                       setCalendarSuccess(true);
                       showToast('Đã lưu lịch hẹn và tạo lời nhắc tự động.');
                     }}
+                    style={{ gap: 5 }}
                   >
-                    Lưu lịch
+                    <IconCalendar />
+                    <span>Lưu lịch</span>
                   </button>
                 </div>
 
@@ -2308,17 +2368,19 @@ export default function App() {
                       setPrefWizardStep('persona');
                       setShowPreferencesModal(true);
                     }}
-                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px' }}
+                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
                   >
-                    Tùy biến
+                    <IconSliders />
+                    <span>Tùy biến</span>
                   </button>
                   <button
                     className="btn btn-primary"
                     onClick={handleSendTestEmail}
                     disabled={isSendingTestEmail}
-                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px' }}
+                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
                   >
-                    {isSendingTestEmail ? 'Đang gửi...' : 'Gửi thử'}
+                    <IconSend />
+                    <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi thử'}</span>
                   </button>
                 </div>
               </div>
@@ -2393,9 +2455,10 @@ export default function App() {
                     setKillSwitchTriggered(true);
                     showToast('Đã kích hoạt dừng khẩn cấp toàn hệ thống.');
                   }}
-                  style={{ fontSize: 12, minHeight: 28, padding: '0 10px' }}
+                  style={{ fontSize: 12, minHeight: 28, padding: '0 10px', gap: 4 }}
                 >
-                  Dừng ngay
+                  <IconClose />
+                  <span>Dừng ngay</span>
                 </button>
               </div>
             </div>
@@ -2529,15 +2592,19 @@ export default function App() {
                     type="button"
                     className="btn btn-secondary"
                     onClick={() => setShowPreferencesModal(false)}
+                    style={{ gap: 4 }}
                   >
-                    Hủy
+                    <IconClose />
+                    <span>Hủy</span>
                   </button>
                   <button
                     type="button"
                     className="btn btn-primary"
                     onClick={() => setPrefWizardStep('topics')}
+                    style={{ gap: 4 }}
                   >
-                    Tiếp tục
+                    <span>Tiếp tục</span>
+                    <IconArrowRight />
                   </button>
                 </div>
               </div>
@@ -2614,8 +2681,10 @@ export default function App() {
                     type="button"
                     className="btn btn-primary"
                     onClick={() => setPrefWizardStep('delivery')}
+                    style={{ gap: 4 }}
                   >
-                    Tiếp tục
+                    <span>Tiếp tục</span>
+                    <IconArrowRight />
                   </button>
                 </div>
               </div>
@@ -2657,9 +2726,11 @@ export default function App() {
                         fontSize: 12.5,
                         opacity: isValidEmail(tempProfile.deliveryEmail) ? 1 : 0.5,
                         cursor: isValidEmail(tempProfile.deliveryEmail) ? 'pointer' : 'not-allowed',
+                        gap: 5,
                       }}
                     >
-                      {isSendingTestEmail ? 'Đang gửi...' : 'Gửi thử'}
+                      <IconSend />
+                      <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi thử'}</span>
                     </button>
                   </div>
                   {!isValidEmail(tempProfile.deliveryEmail) && tempProfile.deliveryEmail.length > 0 && (
@@ -2823,9 +2894,11 @@ export default function App() {
                       padding: '0 20px',
                       opacity: isValidEmail(tempProfile.deliveryEmail) ? 1 : 0.5,
                       cursor: isValidEmail(tempProfile.deliveryEmail) ? 'pointer' : 'not-allowed',
+                      gap: 5,
                     }}
                   >
-                    Lưu cấu hình
+                    <IconCheck />
+                    <span>Lưu cấu hình</span>
                   </button>
                 </div>
               </div>
@@ -2974,6 +3047,18 @@ export default function App() {
                 <br />
                 Được gửi từ hộp thư hệ thống <strong>nguyentuananh11a1.lhpt@gmail.com</strong> theo lịch bạn đã đăng ký.
               </div>
+
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowEmailModal(false)}
+                  style={{ gap: 4, minHeight: 32, padding: '0 16px', fontSize: 13 }}
+                >
+                  <IconClose />
+                  <span>Đóng</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -3018,9 +3103,10 @@ export default function App() {
               <button
                 className="btn btn-secondary"
                 onClick={() => setEditingChannel(null)}
-                style={{ minHeight: 28, padding: '0 8px', fontSize: 12 }}
+                style={{ minHeight: 28, padding: '0 8px', fontSize: 12, gap: 4 }}
               >
-                Đóng
+                <IconClose />
+                <span>Đóng</span>
               </button>
             </div>
 
@@ -3163,14 +3249,17 @@ export default function App() {
 
               {/* Modal footer buttons */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
-                <button className="btn btn-secondary" onClick={() => setEditingChannel(null)}>
-                  Hủy
+                <button className="btn btn-secondary" onClick={() => setEditingChannel(null)} style={{ gap: 4 }}>
+                  <IconClose />
+                  <span>Hủy</span>
                 </button>
                 <button
                   className="btn btn-primary"
                   onClick={() => handleSaveChannelEdit(editingChannel)}
+                  style={{ gap: 4 }}
                 >
-                  Lưu
+                  <IconCheck />
+                  <span>Lưu</span>
                 </button>
               </div>
             </div>
@@ -3202,9 +3291,10 @@ export default function App() {
               <button
                 className="btn btn-secondary"
                 onClick={() => setShowAddCustomChannelModal(false)}
-                style={{ minHeight: 28, padding: '0 8px', fontSize: 12 }}
+                style={{ minHeight: 28, padding: '0 8px', fontSize: 12, gap: 4 }}
               >
-                Đóng
+                <IconClose />
+                <span>Đóng</span>
               </button>
             </div>
 
@@ -3233,15 +3323,18 @@ export default function App() {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
-                <button className="btn btn-secondary" onClick={() => setShowAddCustomChannelModal(false)}>
-                  Hủy
+                <button className="btn btn-secondary" onClick={() => setShowAddCustomChannelModal(false)} style={{ gap: 4 }}>
+                  <IconClose />
+                  <span>Hủy</span>
                 </button>
                 <button
                   className="btn btn-primary"
                   onClick={handleCreateCustomChannel}
                   disabled={!customChannelPrompt.trim() || isParsingCustomChannel}
+                  style={{ gap: 4 }}
                 >
-                  {isParsingCustomChannel ? 'Đang tạo...' : 'Tạo luồng'}
+                  <IconPlus />
+                  <span>{isParsingCustomChannel ? 'Đang tạo...' : 'Tạo luồng'}</span>
                 </button>
               </div>
             </div>

@@ -113,10 +113,13 @@ const IconMail = () => (
 );
 
 const IconSliders = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <line x1="4" y1="21" x2="4" y2="14" /><line x1="4" y1="10" x2="4" y2="3" />
     <line x1="12" y1="21" x2="12" y2="12" /><line x1="12" y1="8" x2="12" y2="3" />
     <line x1="20" y1="21" x2="20" y2="16" /><line x1="20" y1="12" x2="20" y2="3" />
+    <line x1="1" y1="14" x2="7" y2="14" />
+    <line x1="9" y1="8" x2="15" y2="8" />
+    <line x1="17" y1="16" x2="23" y2="16" />
   </svg>
 );
 
@@ -814,6 +817,32 @@ export default function App() {
     });
   };
 
+  // Strictly enforce scheduledTimes constraint matching frequency
+  useEffect(() => {
+    const maxSlots = getMaxSlotsForFrequency(tempProfile.frequency);
+    if (tempProfile.frequency !== 'REALTIME' && tempProfile.scheduledTimes.length > maxSlots) {
+      setTempProfile((prev) => ({
+        ...prev,
+        scheduledTimes: prev.scheduledTimes.slice(0, maxSlots),
+      }));
+    }
+  }, [tempProfile.frequency, tempProfile.scheduledTimes.length]);
+
+  const handleOpenPreferencesModal = () => {
+    const maxSlots = getMaxSlotsForFrequency(profile.frequency);
+    const sanitizedTimes = profile.frequency === 'REALTIME'
+      ? []
+      : (profile.scheduledTimes.length > maxSlots
+          ? profile.scheduledTimes.slice(0, maxSlots)
+          : (profile.scheduledTimes.length === 0 ? ['07:30'] : profile.scheduledTimes));
+    setTempProfile({
+      ...profile,
+      scheduledTimes: sanitizedTimes,
+    });
+    setPrefWizardStep('persona');
+    setShowPreferencesModal(true);
+  };
+
   const handleToggleTimeSlot = (time: string) => {
     if (tempProfile.frequency === 'REALTIME') return;
     const maxSlots = getMaxSlotsForFrequency(tempProfile.frequency);
@@ -836,9 +865,12 @@ export default function App() {
           scheduledTimes: [time],
         }));
       } else if (tempProfile.scheduledTimes.length >= maxSlots) {
-        showToast(
-          `Gói "${tempProfile.frequency === '2_DAILY' ? '2 lần' : '3 lần'} / ngày" chỉ được chọn tối đa ${maxSlots} khung giờ. Hãy bỏ bớt 1 giờ trước khi chọn giờ khác.`
-        );
+        // Seamless replace of last slot
+        setTempProfile((prev) => ({
+          ...prev,
+          scheduledTimes: [...prev.scheduledTimes.slice(0, maxSlots - 1), time].sort(),
+        }));
+        showToast(`Đã chuyển sang khung giờ ${time} (tối đa ${maxSlots} giờ).`);
       } else {
         setTempProfile((prev) => ({
           ...prev,
@@ -1201,11 +1233,7 @@ export default function App() {
             </div>
 
             <button
-              onClick={() => {
-                setTempProfile(profile);
-                setPrefWizardStep('persona');
-                setShowPreferencesModal(true);
-              }}
+              onClick={handleOpenPreferencesModal}
               className="btn btn-secondary"
               style={{
                 minHeight: 28,
@@ -1334,7 +1362,7 @@ export default function App() {
         {/* TAB 1: ASSISTANT (TRỢ LÝ CÁ NHÂN & TƯƠNG TÁC THÔNG MINH)                  */}
         {/* ========================================================================= */}
         {activeTab === 'assistant' && (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: 840, margin: '0 auto', width: '100%' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: 920, margin: '0 auto', width: '100%' }}>
             {/* Top Assistant Status Strip */}
             <div
               style={{
@@ -1360,10 +1388,7 @@ export default function App() {
               <div style={{ display: 'flex', gap: 6 }}>
                 <button
                   className="btn btn-secondary"
-                  onClick={() => {
-                    setTempProfile(profile);
-                    setShowPreferencesModal(true);
-                  }}
+                  onClick={handleOpenPreferencesModal}
                   style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
                 >
                   <IconSliders />
@@ -1484,46 +1509,64 @@ export default function App() {
               )}
             </div>
 
-            {/* Chat Input Box */}
-            <div style={{ position: 'relative' }}>
-              <textarea
+            {/* Chat Input Box: Perfectly Centered Unified Flex Container */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                padding: '4px 6px 4px 16px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                gap: 10,
+                minHeight: 48,
+                boxSizing: 'border-box',
+                transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+              }}
+            >
+              <input
+                type="text"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === 'Enter') {
                     e.preventDefault();
                     handleSendMessage();
                   }
                 }}
                 placeholder="Hỏi trợ lý hoặc yêu cầu tìm kiếm, tổng hợp tin tức..."
-                rows={2}
                 style={{
-                  width: '100%',
-                  padding: '14px 90px 14px 18px',
-                  borderRadius: 'var(--radius-md)',
-                  border: '1px solid var(--border-subtle)',
-                  background: 'var(--bg-surface)',
-                  color: 'var(--text-primary)',
-                  resize: 'none',
+                  flex: 1,
+                  border: 'none',
+                  background: 'transparent',
                   outline: 'none',
-                  fontSize: 14.5,
+                  fontSize: 14,
+                  color: 'var(--text-primary)',
+                  padding: '8px 0',
                   lineHeight: 1.4,
-                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.03)',
+                  height: 36,
+                  boxSizing: 'border-box',
                 }}
               />
               <button
                 className="btn btn-primary"
                 onClick={handleSendMessage}
+                disabled={!chatInput.trim() || isChatGenerating}
                 style={{
-                  position: 'absolute',
-                  right: 12,
-                  bottom: 14,
-                  minHeight: 36,
+                  height: 36,
                   padding: '0 16px',
-                  fontSize: 13.5,
+                  fontSize: 13,
+                  gap: 6,
+                  borderRadius: 'var(--radius-sm)',
+                  flexShrink: 0,
+                  opacity: !chatInput.trim() || isChatGenerating ? 0.6 : 1,
+                  cursor: !chatInput.trim() || isChatGenerating ? 'not-allowed' : 'pointer',
+                  boxSizing: 'border-box',
                 }}
               >
-                Gửi
+                <IconSend />
+                <span>Gửi</span>
               </button>
             </div>
           </div>
@@ -1617,10 +1660,7 @@ export default function App() {
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={() => {
-                      setTempProfile(profile);
-                      setShowPreferencesModal(true);
-                    }}
+                    onClick={handleOpenPreferencesModal}
                     style={{ minHeight: 26, fontSize: 11.5, padding: '0 9px', gap: 4 }}
                   >
                     <IconSliders />
@@ -1708,11 +1748,13 @@ export default function App() {
                         borderLeft: `4px solid ${channel.isActive ? channel.badgeColor : 'var(--border-subtle)'}`,
                         opacity: channel.isActive ? 1 : 0.65,
                         transition: 'all 0.15s ease',
+                        height: '100%',
+                        boxSizing: 'border-box',
                       }}
                     >
                       {/* Top Row: Badge, Title & Toggle Switch */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, minHeight: 28 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
                           <span
                             style={{
                               fontSize: 11,
@@ -1723,11 +1765,22 @@ export default function App() {
                               borderRadius: 4,
                               letterSpacing: 0.3,
                               textTransform: 'uppercase',
+                              flexShrink: 0,
                             }}
                           >
                             {channel.badge}
                           </span>
-                          <span style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--text-primary)' }}>
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 700,
+                              color: 'var(--text-primary)',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                            title={channel.title}
+                          >
                             {channel.title}
                           </span>
                         </div>
@@ -1739,6 +1792,7 @@ export default function App() {
                             alignItems: 'center',
                             cursor: 'pointer',
                             userSelect: 'none',
+                            flexShrink: 0,
                           }}
                           title={channel.isActive ? 'Tạm dừng luồng này' : 'Bật luồng này'}
                         >
@@ -1779,13 +1833,16 @@ export default function App() {
                       <div
                         style={{
                           display: 'flex',
-                          flexWrap: 'wrap',
+                          alignItems: 'center',
                           gap: 8,
-                          padding: '8px 10px',
+                          padding: '7px 10px',
                           background: 'var(--bg-subtle)',
                           borderRadius: 'var(--radius-sm)',
                           fontSize: 12,
                           color: 'var(--text-secondary)',
+                          flexWrap: 'wrap',
+                          minHeight: 32,
+                          boxSizing: 'border-box',
                         }}
                       >
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -1793,14 +1850,14 @@ export default function App() {
                           <strong>{channel.scheduledTime}</strong> ({channel.frequency})
                         </span>
                         <span>•</span>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           <IconMail />
                           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>{targetEmail}</span>
                         </span>
                       </div>
 
                       {/* Keywords pills */}
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, minHeight: 46 }}>
                         {channel.keywords.map((kw, i) => (
                           <span
                             key={i}
@@ -1818,21 +1875,22 @@ export default function App() {
                         ))}
                       </div>
 
-                      {/* Actions */}
+                      {/* Actions - Pinned to bottom with marginTop: auto */}
                       <div
                         style={{
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'space-between',
-                          paddingTop: 8,
+                          paddingTop: 10,
                           borderTop: '1px solid var(--border-subtle)',
+                          marginTop: 'auto',
                         }}
                       >
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                           <button
                             className="btn btn-secondary"
                             onClick={() => setEditingChannel(channel)}
-                            style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
+                            style={{ minHeight: 28, height: 28, fontSize: 12, padding: '0 10px', gap: 5 }}
                           >
                             <IconSliders />
                             <span>Cấu hình</span>
@@ -1843,7 +1901,7 @@ export default function App() {
                               type="button"
                               className="btn btn-secondary"
                               onClick={() => handleDeleteChannel(channel.id, channel.title)}
-                              style={{ minHeight: 28, fontSize: 12, padding: '0 8px', color: 'var(--status-danger)' }}
+                              style={{ minHeight: 28, height: 28, fontSize: 12, padding: '0 8px', color: 'var(--status-danger)' }}
                               title="Xóa cấu hình này"
                             >
                               <IconTrash />
@@ -1857,6 +1915,7 @@ export default function App() {
                           disabled={isSendingThis}
                           style={{
                             minHeight: 28,
+                            height: 28,
                             fontSize: 12,
                             padding: '0 12px',
                             gap: 5,
@@ -2110,7 +2169,7 @@ export default function App() {
         {/* TAB 3: ZERO-APP AUTOMATIONS (CÁC TÁC VỤ CHẠY NGẦM KHÔNG CẦN MỞ ỨNG DỤNG)     */}
         {/* ========================================================================= */}
         {activeTab === 'automations' && (
-          <div style={{ maxWidth: 840, margin: '0 auto', width: '100%' }}>
+          <div style={{ maxWidth: 960, margin: '0 auto', width: '100%' }}>
             <div style={{ marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.3, margin: 0 }}>
                 Tác vụ
@@ -2181,7 +2240,7 @@ export default function App() {
         {/* TAB 4: TOOLS (BỘ CÔNG CỤ THIẾT THỰC)                                      */}
         {/* ========================================================================= */}
         {activeTab === 'tools' && (
-          <div style={{ maxWidth: 840, margin: '0 auto', width: '100%' }}>
+          <div style={{ maxWidth: 960, margin: '0 auto', width: '100%' }}>
             <div style={{ marginBottom: 16 }}>
               <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.3, margin: 0 }}>
                 Công cụ
@@ -2548,7 +2607,7 @@ export default function App() {
         {/* TAB 5: SETTINGS & ACCOUNT CONTROL CENTER                                  */}
         {/* ========================================================================= */}
         {activeTab === 'settings' && (
-          <div style={{ maxWidth: 840, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div style={{ maxWidth: 960, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 18 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.3, margin: 0 }}>
                 Cài đặt
@@ -2573,11 +2632,7 @@ export default function App() {
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button
                     className="btn btn-secondary"
-                    onClick={() => {
-                      setTempProfile(profile);
-                      setPrefWizardStep('persona');
-                      setShowPreferencesModal(true);
-                    }}
+                    onClick={handleOpenPreferencesModal}
                     style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
                   >
                     <IconSliders />
@@ -2718,11 +2773,28 @@ export default function App() {
           <div
             className="email-modal-container"
             onClick={(e) => e.stopPropagation()}
-            style={{ maxWidth: 680, padding: '24px 28px' }}
+            style={{
+              maxWidth: 620,
+              maxHeight: 'min(90dvh, 600px)',
+              padding: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
           >
-            {/* Modal Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h2 style={{ fontSize: 17, fontWeight: 800, letterSpacing: -0.3, color: 'var(--text-primary)', margin: 0 }}>
+            {/* Modal Header: Fixed Top */}
+            <div
+              style={{
+                padding: '16px 20px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                borderBottom: '1px solid var(--border-subtle)',
+                background: 'var(--bg-surface)',
+                flexShrink: 0,
+              }}
+            >
+              <h2 style={{ fontSize: 16, fontWeight: 700, letterSpacing: -0.3, color: 'var(--text-primary)', margin: 0 }}>
                 Cấu hình nhận tin
               </h2>
               <button
@@ -2734,156 +2806,368 @@ export default function App() {
               </button>
             </div>
 
-            {/* 3-Step Segmented Bar */}
-            <div className="pref-tab-bar" style={{ marginBottom: 16 }}>
-              <button
-                type="button"
-                className={`pref-tab-btn ${prefWizardStep === 'persona' ? 'active' : ''}`}
-                onClick={() => setPrefWizardStep('persona')}
-              >
-                <span className="pref-step-pill">1</span>
-                <span>Nhóm</span>
-              </button>
+            {/* Modal Body: Scrollable */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* 3-Step Segmented Bar */}
+              <div className="pref-tab-bar">
+                <button
+                  type="button"
+                  className={`pref-tab-btn ${prefWizardStep === 'persona' ? 'active' : ''}`}
+                  onClick={() => setPrefWizardStep('persona')}
+                >
+                  <span className="pref-step-pill">1</span>
+                  <span>Nhóm</span>
+                </button>
 
-              <button
-                type="button"
-                className={`pref-tab-btn ${prefWizardStep === 'topics' ? 'active' : ''}`}
-                onClick={() => setPrefWizardStep('topics')}
-              >
-                <span className="pref-step-pill">2</span>
-                <span>Chủ đề</span>
-                <span className="mono-pill" style={{ fontSize: 10, padding: '1px 6px' }}>
-                  {Object.values(tempProfile.categories).filter(Boolean).length}/6
-                </span>
-              </button>
+                <button
+                  type="button"
+                  className={`pref-tab-btn ${prefWizardStep === 'topics' ? 'active' : ''}`}
+                  onClick={() => setPrefWizardStep('topics')}
+                >
+                  <span className="pref-step-pill">2</span>
+                  <span>Chủ đề</span>
+                  <span className="mono-pill" style={{ fontSize: 10, padding: '1px 6px' }}>
+                    {Object.values(tempProfile.categories).filter(Boolean).length}/6
+                  </span>
+                </button>
 
-              <button
-                type="button"
-                className={`pref-tab-btn ${prefWizardStep === 'delivery' ? 'active' : ''}`}
-                onClick={() => setPrefWizardStep('delivery')}
-              >
-                <span className="pref-step-pill">3</span>
-                <span>Lịch & Email</span>
-              </button>
-            </div>
+                <button
+                  type="button"
+                  className={`pref-tab-btn ${prefWizardStep === 'delivery' ? 'active' : ''}`}
+                  onClick={() => setPrefWizardStep('delivery')}
+                >
+                  <span className="pref-step-pill">3</span>
+                  <span>Lịch & Email</span>
+                </button>
+              </div>
 
-            {/* STEP 1: AUDIENCE PERSONA */}
-            {prefWizardStep === 'persona' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div className="pref-card-grid">
-                  {PERSONA_PRESETS.map((preset) => {
-                    const isSelected = tempProfile.preset === preset.id;
-                    return (
-                      <div
-                        key={preset.id}
-                        className={`pref-persona-card ${isSelected ? 'selected' : ''}`}
-                        onClick={() => handleApplyPreset(preset.id)}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span style={{ fontSize: 13.5, fontWeight: 700, color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)' }}>
-                            {preset.title}
-                          </span>
-                          {isSelected && (
-                            <span style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center' }}>
-                              <IconCheck />
+              {/* STEP 1: AUDIENCE PERSONA */}
+              {prefWizardStep === 'persona' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div className="pref-card-grid">
+                    {PERSONA_PRESETS.map((preset) => {
+                      const isSelected = tempProfile.preset === preset.id;
+                      return (
+                        <div
+                          key={preset.id}
+                          className={`pref-persona-card ${isSelected ? 'selected' : ''}`}
+                          onClick={() => handleApplyPreset(preset.id)}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: 13.5, fontWeight: 700, color: isSelected ? 'var(--accent-primary)' : 'var(--text-primary)' }}>
+                              {preset.title}
                             </span>
-                          )}
+                            {isSelected && (
+                              <span style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center' }}>
+                                <IconCheck />
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                            {preset.subtitle}
+                          </div>
                         </div>
-                        <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                          {preset.subtitle}
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 2: TOPIC SELECTION */}
+              {prefWizardStep === 'topics' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ minHeight: 28, fontSize: 11.5, padding: '0 8px' }}
+                      onClick={() => {
+                        setTempProfile({
+                          ...tempProfile,
+                          categories: { tech: true, career: true, finance: true, shopping: true, social: true, news: true }
+                        });
+                      }}
+                    >
+                      Bật tất cả
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ minHeight: 28, fontSize: 11.5, padding: '0 8px' }}
+                      onClick={() => {
+                        const currentPreset = PERSONA_PRESETS.find(p => p.id === tempProfile.preset) || PERSONA_PRESETS[0];
+                        setTempProfile({
+                          ...tempProfile,
+                          categories: { ...currentPreset.defaultCategories }
+                        });
+                      }}
+                    >
+                      Mặc định
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {CATEGORY_DEFINITIONS.map((cat) => {
+                      const isEnabled = tempProfile.categories[cat.id as keyof typeof tempProfile.categories];
+                      return (
+                        <div
+                          key={cat.id}
+                          className={`pref-topic-item ${isEnabled ? 'active' : ''}`}
+                          onClick={() => handleToggleCategory(cat.id as keyof typeof tempProfile.categories)}
+                        >
+                          <div>
+                            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-primary)' }}>
+                              {cat.label}
+                            </div>
+                            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
+                              {cat.desc}
+                            </div>
+                          </div>
+
+                          <div className={`toggle-switch-track ${isEnabled ? 'active' : ''}`}>
+                            <div className="toggle-switch-thumb" />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 3: SCHEDULE & DELIVERY */}
+              {prefWizardStep === 'delivery' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {/* Delivery Email Input */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                      Email nhận bản tin (Bắt buộc)
+                    </label>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input
+                        type="email"
+                        required
+                        value={tempProfile.deliveryEmail}
+                        onChange={(e) => setTempProfile({ ...tempProfile, deliveryEmail: e.target.value })}
+                        placeholder="vd: nguyentuananh11a1.lhpt@gmail.com"
+                        style={{
+                          flex: 1,
+                          height: 38,
+                          padding: '0 12px',
+                          borderRadius: 'var(--radius-sm)',
+                          border: !isValidEmail(tempProfile.deliveryEmail) && tempProfile.deliveryEmail.length > 0
+                            ? '1px solid var(--status-error, #E11D48)'
+                            : '1px solid var(--border-subtle)',
+                          background: 'var(--bg-surface)',
+                          color: 'var(--text-primary)',
+                          fontSize: 13.5,
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={handleSendTestEmail}
+                        disabled={isSendingTestEmail || !isValidEmail(tempProfile.deliveryEmail)}
+                        style={{
+                          height: 38,
+                          fontSize: 12.5,
+                          opacity: isValidEmail(tempProfile.deliveryEmail) ? 1 : 0.5,
+                          cursor: isValidEmail(tempProfile.deliveryEmail) ? 'pointer' : 'not-allowed',
+                          gap: 5,
+                          padding: '0 14px',
+                          boxSizing: 'border-box',
+                          flexShrink: 0,
+                        }}
+                      >
+                        <IconSend />
+                        <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi thử'}</span>
+                      </button>
+                    </div>
+                    {!isValidEmail(tempProfile.deliveryEmail) && tempProfile.deliveryEmail.length > 0 && (
+                      <span style={{ fontSize: 11.5, color: 'var(--status-error, #E11D48)' }}>
+                        Vui lòng nhập đúng định dạng email (vd: nguyentuananh11a1.lhpt@gmail.com)
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Frequency */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                      Tần suất gửi tin
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+                      {[
+                        { id: '1_DAILY', label: '1 lần / ngày' },
+                        { id: '2_DAILY', label: '2 lần / ngày' },
+                        { id: '3_DAILY', label: '3 lần / ngày' },
+                        { id: 'REALTIME', label: 'Tức thì' },
+                      ].map((freq) => {
+                        const isSel = tempProfile.frequency === freq.id;
+                        return (
+                          <button
+                            key={freq.id}
+                            type="button"
+                            onClick={() => handleSelectFrequency(freq.id as any)}
+                            style={{
+                              padding: '8px 10px',
+                              borderRadius: 'var(--radius-sm)',
+                              border: isSel ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+                              background: isSel ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+                              color: isSel ? 'var(--accent-primary)' : 'var(--text-primary)',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <span style={{ fontSize: 12, fontWeight: 700 }}>{freq.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Specific Time Slots with Strict Limits or Realtime Info */}
+                  {tempProfile.frequency === 'REALTIME' ? (
+                    <div
+                      style={{
+                        padding: '12px 14px',
+                        borderRadius: 'var(--radius-sm)',
+                        background: 'var(--bg-subtle)',
+                        border: '1px solid var(--border-subtle)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                      }}
+                    >
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-primary)', flexShrink: 0 }} />
+                      <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                        <strong style={{ color: 'var(--text-primary)' }}>Chế độ Tức thì:</strong> Trợ lý tự động rà soát CSDL và gửi email/thông báo ngay khi phát hiện tin tức sốt dẻo hoặc deal hời mới, không cố định khung giờ.
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                          Khung giờ nhận tin tự động
+                        </label>
+                        <span
+                          className="mono-pill"
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 700,
+                            color: tempProfile.scheduledTimes.length === getMaxSlotsForFrequency(tempProfile.frequency) ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                            borderColor: tempProfile.scheduledTimes.length === getMaxSlotsForFrequency(tempProfile.frequency) ? 'var(--accent-primary)' : 'var(--border-subtle)',
+                          }}
+                        >
+                          Đã chọn {tempProfile.scheduledTimes.length}/{getMaxSlotsForFrequency(tempProfile.frequency)} giờ
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {['07:00', '07:30', '08:00', '12:00', '18:30', '20:00'].map((time) => {
+                          const isTimeActive = tempProfile.scheduledTimes.includes(time);
+                          return (
+                            <button
+                              key={time}
+                              type="button"
+                              onClick={() => handleToggleTimeSlot(time)}
+                              className={`subtab-pill ${isTimeActive ? 'active' : ''}`}
+                              style={{
+                                fontSize: 12,
+                                padding: '5px 12px',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              {time}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Summary Tone */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                      Độ dài bản tin
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                      <div
+                        onClick={() => setTempProfile({ ...tempProfile, summaryTone: 'concise' })}
+                        style={{
+                          padding: '10px 14px',
+                          borderRadius: 'var(--radius-sm)',
+                          border: tempProfile.summaryTone === 'concise' ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+                          background: tempProfile.summaryTone === 'concise' ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <div style={{ fontSize: 13, fontWeight: 700, color: tempProfile.summaryTone === 'concise' ? 'var(--accent-primary)' : 'var(--text-primary)' }}>
+                          Ngắn gọn
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, paddingTop: 14, borderTop: '1px solid var(--border-subtle)' }}>
+                      <div
+                        onClick={() => setTempProfile({ ...tempProfile, summaryTone: 'in_depth' })}
+                        style={{
+                          padding: '10px 14px',
+                          borderRadius: 'var(--radius-sm)',
+                          border: tempProfile.summaryTone === 'in_depth' ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+                          background: tempProfile.summaryTone === 'in_depth' ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <div style={{ fontSize: 13, fontWeight: 700, color: tempProfile.summaryTone === 'in_depth' ? 'var(--accent-primary)' : 'var(--text-primary)' }}>
+                          Chi tiết
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer: Sticky Bottom */}
+            <div
+              style={{
+                padding: '12px 20px',
+                borderTop: '1px solid var(--border-subtle)',
+                background: 'var(--bg-surface)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexShrink: 0,
+              }}
+            >
+              {prefWizardStep === 'persona' && (
+                <>
                   <button
                     type="button"
                     className="btn btn-secondary"
                     onClick={() => setShowPreferencesModal(false)}
-                    style={{ gap: 4 }}
+                    style={{ minHeight: 32, fontSize: 12.5 }}
                   >
-                    <IconClose />
-                    <span>Hủy</span>
+                    Hủy
                   </button>
                   <button
                     type="button"
                     className="btn btn-primary"
                     onClick={() => setPrefWizardStep('topics')}
-                    style={{ gap: 4 }}
+                    style={{ minHeight: 32, fontSize: 12.5, gap: 5 }}
                   >
                     <span>Tiếp tục</span>
                     <IconArrowRight />
                   </button>
-                </div>
-              </div>
-            )}
+                </>
+              )}
 
-            {/* STEP 2: TOPIC SELECTION */}
-            {prefWizardStep === 'topics' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    style={{ minHeight: 28, fontSize: 11.5, padding: '0 8px' }}
-                    onClick={() => {
-                      setTempProfile({
-                        ...tempProfile,
-                        categories: { tech: true, career: true, finance: true, shopping: true, social: true, news: true }
-                      });
-                    }}
-                  >
-                    Bật tất cả
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    style={{ minHeight: 28, fontSize: 11.5, padding: '0 8px' }}
-                    onClick={() => {
-                      const currentPreset = PERSONA_PRESETS.find(p => p.id === tempProfile.preset) || PERSONA_PRESETS[0];
-                      setTempProfile({
-                        ...tempProfile,
-                        categories: { ...currentPreset.defaultCategories }
-                      });
-                    }}
-                  >
-                    Mặc định
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {CATEGORY_DEFINITIONS.map((cat) => {
-                    const isEnabled = tempProfile.categories[cat.id as keyof typeof tempProfile.categories];
-                    return (
-                      <div
-                        key={cat.id}
-                        className={`pref-topic-item ${isEnabled ? 'active' : ''}`}
-                        onClick={() => handleToggleCategory(cat.id as keyof typeof tempProfile.categories)}
-                      >
-                        <div>
-                          <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-primary)' }}>
-                            {cat.label}
-                          </div>
-                          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-                            {cat.desc}
-                          </div>
-                        </div>
-
-                        <div className={`toggle-switch-track ${isEnabled ? 'active' : ''}`}>
-                          <div className="toggle-switch-thumb" />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, paddingTop: 14, borderTop: '1px solid var(--border-subtle)' }}>
+              {prefWizardStep === 'topics' && (
+                <>
                   <button
                     type="button"
                     className="btn btn-secondary"
                     onClick={() => setPrefWizardStep('persona')}
+                    style={{ minHeight: 32, fontSize: 12.5 }}
                   >
                     Quay lại
                   </button>
@@ -2891,207 +3175,21 @@ export default function App() {
                     type="button"
                     className="btn btn-primary"
                     onClick={() => setPrefWizardStep('delivery')}
-                    style={{ gap: 4 }}
+                    style={{ minHeight: 32, fontSize: 12.5, gap: 5 }}
                   >
                     <span>Tiếp tục</span>
                     <IconArrowRight />
                   </button>
-                </div>
-              </div>
-            )}
+                </>
+              )}
 
-            {/* STEP 3: SCHEDULE & DELIVERY */}
-            {prefWizardStep === 'delivery' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {/* Delivery Email Input */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                    Email nhận bản tin (Bắt buộc)
-                  </label>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <input
-                      type="email"
-                      required
-                      value={tempProfile.deliveryEmail}
-                      onChange={(e) => setTempProfile({ ...tempProfile, deliveryEmail: e.target.value })}
-                      placeholder="vd: nguyentuananh11a1.lhpt@gmail.com"
-                      style={{
-                        flex: 1,
-                        padding: '8px 12px',
-                        borderRadius: 'var(--radius-sm)',
-                        border: !isValidEmail(tempProfile.deliveryEmail) && tempProfile.deliveryEmail.length > 0
-                          ? '1px solid var(--status-error, #E11D48)'
-                          : '1px solid var(--border-subtle)',
-                        background: 'var(--bg-surface)',
-                        color: 'var(--text-primary)',
-                        fontSize: 13.5,
-                      }}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={handleSendTestEmail}
-                      disabled={isSendingTestEmail || !isValidEmail(tempProfile.deliveryEmail)}
-                      style={{
-                        fontSize: 12.5,
-                        opacity: isValidEmail(tempProfile.deliveryEmail) ? 1 : 0.5,
-                        cursor: isValidEmail(tempProfile.deliveryEmail) ? 'pointer' : 'not-allowed',
-                        gap: 5,
-                      }}
-                    >
-                      <IconSend />
-                      <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi thử'}</span>
-                    </button>
-                  </div>
-                  {!isValidEmail(tempProfile.deliveryEmail) && tempProfile.deliveryEmail.length > 0 && (
-                    <span style={{ fontSize: 11.5, color: 'var(--status-error, #E11D48)' }}>
-                      Vui lòng nhập đúng định dạng email (vd: nguyentuananh11a1.lhpt@gmail.com)
-                    </span>
-                  )}
-                </div>
-
-                {/* Frequency */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                    Tần suất gửi tin
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                    {[
-                      { id: '1_DAILY', label: '1 lần / ngày' },
-                      { id: '2_DAILY', label: '2 lần / ngày' },
-                      { id: '3_DAILY', label: '3 lần / ngày' },
-                      { id: 'REALTIME', label: 'Tức thì' },
-                    ].map((freq) => {
-                      const isSel = tempProfile.frequency === freq.id;
-                      return (
-                        <button
-                          key={freq.id}
-                          type="button"
-                          onClick={() => handleSelectFrequency(freq.id as any)}
-                          style={{
-                            padding: '8px 10px',
-                            borderRadius: 'var(--radius-sm)',
-                            border: isSel ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
-                            background: isSel ? 'var(--bg-subtle)' : 'var(--bg-surface)',
-                            color: isSel ? 'var(--accent-primary)' : 'var(--text-primary)',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <span style={{ fontSize: 12, fontWeight: 700 }}>{freq.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Specific Time Slots with Strict Limits or Realtime Info */}
-                {tempProfile.frequency === 'REALTIME' ? (
-                  <div
-                    style={{
-                      padding: '12px 14px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: 'var(--bg-subtle)',
-                      border: '1px solid var(--border-subtle)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 10,
-                    }}
-                  >
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent-primary)', flexShrink: 0 }} />
-                    <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.45 }}>
-                      <strong style={{ color: 'var(--text-primary)' }}>Chế độ Tức thì:</strong> Trợ lý tự động rà soát CSDL và gửi email/thông báo ngay khi phát hiện tin tức sốt dẻo hoặc deal hời mới, không cố định khung giờ.
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                        Khung giờ nhận tin tự động
-                      </label>
-                      <span
-                        style={{
-                          fontSize: 11.5,
-                          fontWeight: 700,
-                          color: tempProfile.scheduledTimes.length === getMaxSlotsForFrequency(tempProfile.frequency) ? 'var(--accent-primary)' : 'var(--text-tertiary)',
-                        }}
-                      >
-                        Đã chọn {tempProfile.scheduledTimes.length}/{getMaxSlotsForFrequency(tempProfile.frequency)} giờ
-                      </span>
-                    </div>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {['07:00', '07:30', '08:00', '12:00', '18:30', '20:00'].map((time) => {
-                        const isTimeActive = tempProfile.scheduledTimes.includes(time);
-                        const maxSlots = getMaxSlotsForFrequency(tempProfile.frequency);
-                        const isFull = !isTimeActive && tempProfile.scheduledTimes.length >= maxSlots && maxSlots > 1;
-                        return (
-                          <button
-                            key={time}
-                            type="button"
-                            onClick={() => handleToggleTimeSlot(time)}
-                            className={`subtab-pill ${isTimeActive ? 'active' : ''}`}
-                            style={{
-                              fontSize: 12,
-                              padding: '5px 12px',
-                              opacity: isFull ? 0.45 : 1,
-                              cursor: 'pointer',
-                            }}
-                            title={isFull ? `Đã chọn đủ ${maxSlots} giờ cho tần suất này` : undefined}
-                          >
-                            {time}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Summary Tone */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                    Độ dài bản tin
-                  </label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-                    <div
-                      onClick={() => setTempProfile({ ...tempProfile, summaryTone: 'concise' })}
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: 'var(--radius-sm)',
-                        border: tempProfile.summaryTone === 'concise' ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
-                        background: tempProfile.summaryTone === 'concise' ? 'var(--bg-subtle)' : 'var(--bg-surface)',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <div style={{ fontSize: 13, fontWeight: 700, color: tempProfile.summaryTone === 'concise' ? 'var(--accent-primary)' : 'var(--text-primary)' }}>
-                        Ngắn gọn
-                      </div>
-                    </div>
-
-                    <div
-                      onClick={() => setTempProfile({ ...tempProfile, summaryTone: 'in_depth' })}
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: 'var(--radius-sm)',
-                        border: tempProfile.summaryTone === 'in_depth' ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
-                        background: tempProfile.summaryTone === 'in_depth' ? 'var(--bg-subtle)' : 'var(--bg-surface)',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <div style={{ fontSize: 13, fontWeight: 700, color: tempProfile.summaryTone === 'in_depth' ? 'var(--accent-primary)' : 'var(--text-primary)' }}>
-                        Chi tiết
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6, paddingTop: 14, borderTop: '1px solid var(--border-subtle)' }}>
+              {prefWizardStep === 'delivery' && (
+                <>
                   <button
                     type="button"
                     className="btn btn-secondary"
                     onClick={() => setPrefWizardStep('topics')}
+                    style={{ minHeight: 32, fontSize: 12.5 }}
                   >
                     Quay lại
                   </button>
@@ -3101,7 +3199,9 @@ export default function App() {
                     onClick={handleSavePreferences}
                     disabled={!isValidEmail(tempProfile.deliveryEmail)}
                     style={{
-                      padding: '0 20px',
+                      minHeight: 32,
+                      fontSize: 12.5,
+                      padding: '0 18px',
                       opacity: isValidEmail(tempProfile.deliveryEmail) ? 1 : 0.5,
                       cursor: isValidEmail(tempProfile.deliveryEmail) ? 'pointer' : 'not-allowed',
                       gap: 5,
@@ -3110,9 +3210,9 @@ export default function App() {
                     <IconCheck />
                     <span>Lưu cấu hình</span>
                   </button>
-                </div>
-              </div>
-            )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

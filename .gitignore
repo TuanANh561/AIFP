@@ -1,0 +1,44 @@
+# Environment & Secrets (NEVER COMMIT REAL KEYS)
+.env
+*.env.local
+*.pem
+*.key
+
+# Node / Frontend PWA
+node_modules/
+frontend-pwa/dist/
+frontend-pwa/.vite/
+
+# Java / Spring Boot
+backend-core/target/
+*.class
+*.jar
+*.war
+.mvn/timing.properties
+
+# Python / AI Service
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Flutter / Mobile
+mobile-flutter/.dart_tool/
+mobile-flutter/build/
+mobile-flutter/.flutter-plugins
+mobile-flutter/.flutter-plugins-dependencies
+
+# IDEs & OS & Logs
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.db
+backend-core/data/
+.system_generated/
+scratch/
+

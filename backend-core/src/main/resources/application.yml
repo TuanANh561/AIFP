@@ -1,0 +1,53 @@
+server:
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: framework
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/plain,text/css,application/javascript
+
+spring:
+  application:
+    name: aifp-backend-core
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:aifp_db}
+    username: ${POSTGRES_USER:aifp_user}
+    password: ${POSTGRES_PASSWORD:change_me_postgres_local_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  mail:
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:nguyentuananh11a1.lhpt@gmail.com}
+    password: ${SPRING_MAIL_PASSWORD:dbnnkpbhplonmtqj}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+aifp:
+  security:
+    jwt-secret: ${JWT_SIGNING_SECRET:aifp_default_dev_only_jwt_signing_secret_minimum_64_bytes_long_2026_key}
+    access-token-ttl-seconds: 900       # 15 minutes
+    refresh-token-ttl-seconds: 604800   # 7 days
+    internal-shared-secret: ${INTERNAL_SHARED_SECRET:aifp_default_dev_only_hmac_shared_secret_between_spring_and_python_2026}
+    encryption-master-key: ${AES_MASTER_KEY:aifp_default_dev_master_encryption_key_2026}
+    rate-limit-per-minute: ${RATE_LIMIT_PER_MINUTE:60}
+    cors-allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*,http://10.0.2.2:*,http://192.168.*:*,https://*}
+  ai-service:
+    base-url: ${AI_SERVICE_BASE_URL:http://localhost:8001}
+

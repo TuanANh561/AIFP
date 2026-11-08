@@ -1,0 +1,124 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: aifp-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aifp_db}
+      POSTGRES_USER: ${POSTGRES_USER:-aifp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_postgres_local_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - aifp_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aifp_user} -d ${POSTGRES_DB:-aifp_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: aifp-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - aifp_redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  searxng:
+    image: searxng/searxng:latest
+    container_name: aifp-searxng
+    restart: unless-stopped
+    ports:
+      - "8088:8080"
+    volumes:
+      - ./searxng:/etc/searxng:rw
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:8088/
+
+  minio:
+    image: minio/minio:latest
+    container_name: aifp-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-aifp_minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-change_me_minio_secret}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - aifp_miniodata:/data
+
+  ai-service:
+    build:
+      context: ../ai-service
+      dockerfile: Dockerfile
+    container_name: aifp-ai-service
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      INTERNAL_SHARED_SECRET: ${INTERNAL_SHARED_SECRET:-aifp_default_dev_only_hmac_shared_secret_between_spring_and_python_2026}
+      SEARXNG_BASE_URL: http://searxng:8080
+      GEMINI_API_KEYS: ${GEMINI_API_KEYS:-}
+      GROQ_API_KEYS: ${GROQ_API_KEYS:-}
+      OPENROUTER_API_KEYS: ${OPENROUTER_API_KEYS:-}
+      OPENAI_API_KEYS: ${OPENAI_API_KEYS:-}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    depends_on:
+      - searxng
+
+  backend-core:
+    build:
+      context: ../backend-core
+      dockerfile: Dockerfile
+    container_name: aifp-backend-core
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-aifp_db}
+      POSTGRES_USER: ${POSTGRES_USER:-aifp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_postgres_local_password}
+      JWT_SIGNING_SECRET: ${JWT_SIGNING_SECRET:-aifp_default_dev_only_jwt_signing_secret_minimum_64_bytes_long_2026_key}
+      INTERNAL_SHARED_SECRET: ${INTERNAL_SHARED_SECRET:-aifp_default_dev_only_hmac_shared_secret_between_spring_and_python_2026}
+      AES_MASTER_KEY: ${AES_MASTER_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      AI_SERVICE_BASE_URL: http://ai-service:8001
+      CORS_ALLOWED_ORIGIN_PATTERNS: ${CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*,http://10.0.2.2:*,http://192.168.*:*,https://*}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai-service:
+        condition: service_started
+
+  frontend-pwa:
+    build:
+      context: ../frontend-pwa
+      dockerfile: Dockerfile
+    container_name: aifp-frontend-pwa
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      - backend-core
+
+volumes:
+  aifp_pgdata:
+  aifp_redisdata:
+  aifp_miniodata:

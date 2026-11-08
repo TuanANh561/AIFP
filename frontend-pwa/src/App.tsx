@@ -2860,7 +2860,7 @@ export default function App() {
             {/* Sub-Tabs (Clean Pills) */}
             <div style={{ display: 'flex', gap: 6, marginBottom: 18, flexWrap: 'wrap' }}>
               {[
-                { id: 'evolution', label: 'Tự học & Mã nguồn mở' },
+                { id: 'evolution', label: 'Mã nguồn mở' },
                 { id: 'video', label: 'Video & Shorts' },
                 { id: 'vision', label: 'Hóa đơn' },
                 { id: 'shopping', label: 'Mua sắm' },
@@ -2880,325 +2880,168 @@ export default function App() {
 
             {/* TOOL 0: SELF-EVOLUTION & OPEN-SOURCE RADAR */}
             {toolSubTab === 'evolution' && (
-              <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {/* Header Row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-                        Hệ Thống Tự Học & Quét Mã Nguồn Mở (Self-Evolution Engine)
-                      </h3>
-                      <span className="mono-pill" style={{ color: 'var(--status-running)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                        Chu kỳ 07:00 Hàng ngày
-                      </span>
-                      <span className="mono-pill">Level 3 HITL Gate</span>
-                    </div>
-                    <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>
-                      Tự động đối chiếu mã nguồn mở uy tín trên GitHub, đánh giá kiến trúc hệ thống và tạo đề xuất nâng cấp gửi qua email.
-                    </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                      Mã nguồn mở
+                    </h3>
+                    <span className="mono-pill" style={{ color: 'var(--status-running)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                      5 đề xuất
+                    </span>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                      Cập nhật {lastEvolutionAuditTime}
+                    </span>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
                     <button
                       type="button"
                       className="btn btn-secondary"
                       onClick={handleRunEvolutionAudit}
                       disabled={isAuditingEvolution}
-                      style={{ gap: 6, fontSize: 12.5, minHeight: 32 }}
+                      style={{ gap: 5, fontSize: 12, minHeight: 28, height: 28, padding: '0 10px' }}
                     >
-                      <IconRefresh />
-                      <span>{isAuditingEvolution ? 'Đang quét...' : 'Quét mã nguồn mở'}</span>
+                      <IconRefresh spinning={isAuditingEvolution} />
+                      <span>{isAuditingEvolution ? 'Đang quét...' : 'Quét lại'}</span>
                     </button>
                     <button
                       type="button"
                       className="btn btn-primary"
                       onClick={handleTriggerEvolutionProposalEmail}
-                      style={{ gap: 6, fontSize: 12.5, minHeight: 32 }}
+                      style={{ gap: 5, fontSize: 12, minHeight: 28, height: 28, padding: '0 12px' }}
                     >
                       <IconSend />
-                      <span>Gửi email đề xuất ngay</span>
+                      <span>Gửi mail</span>
                     </button>
                   </div>
                 </div>
 
-                {/* Status Bar */}
+                {/* Grid of 5 Curated Open-Source Cards */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+                  {[
+                    {
+                      name: 'crawl4ai',
+                      stars: '★ 34.5k',
+                      url: 'https://github.com/unclecode/crawl4ai',
+                      tag: 'Thu thập tin & Việc làm',
+                      summary: 'Cào quét dữ liệu tự động tốc độ cao, trích xuất Markdown sạch không quảng cáo.',
+                    },
+                    {
+                      name: 'modelcontextprotocol',
+                      stars: '★ 18.2k',
+                      url: 'https://github.com/modelcontextprotocol',
+                      tag: 'Chuẩn công cụ MCP',
+                      summary: 'Chuẩn kết nối công cụ mở của Anthropic, tích hợp hơn 1,000 API doanh nghiệp.',
+                    },
+                    {
+                      name: 'mem0',
+                      stars: '★ 26.8k',
+                      url: 'https://github.com/mem0ai/mem0',
+                      tag: 'Bộ nhớ dài hạn',
+                      summary: 'Tự động học thói quen người dùng, giải quyết xung đột thông tin và nén bộ nhớ.',
+                    },
+                    {
+                      name: 'ollama',
+                      stars: '★ 118k',
+                      url: 'https://github.com/ollama/ollama',
+                      tag: 'AI Offline 0đ',
+                      summary: 'Chạy mô hình SLM cục bộ (Gemma 2 / Qwen 2.5), phân loại tin tức miễn phí và bảo mật.',
+                    },
+                    {
+                      name: 'livekit',
+                      stars: '★ 8.5k',
+                      url: 'https://github.com/livekit/agents',
+                      tag: 'Đàm thoại 2 chiều',
+                      summary: 'Đàm thoại giọng nói thời gian thực độ trễ thấp (< 300ms) trên Web & Mobile.',
+                    },
+                  ].map((oss) => (
+                    <div
+                      key={oss.name}
+                      className="card-surface card-interactive"
+                      style={{
+                        padding: '14px 16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 10,
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 'var(--radius-md)',
+                        background: 'var(--bg-surface)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>
+                            {oss.name}
+                          </span>
+                          <span className="mono-pill" style={{ fontSize: 10.5 }}>
+                            {oss.stars}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>
+                          {oss.tag}
+                        </span>
+                      </div>
+
+                      <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.45, flex: 1 }}>
+                        {oss.summary}
+                      </p>
+
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid var(--border-subtle)', marginTop: 'auto' }}>
+                        <a
+                          href={oss.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ fontSize: 12, color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}
+                        >
+                          GitHub ↗
+                        </a>
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => {
+                            showToast(`Đã ghi nhận duyệt đề xuất: ${oss.name}`);
+                          }}
+                          style={{ fontSize: 11.5, minHeight: 26, height: 26, padding: '0 10px' }}
+                        >
+                          Duyệt
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Minimalist 1-line Footer */}
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '8px 14px',
+                    padding: '8px 12px',
                     borderRadius: 'var(--radius-sm)',
                     background: 'var(--bg-subtle)',
                     border: '1px solid var(--border-subtle)',
                     fontSize: 12,
-                    color: 'var(--text-secondary)',
+                    color: 'var(--text-tertiary)',
                     flexWrap: 'wrap',
-                    gap: 8,
+                    gap: 6,
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
-                    <span>Trạng thái: <strong>5 Đề xuất Mã nguồn mở sẵn sàng</strong> &middot; Cập nhật: {lastEvolutionAuditTime}</span>
-                  </div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11.5 }}>
-                    Mục tiêu: Giảm 85% chi phí API · Nâng cao tính tự chủ 100%
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
+                    <span>Tự động quét lúc 07:00 hàng ngày &middot; Gửi email để phê duyệt</span>
                   </span>
-                </div>
-
-                {/* Section 1: Curated Open-Source Integrations */}
-                <div>
-                  <h4 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 12px 0', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                    1. Top Mã Nguồn Mở Tinh Hoa Đề Xuất Tích Hợp Cho AIFP
-                  </h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 14 }}>
-                    {[
-                      {
-                        name: 'unclecode/crawl4ai',
-                        stars: '★ 34.5k',
-                        license: 'Apache-2.0',
-                        url: 'https://github.com/unclecode/crawl4ai',
-                        role: 'Async LLM-Friendly Web & Dynamic Crawler',
-                        problem: 'Tăng tốc cào quét tin tức & việc làm gấp 5x, bypass bot, trích xuất Markdown sạch không lẫn quảng cáo.',
-                        impact: 'Tích hợp vào ai-service/app/crawlers/, nâng cấp bộ bóc tách dữ liệu cho bảng live_articles.',
-                        code: 'from crawl4ai import AsyncWebCrawler\nasync with AsyncWebCrawler() as crawler:\n    res = await crawler.arun(url="https://...")',
-                      },
-                      {
-                        name: 'modelcontextprotocol/python-sdk',
-                        stars: '★ 18.2k',
-                        license: 'MIT',
-                        url: 'https://github.com/modelcontextprotocol',
-                        role: 'Model Context Protocol (MCP) Standard',
-                        problem: 'Chuẩn hóa 4-Level Tool Gate sang chuẩn mở MCP, kết nối sẵn hơn 1,000 công cụ doanh nghiệp mà không cần custom API.',
-                        impact: 'Xây dựng McpBridgeClient trong Java Spring Boot & Python LangGraph, mở rộng vô hạn kho công cụ.',
-                        code: '{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "query_database"}}',
-                      },
-                      {
-                        name: 'mem0ai/mem0',
-                        stars: '★ 26.8k',
-                        license: 'Apache-2.0',
-                        url: 'https://github.com/mem0ai/mem0',
-                        role: 'The Memory Layer for Personalized AI',
-                        problem: 'Tự động học hỏi thói quen, giải quyết xung đột thông tin và tự động nén bộ nhớ người dùng theo thời gian.',
-                        impact: 'Đồng bộ hai chiều với bảng personal_memories trong PostgreSQL + pgvector của AIFP.',
-                        code: 'from mem0 import Memory\nm = Memory()\nm.add("Người dùng muốn nhận tin Game Tester lúc 08:00", user_id=uid)',
-                      },
-                      {
-                        name: 'ollama/ollama',
-                        stars: '★ 118k',
-                        license: 'MIT',
-                        url: 'https://github.com/ollama/ollama',
-                        role: 'Local SLM Engine (Gemma 2 / Qwen 2.5)',
-                        problem: 'Chạy mô hình nhỏ hoàn toàn offline trên laptop hoặc server, phục vụ phân loại tin và lọc trùng lặp với chi phí 0đ.',
-                        impact: 'Tầng Fallback cuối cùng trong MultiProviderFailoverRouter, bảo mật tuyệt đối (Zero Data Leakage).',
-                        code: 'ollama run qwen2.5:3b "Phân loại bài viết và trích xuất thực thể chính"',
-                      },
-                      {
-                        name: 'livekit/agents',
-                        stars: '★ 8.5k',
-                        license: 'Apache-2.0',
-                        url: 'https://github.com/livekit/agents',
-                        role: 'Real-Time Voice Duplex & Multimodal Bridge',
-                        problem: 'Chuyển hóa trợ lý từ gõ văn bản sang đàm thoại trực tiếp 2 chiều độ trễ siêu thấp (< 300ms) trên Web & Mobile.',
-                        impact: 'WebRTC bridge giữa Web/Mobile client và Python Worker, tích hợp Deepgram / Whisper và Cartesia / Piper TTS.',
-                        code: 'agent = VoicePipelineAgent(vad=silero, stt=deepgram, llm=google, tts=cartesia)',
-                      },
-                    ].map((oss) => (
-                      <div
-                        key={oss.name}
-                        style={{
-                          border: '1px solid var(--border-subtle)',
-                          borderRadius: 'var(--radius-sm)',
-                          padding: 16,
-                          background: 'var(--bg-subtle)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 10,
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 6 }}>
-                          <span style={{ fontWeight: 800, fontSize: 14.5, color: 'var(--text-primary)' }}>
-                            {oss.name}
-                          </span>
-                          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                            <span style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
-                              {oss.stars}
-                            </span>
-                            <span style={{ background: '#E0E7FF', color: '#3730A3', fontSize: 11, fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
-                              {oss.license}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--status-running)', textTransform: 'uppercase' }}>
-                          {oss.role}
-                        </div>
-
-                        <div style={{ fontSize: 12.5, color: 'var(--text-primary)', lineHeight: 1.5 }}>
-                          <strong>Giải quyết:</strong> {oss.problem}
-                        </div>
-
-                        <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                          <strong>Tác động:</strong> {oss.impact}
-                        </div>
-
-                        <pre
-                          style={{
-                            background: '#0F172A',
-                            color: '#38BDF8',
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: 11,
-                            padding: '8px 10px',
-                            borderRadius: 'var(--radius-sm)',
-                            overflowX: 'auto',
-                            margin: 0,
-                            lineHeight: 1.4,
-                          }}
-                        >
-                          <code>{oss.code}</code>
-                        </pre>
-
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-                          <a
-                            href={oss.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{ fontSize: 12, color: 'var(--accent-primary)', fontWeight: 600, textDecoration: 'none' }}
-                          >
-                            Xem GitHub ↗
-                          </a>
-                          <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={() => {
-                              showToast(`Đã sao chép cấu hình đề xuất tích hợp ${oss.name}`);
-                            }}
-                            style={{ fontSize: 11.5, minHeight: 26, padding: '0 8px' }}
-                          >
-                            Duyệt đề xuất
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Section 2: Evolution Matrix */}
-                <div>
-                  <h4 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 12px 0', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                    2. Đối Chiếu Tiến Hóa Kiến Trúc AIFP
-                  </h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-                    <div style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: 14, background: 'var(--bg-subtle)' }}>
-                      <span className="mono-pill" style={{ marginBottom: 6 }}>Quá khứ &middot; Nền móng</span>
-                      <div style={{ fontWeight: 700, fontSize: 13.5, margin: '6px 0 4px 0' }}>16/16 Module cốt lõi</div>
-                      <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                        Cô lập tenant tuyệt đối, phân quyền 4 cấp độ, mã hóa Web Push AES-256-GCM, khử trùng lặp DELTA_ONLY và tự động hóa ngầm Zero-App-Open.
-                      </p>
-                    </div>
-
-                    <div style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: 14, background: 'var(--bg-subtle)' }}>
-                      <span className="mono-pill" style={{ marginBottom: 6, color: 'var(--accent-primary)', borderColor: 'var(--accent-primary)' }}>Hiện tại &middot; Vận hành thực tế</span>
-                      <div style={{ fontWeight: 700, fontSize: 13.5, margin: '6px 0 4px 0' }}>Spring Boot 3 + LangGraph 7-Node</div>
-                      <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                        Bộ định tuyến Failover xoay vòng đa nhà cung cấp (Gemini &rarr; Groq &rarr; OpenRouter &rarr; OpenAI &rarr; Ollama), cào quét CSDL thực tế và gửi mail Gmail SMTP.
-                      </p>
-                    </div>
-
-                    <div style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', padding: 14, background: 'var(--bg-subtle)' }}>
-                      <span className="mono-pill" style={{ marginBottom: 6, color: '#10B981', borderColor: '#10B981' }}>Tương lai &middot; Bứt phá mã nguồn mở</span>
-                      <div style={{ fontWeight: 700, fontSize: 13.5, margin: '6px 0 4px 0' }}>MCP Standard + Local SLM + Voice Duplex</div>
-                      <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                        Chuẩn hóa giao thức MCP kết nối 1,000+ công cụ, nhúng mô hình SLM chạy offline 0đ, và đàm thoại giọng nói 2 chiều siêu tốc độ.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section 3: Actionable RFCs */}
-                <div>
-                  <h4 style={{ fontSize: 14, fontWeight: 700, margin: '0 0 12px 0', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                    3. Kế Hoạch Nâng Cấp Kỹ Thuật (Architecture RFCs)
-                  </h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {[
-                      { id: 'RFC-01', title: 'Chuẩn hóa Tool sang Model Context Protocol (MCP)', desc: 'Xây dựng McpBridgeClient trong Java Spring Boot & Python LangGraph để kết nối AIFP với kho công cụ MCP toàn cầu (GitHub, Notion, Figma, Slack).' },
-                      { id: 'RFC-02', title: 'Tích hợp Crawl4AI bất đối xứng tối ưu hóa cào tin & việc làm', desc: 'Bổ sung engine cào quét Crawl4AI vào ai-service, giúp trích xuất trực tiếp Markdown sạch và vượt qua các cơ chế chặn bot của các sàn tuyển dụng.' },
-                      { id: 'RFC-03', title: 'Bộ nhớ dài hạn tự hoàn thiện tích hợp Mem0 Graph Memory', desc: 'Tự động học hỏi thói quen và sở thích qua các phiên chat, tự động giải quyết xung đột thông tin và nén bộ nhớ người dùng.' },
-                      { id: 'RFC-04', title: 'On-device Edge inference qua Ollama giảm chi phí LLM về 0đ', desc: 'Sử dụng Gemma 2 2B / Qwen 2.5 3B chạy cục bộ để thực hiện các tác vụ lọc trùng DELTA_ONLY, phân loại thể loại tin tức hoàn toàn miễn phí.' },
-                    ].map((rfc) => (
-                      <div
-                        key={rfc.id}
-                        style={{
-                          display: 'flex',
-                          gap: 12,
-                          alignItems: 'flex-start',
-                          padding: '10px 14px',
-                          borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--border-subtle)',
-                          background: 'var(--bg-subtle)',
-                        }}
-                      >
-                        <span className="mono-pill" style={{ fontWeight: 800, color: 'var(--accent-primary)', flexShrink: 0 }}>
-                          {rfc.id}
-                        </span>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>
-                            {rfc.title}
-                          </div>
-                          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                            {rfc.desc}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* HITL Notice & Quick Action Banner */}
-                <div
-                  style={{
-                    padding: 16,
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid rgba(16, 185, 129, 0.3)',
-                    background: 'rgba(16, 185, 129, 0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: 12,
-                  }}
-                >
-                  <div style={{ maxWidth: 640 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text-primary)', marginBottom: 2 }}>
-                      Quyền Kiểm Soát Người Dùng (Human-in-the-Loop Gate)
-                    </div>
-                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                      Hệ thống tự học và đối chiếu mã nguồn mở hàng ngày lúc 07:00 sáng, tự soạn thảo giải pháp và gửi email cho bạn xem xét. Mọi thay đổi kiến trúc chỉ thực hiện khi bạn phê duyệt.
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={handleTriggerEvolutionProposalEmail}
-                      style={{ fontSize: 12, minHeight: 30, gap: 5 }}
-                    >
-                      <IconSend />
-                      <span>Nhận đề xuất qua email</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        setActiveTab('assistant');
-                        showToast('Đang mở Trợ lý để thảo luận về đề xuất mã nguồn mở...');
-                      }}
-                      style={{ fontSize: 12, minHeight: 30 }}
-                    >
-                      Thảo luận với AI
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab('assistant');
+                      showToast('Đang mở Trợ lý...');
+                    }}
+                    style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                  >
+                    Hỏi Trợ lý →
+                  </button>
                 </div>
               </div>
             )}

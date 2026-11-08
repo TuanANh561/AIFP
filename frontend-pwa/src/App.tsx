@@ -130,6 +130,22 @@ const IconCamera = () => (
   </svg>
 );
 
+const AppLogo = ({ size = 32 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ flexShrink: 0, display: 'block', borderRadius: Math.round(size * 0.26) }}
+  >
+    <rect width="32" height="32" rx="8.5" fill="#0F172A" />
+    <path d="M16 6.5L24.5 22.5H20.2L16 14.5L11.8 22.5H7.5L16 6.5Z" fill="#F8FAFC" />
+    <path d="M11.5 18.5H20.5L21.5 20.8H10.5L11.5 18.5Z" fill="#10B981" />
+    <circle cx="16" cy="11.8" r="1.6" fill="#38BDF8" />
+  </svg>
+);
+
 const IconArrowRight = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <line x1="5" y1="12" x2="19" y2="12" />
@@ -668,7 +684,7 @@ export default function App() {
     {
       id: 'm-1',
       role: 'assistant',
-      text: 'Chào bạn! Tôi là Trợ lý Cá nhân AIFP. Tôi tự động theo dõi tin tức công nghệ, việc làm Flutter và săn deal giảm giá theo sở thích của bạn. Mỗi sáng lúc 07:30, tôi sẽ gửi bản tin tóm tắt có ảnh và link vào email của bạn — bạn không cần phải mở ứng dụng hàng ngày.',
+      text: 'Chào bạn! Tôi là Trợ lý Cá nhân Aura. Tôi tự động theo dõi tin tức công nghệ, việc làm remote/game và săn deal Shopee theo sở thích của bạn. Mỗi sáng theo lịch bạn chọn, tôi sẽ gửi bản tin tóm tắt có ảnh và link vào email của bạn — bạn không cần phải mở ứng dụng hàng ngày.',
       citations: [
         { label: 'itviec.com/flutter-jobs', url: 'https://itviec.com' },
         { label: 'vnexpress.net/cong-nghe', url: 'https://vnexpress.net' },
@@ -1401,26 +1417,15 @@ export default function App() {
         <div style={{ padding: '6px 6px 14px 6px', borderBottom: '1px solid var(--border-subtle)', marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: 'var(--accent-primary)',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 800,
-                  fontSize: 15,
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.12)',
-                }}
-              >
-                A
+              <AppLogo size={32} />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontWeight: 800, fontSize: 16.5, letterSpacing: -0.4, color: 'var(--text-primary)', lineHeight: 1.15 }}>
+                  Aura
+                </span>
+                <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)', fontWeight: 600, letterSpacing: 0.3, textTransform: 'uppercase' }}>
+                  Life Assistant
+                </span>
               </div>
-              <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: -0.3, color: 'var(--text-primary)' }}>
-                AIFP
-              </span>
             </div>
 
             <button
@@ -4403,7 +4408,7 @@ export default function App() {
                 }}
               >
                 <div style={{ fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', opacity: 0.85 }}>
-                  Bản tin cá nhân hàng ngày · AIFP Life Assistant
+                  Bản tin cá nhân hàng ngày · Aura Life Assistant
                 </div>
                 <h2 style={{ fontSize: 18, fontWeight: 800, margin: '6px 0 2px 0' }}>
                   Điểm tin chọn lọc dành riêng cho {profile.personaTitle}
@@ -4484,7 +4489,7 @@ export default function App() {
                   lineHeight: 1.5,
                 }}
               >
-                Bản tin được tổng hợp tự động bởi Trợ lý Cá nhân AIFP theo đúng sở thích của bạn.
+                Bản tin được tổng hợp tự động bởi Trợ lý Cá nhân Aura theo đúng sở thích của bạn.
                 <br />
                 Được gửi từ hộp thư hệ thống đã xác thực theo lịch bạn đã đăng ký.
               </div>

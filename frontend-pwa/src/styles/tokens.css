@@ -1,31 +1,31 @@
 :root {
-  /* Surface & Backgrounds */
-  --bg-canvas: #F8FAFC;
+  /* Surface & Backgrounds - Minimalist Editorial (Claude / ChatGPT / Linear aesthetic) */
+  --bg-canvas: #FAFAFA;
   --bg-surface: #FFFFFF;
-  --bg-subtle: #F1F5F9;
-  --bg-active: #E2E8F0;
+  --bg-subtle: #F4F4F5;
+  --bg-active: #E4E4E7;
 
-  /* Typography */
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-tertiary: #94A3B8;
+  /* Typography - High-signal Charcoal Ink */
+  --text-primary: #09090B;
+  --text-secondary: #52525B;
+  --text-tertiary: #A1A1AA;
   --text-inverse: #FFFFFF;
 
-  /* Borders & Dividers */
-  --border-subtle: #E2E8F0;
-  --border-strong: #CBD5E1;
+  /* Borders & Dividers - Crisp 1px Architectural */
+  --border-subtle: #E4E4E7;
+  --border-strong: #D4D4D8;
 
-  /* Accent & Status Colors */
-  --accent-primary: #0F766E;
-  --accent-primary-hover: #115E59;
+  /* Accent & Status Colors - Monochromatic Obsidian Primary */
+  --accent-primary: #18181B;
+  --accent-primary-hover: #27272A;
   --status-running: #10B981;
   --status-approval: #F59E0B;
   --status-danger: #EF4444;
 
   /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 
   /* Fonts */
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -33,21 +33,21 @@
 }
 
 .dark {
-  --bg-canvas: #0B0F17;
-  --bg-surface: #131B2E;
-  --bg-subtle: #1E293B;
-  --bg-active: #334155;
+  --bg-canvas: #09090B;
+  --bg-surface: #121215;
+  --bg-subtle: #1C1C21;
+  --bg-active: #27272A;
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-tertiary: #64748B;
-  --text-inverse: #0B0F17;
+  --text-primary: #F4F4F5;
+  --text-secondary: #A1A1AA;
+  --text-tertiary: #71717A;
+  --text-inverse: #09090B;
 
-  --border-subtle: #1E293B;
-  --border-strong: #334155;
+  --border-subtle: #27272A;
+  --border-strong: #3F3F46;
 
-  --accent-primary: #14B8A6;
-  --accent-primary-hover: #0D9488;
+  --accent-primary: #F4F4F5;
+  --accent-primary-hover: #FFFFFF;
 }
 
 * {
@@ -477,24 +477,13 @@ input, textarea, select {
   text-transform: uppercase;
 }
 
-.source-badge-fb {
-  background: #EBF5FF;
-  color: #1877F2;
-}
-
-.source-badge-vn {
-  background: #FFF0E6;
-  color: #E65100;
-}
-
-.source-badge-tech {
-  background: #E8F5E9;
-  color: #0F766E;
-}
-
+.source-badge-fb,
+.source-badge-vn,
+.source-badge-tech,
 .source-badge-shop {
-  background: #FCE4EC;
-  color: #C2185B;
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
 }
 
 .subtab-pill {
@@ -663,12 +652,12 @@ input, textarea, select {
 }
 
 .toggle-switch-track {
-  width: 42px;
-  height: 24px;
+  width: 40px;
+  height: 22px;
   border-radius: 9999px;
   background: var(--border-strong);
   position: relative;
-  transition: background 0.2s ease;
+  transition: background 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
 }
 
@@ -676,16 +665,24 @@ input, textarea, select {
   background: var(--accent-primary);
 }
 
+.dark .toggle-switch-track {
+  background: #3F3F46;
+}
+
+.dark .toggle-switch-track.active {
+  background: var(--accent-primary);
+}
+
 .toggle-switch-thumb {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background: #FFFFFF;
+  background: var(--text-inverse);
   position: absolute;
   top: 3px;
   left: 3px;
-  transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: left 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .toggle-switch-track.active .toggle-switch-thumb {

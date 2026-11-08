@@ -590,6 +590,7 @@ export default function App() {
   const [killSwitchTriggered, setKillSwitchTriggered] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
+  const [showCompanionDrawer, setShowCompanionDrawer] = useState(true);
 
   // Preference Profile State (Two-Tier Persistence: localStorage + Database)
   const sanitizeProfileSlots = (p: UserPreferencesProfile): UserPreferencesProfile => {
@@ -1600,6 +1601,15 @@ export default function App() {
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button
                     className="btn btn-secondary"
+                    onClick={() => setShowCompanionDrawer(!showCompanionDrawer)}
+                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
+                    title={showCompanionDrawer ? 'Thu gọn bảng phụ' : 'Mở bảng phụ'}
+                  >
+                    <IconSliders />
+                    <span>{showCompanionDrawer ? 'Thu gọn' : 'Bảng phụ'}</span>
+                  </button>
+                  <button
+                    className="btn btn-secondary"
                     onClick={handleOpenPreferencesModal}
                     style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
                   >
@@ -1618,21 +1628,20 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Quick Action Suggestion Pills (Crisp, High-Signal) */}
+              {/* Quick Action Suggestion Pills (Crisp, High-Signal, Editorial) */}
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
                 {[
-                  { label: 'Việc làm test game', query: 'Tôi muốn nhận mail việc làm test game và cày game remote không cần kinh nghiệm', icon: <IconPlus /> },
-                  { label: 'Điểm tin', query: 'Điểm tin công nghệ hôm nay', icon: <IconSearch /> },
-                  { label: 'Việc làm IT', query: 'Tìm việc làm Flutter và Java mới nhất', icon: <IconSearch /> },
-                  { label: 'Giá Keychron', query: 'Kiểm tra giá bàn phím Keychron K2 Pro', icon: <IconSliders /> },
-                  { label: 'Quét hóa đơn', query: 'Quét hóa đơn chi tiêu cà phê', icon: <IconCamera /> },
+                  { label: 'Việc làm test game', query: 'Tôi muốn nhận mail việc làm test game và cày game remote không cần kinh nghiệm' },
+                  { label: 'Điểm tin sáng', query: 'Điểm tin công nghệ hôm nay' },
+                  { label: 'Việc làm IT', query: 'Tìm việc làm Flutter và Java mới nhất' },
+                  { label: 'Săn deal Keychron', query: 'Kiểm tra giá bàn phím Keychron K2 Pro' },
+                  { label: 'Quét hóa đơn', query: 'Quét hóa đơn chi tiêu cà phê' },
                 ].map((p, idx) => (
                   <div
                     key={idx}
                     className="quick-prompt-pill"
                     onClick={() => setChatInput(p.query)}
                   >
-                    {p.icon}
                     <span>{p.label}</span>
                   </div>
                 ))}
@@ -1865,96 +1874,98 @@ export default function App() {
               </div>
             </div>
 
-            {/* Desktop Companion Drawer: Fills the right side on desktop */}
-            <aside className="desktop-companion-drawer">
-              {/* Active Channels Quick Status & Toggles */}
-              <div className="card-surface" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>
-                    <IconBell />
-                    <span>Kênh tự động</span>
-                  </div>
-                  <span className="mono-pill" style={{ fontSize: 10.5 }}>
-                    {topicChannels.filter((c) => c.isActive).length}/{topicChannels.length} bật
-                  </span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 260, overflowY: 'auto', paddingRight: 2 }}>
-                  {topicChannels.map((ch) => (
-                    <div
-                      key={ch.id}
-                      className="channel-quick-row"
-                      onClick={() => handleToggleChannel(ch.id)}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '6px 10px',
-                        borderRadius: 'var(--radius-sm)',
-                        background: ch.isActive ? 'var(--bg-subtle)' : 'var(--bg-surface)',
-                        border: '1px solid var(--border-subtle)',
-                        cursor: 'pointer',
-                        userSelect: 'none',
-                      }}
-                      title={`Bấm để ${ch.isActive ? 'tắt' : 'bật'} [${ch.title}]`}
-                    >
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {ch.title}
-                      </span>
-                      <div className={`toggle-switch-track sm ${ch.isActive ? 'active' : ''}`}>
-                        <div className="toggle-switch-thumb" />
-                      </div>
+            {/* Desktop Companion Drawer: Fills the right side on desktop (Collapsible) */}
+            {showCompanionDrawer && (
+              <aside className="desktop-companion-drawer">
+                {/* Active Channels Quick Status & Toggles */}
+                <div className="card-surface" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>
+                      <IconBell />
+                      <span>Kênh tự động</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Real CSDL News Highlights */}
-              <div className="card-surface" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1, minHeight: 220 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
-                    <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>Tin mới</span>
+                    <span className="mono-pill" style={{ fontSize: 10.5 }}>
+                      {topicChannels.filter((c) => c.isActive).length}/{topicChannels.length} bật
+                    </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleSyncLiveNews}
-                    disabled={isSyncingNews}
-                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 2, color: 'var(--text-secondary)' }}
-                    title="Cập nhật tin mới"
-                  >
-                    <IconRefresh spinning={isSyncingNews} />
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 260, overflowY: 'auto', paddingRight: 2 }}>
+                    {topicChannels.map((ch) => (
+                      <div
+                        key={ch.id}
+                        className="channel-quick-row"
+                        onClick={() => handleToggleChannel(ch.id)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '6px 10px',
+                          borderRadius: 'var(--radius-sm)',
+                          background: ch.isActive ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+                          border: '1px solid var(--border-subtle)',
+                          cursor: 'pointer',
+                          userSelect: 'none',
+                        }}
+                        title={`Bấm để ${ch.isActive ? 'tắt' : 'bật'} [${ch.title}]`}
+                      >
+                        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {ch.title}
+                        </span>
+                        <div className={`toggle-switch-track sm ${ch.isActive ? 'active' : ''}`}>
+                          <div className="toggle-switch-thumb" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto' }}>
-                  {liveNews.slice(0, 5).map((item) => (
-                    <a
-                      key={item.id}
-                      href={item.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="drawer-news-item"
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 2,
-                        padding: '7px 9px',
-                        borderRadius: 'var(--radius-sm)',
-                        background: 'var(--bg-subtle)',
-                        textDecoration: 'none',
-                        color: 'inherit',
-                      }}
+
+                {/* Real CSDL News Highlights */}
+                <div className="card-surface" style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1, minHeight: 220 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
+                      <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text-primary)' }}>Tin mới</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSyncLiveNews}
+                      disabled={isSyncingNews}
+                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 2, color: 'var(--text-secondary)' }}
+                      title="Cập nhật tin mới"
                     >
-                      <span className="drawer-news-title" style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                        {item.title}
-                      </span>
-                      <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                        {item.source} · {formatRelativeTime(item.publishedAt)}
-                      </span>
-                    </a>
-                  ))}
+                      <IconRefresh spinning={isSyncingNews} />
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, overflowY: 'auto' }}>
+                    {liveNews.slice(0, 5).map((item) => (
+                      <a
+                        key={item.id}
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="drawer-news-item"
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 2,
+                          padding: '7px 9px',
+                          borderRadius: 'var(--radius-sm)',
+                          background: 'var(--bg-subtle)',
+                          textDecoration: 'none',
+                          color: 'inherit',
+                        }}
+                      >
+                        <span className="drawer-news-title" style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                          {item.title}
+                        </span>
+                        <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                          {item.source} · {formatRelativeTime(item.publishedAt)}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </aside>
+              </aside>
+            )}
           </div>
         )}
 
@@ -2018,86 +2029,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* QUICK TOGGLE DASHBOARD: BẬT/TẮT TRỰC TIẾP KHÔNG CẦN VÀO MODAL */}
-            <div
-              className="card-surface"
-              style={{
-                padding: '12px 16px',
-                marginBottom: 16,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 10,
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <IconBell />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
-                    Bật / Tắt nhận tin tự động
-                  </span>
-                  <span className="mono-pill" style={{ fontSize: 11 }}>
-                    Hộp thư: {profile.deliveryEmail}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={handleOpenPreferencesModal}
-                    style={{ minHeight: 26, fontSize: 11.5, padding: '0 9px', gap: 4 }}
-                  >
-                    <IconSliders />
-                    <span>Lịch tổng thể</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Direct Quick Toggle Switches */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8 }}>
-                {topicChannels.map((ch) => (
-                  <div
-                    key={ch.id}
-                    className="quick-toggle-pill"
-                    onClick={() => handleToggleChannel(ch.id)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '8px 12px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: ch.isActive ? 'var(--bg-subtle)' : 'var(--bg-surface)',
-                      border: `1px solid ${ch.isActive ? ch.badgeColor : 'var(--border-subtle)'}`,
-                      cursor: 'pointer',
-                      userSelect: 'none',
-                    }}
-                    title={`Bấm để ${ch.isActive ? 'tạm dừng' : 'kích hoạt'} nhận tin [${ch.title}]`}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span
-                        style={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          background: ch.isActive ? ch.badgeColor : 'var(--text-tertiary)',
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span style={{ fontSize: 12, fontWeight: 600, color: ch.isActive ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-                        {ch.title}
-                      </span>
-                    </div>
-
-                    <div className={`toggle-switch-track sm ${ch.isActive ? 'active' : ''}`} style={{ background: ch.isActive ? ch.badgeColor : undefined }}>
-                      <div className="toggle-switch-thumb" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* SECTION 1: TOPIC CHANNELS AUTOMATION */}
             <div style={{ marginBottom: 18 }}>
               <div
@@ -2142,10 +2073,11 @@ export default function App() {
                           <span
                             style={{
                               fontSize: 11,
-                              fontWeight: 700,
-                              color: '#FFFFFF',
-                              background: channel.badgeColor,
-                              padding: '2px 8px',
+                              fontWeight: 600,
+                              color: 'var(--text-secondary)',
+                              background: 'var(--bg-subtle)',
+                              border: '1px solid var(--border-subtle)',
+                              padding: '2px 7px',
                               borderRadius: 4,
                               letterSpacing: 0.3,
                               textTransform: 'uppercase',

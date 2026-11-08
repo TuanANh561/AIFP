@@ -190,6 +190,17 @@ public class EmailCenterService {
         }
     }
 
+    public record OpenSourceProposalItem(
+            String name,
+            String githubUrl,
+            String stars,
+            String license,
+            String primaryRole,
+            String problemSolvedInAifp,
+            String architecturalImpact,
+            String sampleSnippet
+    ) {}
+
     public String renderCardBasedDigestHtml(String digestTitle, java.util.List<DigestArticleCard> articles) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html><html><head><meta charset='utf-8'/><style>")
@@ -327,6 +338,30 @@ public class EmailCenterService {
             String futureRoadmap,
             List<String> suggestedImprovements
     ) {
+        return renderAiEvolutionHtml(
+                reportTitle,
+                reportDate,
+                breakthroughs,
+                null,
+                pastSummary,
+                presentSummary,
+                futureRoadmap,
+                suggestedImprovements,
+                "http://localhost:5173/"
+        );
+    }
+
+    public String renderAiEvolutionHtml(
+            String reportTitle,
+            String reportDate,
+            List<DigestArticleCard> breakthroughs,
+            List<OpenSourceProposalItem> openSourceProposals,
+            String pastSummary,
+            String presentSummary,
+            String futureRoadmap,
+            List<String> suggestedImprovements,
+            String webReviewUrl
+    ) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html><html lang='vi'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1.0'/><style>")
                 .append("body{margin:0;padding:24px;background:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0F172A;}")
@@ -352,13 +387,27 @@ public class EmailCenterService {
                 .append(".article-card h4 a{color:#0F172A;text-decoration:none;}")
                 .append(".article-card p{margin:0 0 8px 0;font-size:12.5px;color:#64748B;line-height:1.5;}")
                 .append(".article-meta{font-size:11.5px;color:#94A3B8;display:flex;align-items:center;gap:8px;}")
+                .append(".oss-card{border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px;margin-bottom:16px;background:#FFFFFF;box-shadow:0 2px 6px rgba(0,0,0,0.02);}")
+                .append(".oss-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;}")
+                .append(".oss-name{font-size:16px;font-weight:800;color:#0F172A;text-decoration:none;}")
+                .append(".oss-badges{display:flex;align-items:center;gap:6px;}")
+                .append(".oss-stars{background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;}")
+                .append(".oss-license{background:#E0E7FF;color:#3730A3;font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;}")
+                .append(".oss-role{font-size:12px;font-weight:700;color:#0D9488;text-transform:uppercase;margin-bottom:6px;}")
+                .append(".oss-detail{font-size:13px;color:#334155;line-height:1.5;margin-bottom:6px;}")
+                .append(".oss-code{background:#0F172A;color:#38BDF8;font-family:'JetBrains Mono',Consolas,monospace;font-size:11.5px;padding:10px 14px;border-radius:8px;overflow-x:auto;margin:8px 0 0 0;line-height:1.45;}")
+                .append(".hitl-box{background:#F8FAFC;border:1px solid #CBD5E1;border-radius:12px;padding:24px 20px;text-align:center;}")
+                .append(".hitl-title{font-size:16px;font-weight:800;color:#0F172A;margin-bottom:6px;}")
+                .append(".hitl-desc{font-size:13px;color:#64748B;line-height:1.5;margin-bottom:16px;max-width:520px;margin-left:auto;margin-right:auto;}")
+                .append(".hitl-btn-primary{display:inline-block;background:#0F172A;color:#FFFFFF;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:700;font-size:13.5px;margin:4px 6px;}")
+                .append(".hitl-btn-secondary{display:inline-block;background:#FFFFFF;color:#0F172A;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:700;font-size:13.5px;border:1px solid #CBD5E1;margin:4px 6px;}")
                 .append(".footer{background:#F8FAFC;padding:20px 28px;text-align:center;font-size:12px;color:#94A3B8;line-height:1.5;border-top:1px solid #E2E8F0;}")
                 .append("</style></head><body>")
                 .append("<div class='container'>")
                 .append("<div class='header'>")
-                .append("<span class='badge'>Báo cáo Chiến lược Tiến hóa AI</span>")
+                .append("<span class='badge'>Báo cáo Tự Tiến Hóa & Mã Nguồn Mở</span>")
                 .append("<h1>").append(reportTitle).append("</h1>")
-                .append("<p>").append(reportDate).append(" &middot; Bản tin tự động phân tích đột phá AI và đề xuất nâng cấp nền tảng AIFP</p>")
+                .append("<p>").append(reportDate).append(" &middot; Bản tin tự động đối chiếu mã nguồn mở uy tín & đề xuất giải pháp nâng cấp hệ thống</p>")
                 .append("</div>")
 
                 // Section 1: Daily AI Breakthroughs
@@ -375,11 +424,39 @@ public class EmailCenterService {
             }
         }
 
-        html.append("</div>")
+        html.append("</div>");
 
-                // Section 2: Past, Present, Future Matrix
-                .append("<div class='section'>")
-                .append("<div class='section-title'>2. Đối Chiếu Hệ Thống AIFP (Quá Khứ &middot; Hiện Tại &middot; Tương Lai)</div>")
+        // Section 2: Curated Open-Source Proposals
+        if (openSourceProposals != null && !openSourceProposals.isEmpty()) {
+            html.append("<div class='section'>")
+                    .append("<div class='section-title'>2. Đề Xuất Tích Hợp Mã Nguồn Mở Tinh Hoa Cho AIFP</div>");
+
+            for (OpenSourceProposalItem oss : openSourceProposals) {
+                html.append("<div class='oss-card'>")
+                        .append("<div class='oss-header'>")
+                        .append("<a class='oss-name' href='").append(oss.githubUrl()).append("' target='_blank'>").append(oss.name()).append(" ↗</a>")
+                        .append("<div class='oss-badges'>")
+                        .append("<span class='oss-stars'>").append(oss.stars()).append("</span>")
+                        .append("<span class='oss-license'>").append(oss.license()).append("</span>")
+                        .append("</div>")
+                        .append("</div>")
+                        .append("<div class='oss-role'>").append(oss.primaryRole()).append("</div>")
+                        .append("<div class='oss-detail'><strong>Bài toán giải quyết:</strong> ").append(oss.problemSolvedInAifp()).append("</div>")
+                        .append("<div class='oss-detail'><strong>Kiến trúc & Tối ưu:</strong> ").append(oss.architecturalImpact()).append("</div>");
+
+                if (oss.sampleSnippet() != null && !oss.sampleSnippet().isBlank()) {
+                    html.append("<pre class='oss-code'><code>").append(oss.sampleSnippet()).append("</code></pre>");
+                }
+
+                html.append("</div>");
+            }
+
+            html.append("</div>");
+        }
+
+        // Section 3: Past, Present, Future Matrix
+        html.append("<div class='section'>")
+                .append("<div class='section-title'>3. Đối Chiếu Hệ Thống AIFP (Quá Khứ &middot; Hiện Tại &middot; Tương Lai)</div>")
                 .append("<div class='matrix-card'>")
                 .append("<span class='matrix-tag tag-past'>Quá khứ &middot; Nền móng đã hoàn thành</span>")
                 .append("<div class='matrix-title'>16/16 Module cốt lõi & Cơ chế Vận hành ngầm Zero-App-Open</div>")
@@ -399,9 +476,9 @@ public class EmailCenterService {
                 .append("</div>")
                 .append("</div>")
 
-                // Section 3: Actionable System Improvements & New Features for AIFP
+                // Section 4: Actionable System Improvements & New Features for AIFP
                 .append("<div class='section'>")
-                .append("<div class='section-title'>3. Đề Xuất Cải Tiến Kỹ Thuật & Chức Năng Mới Cho AIFP</div>")
+                .append("<div class='section-title'>4. Đề Xuất Kỹ Thuật Hành Động Cụ Thể (Actionable RFCs)</div>")
                 .append("<div class='action-box'>");
 
         if (suggestedImprovements != null) {
@@ -417,10 +494,22 @@ public class EmailCenterService {
         html.append("</div>")
                 .append("</div>")
 
+                // Section 5: Human-in-the-Loop Review CTA
+                .append("<div class='section'>")
+                .append("<div class='hitl-box'>")
+                .append("<div class='hitl-title'>Bạn có đồng ý để hệ thống tiến hành áp dụng đề xuất này?</div>")
+                .append("<div class='hitl-desc'>Tuân thủ nguyên tắc Level 3 Gate: Hệ thống tự nghiên cứu, tự học và tự động soạn thảo giải pháp, nhưng mọi thay đổi kiến trúc đều cần bạn xem xét và phê duyệt.</div>")
+                .append("<div>")
+                .append("<a class='hitl-btn-primary' href='").append(webReviewUrl != null ? webReviewUrl : "http://localhost:5173/").append("' target='_blank'>Xem & Duyệt trên AIFP Workspace →</a>")
+                .append("<a class='hitl-btn-secondary' href='").append(webReviewUrl != null ? webReviewUrl : "http://localhost:5173/").append("' target='_blank'>Trao đổi chi tiết với Trợ lý AI</a>")
+                .append("</div>")
+                .append("</div>")
+                .append("</div>")
+
                 // Footer
                 .append("<div class='footer'>")
-                .append("Bản tin Tiến hóa AI được tổng hợp & đối chiếu tự động bởi AIFP Autonomous Engine.<br/>")
-                .append("Gửi tự động tới <strong>").append(fromEmail).append("</strong> theo cấu hình tiến hóa hệ thống hàng ngày.")
+                .append("Bản tin Tự Tiến Hóa được tổng hợp & đối chiếu tự động bởi AIFP Continuous Self-Evolution Engine.<br/>")
+                .append("Gửi tự động theo dõi lịch trình phát triển hệ thống hàng ngày.")
                 .append("</div>")
                 .append("</div></body></html>");
 

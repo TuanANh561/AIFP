@@ -93,8 +93,8 @@ public class ChatService {
         String rawContent = request.content().trim();
         String lowerQuery = rawContent.toLowerCase();
 
-        boolean isAutomationIntent = (lowerQuery.contains("mail") || lowerQuery.contains("email") || lowerQuery.contains("tự động") || lowerQuery.contains("luồng") || lowerQuery.contains("lên lịch") || lowerQuery.contains("cấu hình"))
-                && (lowerQuery.contains("việc") || lowerQuery.contains("job") || lowerQuery.contains("game") || lowerQuery.contains("remote") || lowerQuery.contains("shopee") || lowerQuery.contains("deal") || lowerQuery.contains("công nghệ") || lowerQuery.contains("tiến hóa") || lowerQuery.contains("gửi"));
+        boolean isAutomationIntent = (lowerQuery.contains("mail") || lowerQuery.contains("email") || lowerQuery.contains("tự động") || lowerQuery.contains("luồng") || lowerQuery.contains("lên lịch") || lowerQuery.contains("cấu hình") || lowerQuery.contains("đề xuất") || lowerQuery.contains("phát triển") || lowerQuery.contains("tự học") || lowerQuery.contains("học hỏi"))
+                && (lowerQuery.contains("việc") || lowerQuery.contains("job") || lowerQuery.contains("game") || lowerQuery.contains("remote") || lowerQuery.contains("shopee") || lowerQuery.contains("deal") || lowerQuery.contains("công nghệ") || lowerQuery.contains("tiến hóa") || lowerQuery.contains("mã nguồn mở") || lowerQuery.contains("open source") || lowerQuery.contains("phát triển") || lowerQuery.contains("gửi") || lowerQuery.contains("học") || lowerQuery.contains("hệ thống"));
 
         String selectedModel = "gemini-2.5-flash";
         String replyContent;
@@ -115,7 +115,12 @@ public class ChatService {
             String frequency = "Hàng ngày";
             List<String> keywords;
 
-            if (lowerQuery.contains("game") || lowerQuery.contains("việc") || lowerQuery.contains("job") || lowerQuery.contains("remote")) {
+            if (lowerQuery.contains("mã nguồn mở") || lowerQuery.contains("open source") || lowerQuery.contains("tự học") || lowerQuery.contains("tự phát triển") || lowerQuery.contains("tiến hóa") || lowerQuery.contains("lộ trình") || lowerQuery.contains("nâng cấp")) {
+                channelId = "ai-evolution";
+                title = "Tự Học Hỏi Hàng Ngày & Đề Xuất Tự Phát Triển (Mã Nguồn Mở)";
+                keywords = List.of("Crawl4AI", "Model Context Protocol", "Mem0", "Ollama SLM", "LiveKit");
+                scheduledTime = "07:00";
+            } else if (lowerQuery.contains("game") || lowerQuery.contains("việc") || lowerQuery.contains("job") || lowerQuery.contains("remote")) {
                 channelId = "jobs";
                 title = "Tuyển dụng Test Game & Remote Tuyển chọn";
                 keywords = List.of("Test Game", "Cày Game", "Remote không kinh nghiệm", "Không tiếng Anh");
@@ -125,11 +130,6 @@ public class ChatService {
                 title = "Săn Deal & Khuyến mãi Shopee Chọn lọc";
                 keywords = List.of("Keychron", "Màn hình 4K", "Flash Sale");
                 scheduledTime = "11:30";
-            } else if (lowerQuery.contains("tiến hóa") || lowerQuery.contains("lộ trình")) {
-                channelId = "ai-evolution";
-                title = "Tiến hóa AI & Lộ trình Nâng cấp Hệ thống";
-                keywords = List.of("DeepSeek R1", "MCP Protocol", "Gemini 2.5", "On-device SLM");
-                scheduledTime = "07:00";
             } else {
                 channelId = "tech";
                 title = "Tin tức Công nghệ & AI Chọn lọc";
@@ -153,12 +153,21 @@ public class ChatService {
             );
             taskRepository.save(newTask);
 
-            replyContent = "Đã thiết lập luồng gửi email tự động cho bạn:\n\n" +
-                    "• **Chủ đề:** " + title + "\n" +
-                    "• **Lịch gửi:** " + scheduledTime + " (" + frequency + ")\n" +
-                    "• **Email nhận:** " + recipientEmail + "\n" +
-                    "• **Từ khóa:** " + String.join(", ", keywords) + "\n\n" +
-                    "Bạn có thể bấm nút bên dưới để nhận email thử ngay hoặc xem danh sách bài mới.";
+            if ("ai-evolution".equals(channelId)) {
+                replyContent = "Đã kích hoạt và lên lịch luồng **Tự Học Hỏi & Đề Xuất Nâng Cấp Hệ Thống Hàng Ngày**:\n\n" +
+                        "• **Cơ chế tự vận hành:** Hệ thống sẽ tự động đối chiếu các mã nguồn mở tinh hoa (Crawl4AI, MCP Standard, Mem0, Ollama SLM, LiveKit) với kiến trúc hiện tại của AIFP.\n" +
+                        "• **Báo cáo đề xuất:** Tự động tạo bản đề xuất kỹ thuật (RFC/ADR) gồm: bài toán giải quyết, kiến trúc tích hợp, ước tính chi phí tiết kiệm và code mẫu.\n" +
+                        "• **Lịch gửi email:** " + scheduledTime + " (" + frequency + ") tới `" + recipientEmail + "`.\n" +
+                        "• **Quyền kiểm soát (Level 3 Gate):** Mọi đề xuất gửi qua email đều có nút `[Duyệt triển khai]` để bạn toàn quyền xem xét trước khi hệ thống áp dụng.\n\n" +
+                        "Bạn có thể bấm **'Gửi email thử ngay'** bên dưới để nhận ngay báo cáo đề xuất mã nguồn mở mới nhất vào hòm thư!";
+            } else {
+                replyContent = "Đã thiết lập luồng gửi email tự động cho bạn:\n\n" +
+                        "• **Chủ đề:** " + title + "\n" +
+                        "• **Lịch gửi:** " + scheduledTime + " (" + frequency + ")\n" +
+                        "• **Email nhận:** " + recipientEmail + "\n" +
+                        "• **Từ khóa:** " + String.join(", ", keywords) + "\n\n" +
+                        "Bạn có thể bấm nút bên dưới để nhận email thử ngay hoặc xem danh sách bài mới.";
+            }
 
             String kwJson = "[\"" + String.join("\",\"", keywords) + "\"]";
             replyContent += "\n\n<!-- AUTOMATION_ACTION: {\"action\":\"SETUP_CHANNEL\",\"channelId\":\"" + channelId + "\",\"title\":\"" + title + "\",\"scheduledTime\":\"" + scheduledTime + "\",\"frequency\":\"" + frequency + "\",\"customEmail\":\"" + recipientEmail + "\",\"keywords\":" + kwJson + "} -->";

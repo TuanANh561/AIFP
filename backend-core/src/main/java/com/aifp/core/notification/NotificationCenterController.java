@@ -465,14 +465,70 @@ public class NotificationCenterController {
                     "[Frontend Web & Mobile] Xây dựng Bảng điều khiển 'Chỉ số Tiến hóa AI' (AI Evolution Index) hiển thị trực quan các đề xuất nâng cấp được AI đề xuất và cho phép duyệt áp dụng 1-click.",
                     "[Tối ưu Hiệu năng & Chi phí] Triển khai Context Caching cho các tác vụ tổng hợp tin tức lặp lại, giúp giảm thêm 60-75% chi phí gọi LLM hàng ngày."
             );
+
+            List<EmailCenterService.OpenSourceProposalItem> openSourceProposals = List.of(
+                    new EmailCenterService.OpenSourceProposalItem(
+                            "unclecode/crawl4ai",
+                            "https://github.com/unclecode/crawl4ai",
+                            "★ 34.5k",
+                            "Apache-2.0",
+                            "Async LLM-Friendly Web & Dynamic Crawler",
+                            "Tăng tốc cào quét tin tức & việc làm lên gấp 5 lần, bypass các trang chặn bot, trích xuất Markdown sạch không lẫn quảng cáo hay boilerplate.",
+                            "Tích hợp vào ai-service/app/crawlers/, nâng cấp bộ bóc tách tin tức, giảm 80% thời gian xử lý HTML so với phương pháp truyền thống.",
+                            "from crawl4ai import AsyncWebCrawler\nasync with AsyncWebCrawler() as crawler:\n    res = await crawler.arun(url='https://example.com')\n    clean_markdown = res.markdown"
+                    ),
+                    new EmailCenterService.OpenSourceProposalItem(
+                            "modelcontextprotocol/python-sdk",
+                            "https://github.com/modelcontextprotocol",
+                            "★ 18.2k",
+                            "MIT",
+                            "Model Context Protocol (MCP) Standard",
+                            "Chuẩn hóa 4-Level Tool Gate sang giao thức MCP mở toàn cầu, cho phép AIFP kết nối sẵn với hơn 1,000 công cụ MCP (GitHub, Notion, SQLite, Brave Search, Google Drive).",
+                            "Xây dựng McpBridgeClient trong Java Spring Boot & Python LangGraph, mở rộng vô hạn khả năng tích hợp mà không phải code custom API.",
+                            "{\n  \"jsonrpc\": \"2.0\",\n  \"method\": \"tools/call\",\n  \"params\": {\"name\": \"query_database\", \"arguments\": {\"sql\": \"...\"}}\n}"
+                    ),
+                    new EmailCenterService.OpenSourceProposalItem(
+                            "mem0ai/mem0",
+                            "https://github.com/mem0ai/mem0",
+                            "★ 26.8k",
+                            "Apache-2.0",
+                            "The Memory Layer for AI Assistants",
+                            "Tự động học hỏi thói quen, lịch trình, sở thích của người dùng qua các phiên chat, tự động giải quyết xung đột thông tin (conflict resolution) và nén bộ nhớ.",
+                            "Đồng bộ hai chiều với bảng personal_memories trong PostgreSQL + pgvector, giúp trợ lý ngày càng thông minh và cá nhân hóa theo từng ngày.",
+                            "from mem0 import Memory\nm = Memory()\nm.add('Người dùng muốn nhận email việc làm Game Tester lúc 08:00', user_id=user_id)"
+                    ),
+                    new EmailCenterService.OpenSourceProposalItem(
+                            "ollama/ollama",
+                            "https://github.com/ollama/ollama",
+                            "★ 118k",
+                            "MIT",
+                            "Local SLM Engine (Gemma 2 / Qwen 2.5)",
+                            "Chạy mô hình ngôn ngữ nhỏ hoàn toàn offline trên máy tính hoặc server cục bộ, phục vụ phân loại tin tức và kiểm tra trùng lặp DELTA_ONLY với chi phí 0 VNĐ.",
+                            "Bảo mật tuyệt đối thông tin nhạy cảm (Zero Data Leakage), hoạt động bền bỉ ngay cả khi mất kết nối Internet hoặc hết quota API đám mây.",
+                            "ollama run qwen2.5:3b \"Phân loại bài viết theo chủ đề và trích xuất thực thể chính\""
+                    ),
+                    new EmailCenterService.OpenSourceProposalItem(
+                            "livekit/agents",
+                            "https://github.com/livekit/agents",
+                            "★ 8.5k",
+                            "Apache-2.0",
+                            "Real-Time Voice Duplex & Multimodal Bridge",
+                            "Chuyển hóa trợ lý từ gõ văn bản sang đàm thoại trực tiếp 2 chiều độ trễ siêu thấp (< 300ms) trên Web PWA và Mobile Flutter.",
+                            "Kết nối WebRTC giữa Web/Mobile client và Python Worker, tích hợp Deepgram / Faster-Whisper STT và Cartesia / Piper TTS.",
+                            "agent = VoicePipelineAgent(\n    vad=silero.VAD.load(),\n    stt=deepgram.STT(),\n    llm=google.LLM(),\n    tts=cartesia.TTS()\n)"
+                    )
+            );
+
             htmlBody = emailCenterService.renderAiEvolutionHtml(
                     headerTitle,
                     "Hôm nay, 08/11/2026",
                     articles,
+                    openSourceProposals,
                     pastSummary,
                     presentSummary,
                     futureRoadmap,
-                    suggestedImprovements
+                    suggestedImprovements,
+                    "http://localhost:5173/"
             );
         } else {
             htmlBody = emailCenterService.renderCardBasedDigestHtml(headerTitle, articles);

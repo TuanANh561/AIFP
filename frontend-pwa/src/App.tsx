@@ -151,6 +151,12 @@ const IconEye = () => (
   </svg>
 );
 
+const IconBookmark = ({ filled }: { filled?: boolean }) => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
 const IconPlay = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polygon points="5 3 19 12 5 21 5 3" />
@@ -361,16 +367,42 @@ const INITIAL_NEWS: NewsCardItem[] = [
     fetchedAt: new Date().toISOString(),
   },
   {
-    id: 'n-4',
+    id: 'n-job-1',
     channelId: 'jobs',
-    source: 'ITViec Tuyển dụng',
+    source: 'Viec Lam Hub',
     sourceType: 'tech',
-    category: 'Cơ hội việc làm',
-    title: 'Tuyển dụng Kỹ sư Lập trình Flutter & Mobile App (iOS / Android)',
-    summary: 'Doanh nghiệp công nghệ tuyển dụng chuyên gia Flutter, yêu cầu vững State Management (Riverpod/Bloc), kết nối Clean Architecture và tối ưu hiệu năng PWA.',
-    imageUrl: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=1200&auto=format&fit=crop&q=80',
-    url: 'https://itviec.com/it-jobs/flutter',
-    publishedAt: new Date(Date.now() - 150 * 60 * 1000).toISOString(),
+    category: 'Cơ hội việc làm online',
+    title: 'CƠ HỘI VIỆC LÀM ONLINE: TESTER & TRẢI NGHIỆM GAME MOBILE',
+    summary: 'Cơ hội linh hoạt · Không yêu cầu kinh nghiệm | Thu nhập tham khảo: 1.100.000–5.800.000 VNĐ/ngày\n• Hỗ trợ chơi thử và báo cáo lỗi game mobile (casual, nhập vai MMO)\n• Có hướng dẫn chi tiết từ A-Z cho người mới bắt đầu\n• Không yêu cầu tiếng Anh (giao diện và hướng dẫn 100% tiếng Việt)\n• Thiết bị: Smartphone Android/iOS hoặc PC cơ bản\n* Phù hợp cho ứng viên đang tìm cơ hội online linh hoạt tại nhà.',
+    imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80',
+    url: 'https://topcv.vn/viec-lam/game-tester',
+    publishedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    fetchedAt: new Date().toISOString(),
+  },
+  {
+    id: 'n-job-2',
+    channelId: 'jobs',
+    source: 'Game Studio QA',
+    sourceType: 'tech',
+    category: 'Cơ hội việc làm online',
+    title: 'TUYỂN CỘNG TÁC VIÊN CÀY GAME & REVIEW TỰA GAME MỚI',
+    summary: 'Chơi game kiếm thêm thu nhập tại nhà · Part-time linh hoạt | Thu nhập: 800.000–3.200.000 VNĐ/tuần\n• Tham gia cày cấp độ và kiểm thử tính năng server game mới ra mắt\n• Không yêu cầu kinh nghiệm, hướng dẫn từng bước qua tài liệu tiếng Việt\n• Không áp chỉ tiêu, nhận thưởng trực tiếp theo tiến độ hoàn thành\n• Nhận thanh toán theo tuần qua tài khoản ngân hàng hoặc ví MoMo.\n* Dành cho các bạn trẻ đam mê game, có thời gian rảnh rỗi tại nhà.',
+    imageUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
+    url: 'https://gamehub.vn/tuyen-dung-game/',
+    publishedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+    fetchedAt: new Date().toISOString(),
+  },
+  {
+    id: 'n-job-3',
+    channelId: 'jobs',
+    source: 'TopCV Remote Hub',
+    sourceType: 'tech',
+    category: 'Cơ hội việc làm online',
+    title: 'NHÂN VIÊN NHẬP LIỆU & HỖ TRỢ KHÁCH HÀNG ONLINE (REMOTE)',
+    summary: 'Remote 100% không yêu cầu kinh nghiệm · Toàn quốc | Thu nhập: 1.100.000–4.500.000 VNĐ/tuần\n• Nhập liệu danh mục sản phẩm và phản hồi tin nhắn khách hàng theo kịch bản\n• Không yêu cầu kinh nghiệm, đào tạo online 1 buổi là làm việc được ngay\n• Không yêu cầu tiếng Anh, làm việc 100% bằng tiếng Việt\n• Chủ động đăng ký ca làm việc sáng, chiều hoặc tối linh hoạt.\n* Phù hợp cho người tìm việc làm thêm nghiêm túc, thu nhập đều đặn.',
+    imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80',
+    url: 'https://www.topcv.vn/viec-lam-remote',
+    publishedAt: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
     fetchedAt: new Date().toISOString(),
   },
   {
@@ -434,16 +466,16 @@ const INITIAL_TOPIC_CHANNELS: TopicChannelConfig[] = [
   },
   {
     id: 'jobs',
-    title: 'Tuyển dụng IT',
+    title: 'Việc làm & Test Game',
     subtitle: '',
-    badge: 'ITViec',
+    badge: 'Việc Làm Hub',
     badgeColor: '#0F766E',
     scheduledTime: '08:00',
     customEmail: '',
-    frequency: 'Thứ 2 - Thứ 6',
-    keywords: ['Flutter', 'Spring Boot', 'Remote USD'],
+    frequency: 'Hàng ngày',
+    keywords: ['Test Game', 'Cày Game', 'Remote không kinh nghiệm', 'Không tiếng Anh'],
     isActive: true,
-    sourceSummary: 'ITViec, TopCV',
+    sourceSummary: 'Viec Lam Hub, TopCV, GameHub, ITViec',
   },
   {
     id: 'tech',
@@ -569,6 +601,25 @@ export default function App() {
   const [editingChannel, setEditingChannel] = useState<TopicChannelConfig | null>(null);
   const [sendingChannelId, setSendingChannelId] = useState<string | null>(null);
   const [newsFilter, setNewsFilter] = useState<'all' | 'shopping' | 'jobs' | 'tech' | 'finance' | 'social' | 'ai-evolution'>('all');
+  const [bookmarkedJobIds, setBookmarkedJobIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('aifp_bookmarked_jobs');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const handleToggleBookmark = (id: string) => {
+    setBookmarkedJobIds((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      try {
+        localStorage.setItem('aifp_bookmarked_jobs', JSON.stringify(next));
+      } catch {}
+      showToast(prev.includes(id) ? 'Đã bỏ lưu tin tuyển dụng.' : 'Đã lưu việc làm vào danh sách quan tâm!');
+      return next;
+    });
+  };
   const [showAddCustomChannelModal, setShowAddCustomChannelModal] = useState(false);
   const [newChannelForm, setNewChannelForm] = useState<{
     title: string;
@@ -1446,6 +1497,7 @@ export default function App() {
               {/* Quick Action Suggestion Pills (Crisp, High-Signal) */}
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
                 {[
+                  { label: 'Việc làm test game', query: 'Tôi muốn nhận mail việc làm test game và cày game remote không cần kinh nghiệm', icon: <IconPlus /> },
                   { label: 'Điểm tin', query: 'Điểm tin công nghệ hôm nay', icon: <IconSearch /> },
                   { label: 'Việc làm IT', query: 'Tìm việc làm Flutter và Java mới nhất', icon: <IconSearch /> },
                   { label: 'Giá Keychron', query: 'Kiểm tra giá bàn phím Keychron K2 Pro', icon: <IconSliders /> },
@@ -1464,32 +1516,112 @@ export default function App() {
 
               {/* Chat Messages Feed */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto', marginBottom: 16, paddingRight: 4 }}>
-                {chatMessages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                      maxWidth: msg.role === 'user' ? '80%' : '92%',
-                      gap: 6,
-                    }}
-                  >
+                {chatMessages.map((msg) => {
+                  const actionMatch = msg.text.match(/<!-- AUTOMATION_ACTION: (.*?) -->/);
+                  let autoPayload: any = null;
+                  let displayText = msg.text;
+                  if (actionMatch) {
+                    try {
+                      autoPayload = JSON.parse(actionMatch[1]);
+                      displayText = msg.text.replace(/<!-- AUTOMATION_ACTION: (.*?) -->/, '').trim();
+                    } catch {}
+                  }
+
+                  return (
                     <div
+                      key={msg.id}
                       style={{
-                        background: msg.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-surface)',
-                        color: msg.role === 'user' ? '#FFFFFF' : 'var(--text-primary)',
-                        padding: '14px 18px',
-                        borderRadius: 'var(--radius-md)',
-                        border: msg.role === 'user' ? 'none' : '1px solid var(--border-subtle)',
-                        boxShadow: msg.role === 'user' ? '0 2px 6px rgba(15, 118, 110, 0.25)' : '0 1px 3px rgba(0, 0, 0, 0.03)',
-                        fontSize: 14,
-                        lineHeight: 1.6,
-                        whiteSpace: 'pre-wrap',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                        maxWidth: msg.role === 'user' ? '80%' : '92%',
+                        gap: 6,
                       }}
                     >
-                      {msg.text}
-                    </div>
+                      <div
+                        style={{
+                          background: msg.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-surface)',
+                          color: msg.role === 'user' ? '#FFFFFF' : 'var(--text-primary)',
+                          padding: '14px 18px',
+                          borderRadius: 'var(--radius-md)',
+                          border: msg.role === 'user' ? 'none' : '1px solid var(--border-subtle)',
+                          boxShadow: msg.role === 'user' ? '0 2px 6px rgba(15, 118, 110, 0.25)' : '0 1px 3px rgba(0, 0, 0, 0.03)',
+                          fontSize: 14,
+                          lineHeight: 1.6,
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      >
+                        {displayText}
+                      </div>
+
+                      {/* Interactive Automation Setup Card */}
+                      {autoPayload && (
+                        <div
+                          style={{
+                            padding: '16px 18px',
+                            background: 'var(--bg-surface)',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-md)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 10,
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--status-running)' }} />
+                              <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>Luồng tự động hóa đã được thiết lập</strong>
+                            </div>
+                            <span className="mono-pill" style={{ fontSize: 11, background: 'var(--bg-subtle)' }}>
+                              {autoPayload.scheduledTime} · {autoPayload.frequency}
+                            </span>
+                          </div>
+
+                          <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                            <div><strong>Chủ đề:</strong> {autoPayload.title}</div>
+                            <div><strong>Hòm thư nhận:</strong> {autoPayload.customEmail}</div>
+                            <div><strong>Tiêu chí:</strong> {Array.isArray(autoPayload.keywords) ? autoPayload.keywords.join(', ') : autoPayload.keywords}</div>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                            <button
+                              type="button"
+                              className="btn btn-primary"
+                              onClick={() => {
+                                const found = topicChannels.find((c) => c.id === autoPayload.channelId) || {
+                                  id: autoPayload.channelId,
+                                  title: autoPayload.title,
+                                  subtitle: '',
+                                  badge: 'Việc Làm Hub',
+                                  badgeColor: '#0F766E',
+                                  scheduledTime: autoPayload.scheduledTime,
+                                  customEmail: autoPayload.customEmail,
+                                  frequency: autoPayload.frequency,
+                                  keywords: autoPayload.keywords,
+                                  isActive: true,
+                                  sourceSummary: 'Tự động thiết lập qua Chatbot',
+                                };
+                                handleSendChannelDigest(found);
+                              }}
+                              style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5 }}
+                            >
+                              <IconSend />
+                              <span>Gửi thử 1 email ngay</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              onClick={() => setActiveTab('digests')}
+                              style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5 }}
+                            >
+                              <IconEye />
+                              <span>Xem trong Bản tin</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
 
                     {/* Grounded Citations */}
                     {msg.citations && msg.citations.length > 0 && (
@@ -1523,7 +1655,8 @@ export default function App() {
                       </div>
                     )}
                   </div>
-                ))}
+                );
+              })}
 
                 {isChatGenerating && (
                   <div
@@ -2189,7 +2322,160 @@ export default function App() {
 
             {/* Card-Based News Feed */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 14 }}>
-              {filteredNews.map((item) => (
+              {filteredNews.map((item) => {
+                const isJobItem = item.channelId === 'jobs' || item.category.toLowerCase().includes('việc') || item.title.includes('TESTER') || item.title.includes('CÀY GAME') || item.title.includes('NHẬP LIỆU') || item.title.includes('THỰC TẬP');
+
+                if (isJobItem) {
+                  const isBookmarked = bookmarkedJobIds.includes(item.id);
+                  const bulletLines = item.summary.split('\n').filter((l) => l.trim().startsWith('•')).map((l) => l.replace(/^•\s*/, ''));
+                  const firstLine = item.summary.split('\n')[0];
+                  const salaryPart = firstLine.includes('|') ? firstLine.split('|')[1].trim() : (item.summary.includes('Thu nhập') ? item.summary.split('\n')[0] : 'Thu nhập tham khảo: 1.100.000–5.800.000 VNĐ/ngày');
+                  const subtitlePart = firstLine.includes('|') ? firstLine.split('|')[0].trim() : 'Cơ hội linh hoạt · Không yêu cầu kinh nghiệm';
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="card-surface"
+                      style={{
+                        padding: '22px 20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12,
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border-subtle)',
+                        background: 'var(--bg-surface)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                        boxSizing: 'border-box',
+                        height: '100%',
+                      }}
+                    >
+                      {/* Top Row: Source, Verified & Bookmark */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                          <span>{item.source}</span>
+                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 400 }}>• Đã xác thực</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleToggleBookmark(item.id)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: 4,
+                            color: isBookmarked ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                          title={isBookmarked ? 'Bỏ lưu việc làm này' : 'Lưu tin tuyển dụng này'}
+                        >
+                          <IconBookmark filled={isBookmarked} />
+                        </button>
+                      </div>
+
+                      {/* Job Title */}
+                      <h3
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 800,
+                          textTransform: 'uppercase',
+                          letterSpacing: -0.2,
+                          lineHeight: 1.35,
+                          margin: '2px 0 0 0',
+                          color: '#1E3A8A',
+                        }}
+                      >
+                        {item.title}
+                      </h3>
+
+                      {/* Subtitle */}
+                      <div style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>
+                        {subtitlePart}
+                      </div>
+
+                      {/* Location Pill */}
+                      <div>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            padding: '3px 9px',
+                            borderRadius: 6,
+                            background: 'var(--status-running-bg)',
+                            color: 'var(--status-running)',
+                            fontSize: 11.5,
+                            fontWeight: 700,
+                          }}
+                        >
+                          Việt Nam · Remote
+                        </span>
+                      </div>
+
+                      {/* Type & Salary */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={{ fontSize: 12.5, color: 'var(--text-secondary)', fontWeight: 600 }}>
+                          Part-time / Full-time (Tự do chọn giờ)
+                        </span>
+                        <strong style={{ fontSize: 13.5, color: 'var(--text-primary)' }}>
+                          {salaryPart}
+                        </strong>
+                      </div>
+
+                      {/* Bullet points */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, margin: '2px 0' }}>
+                        {(bulletLines.length > 0
+                          ? bulletLines
+                          : [
+                              'Chơi thử và báo cáo lỗi game mobile (casual, nhập vai MMO)',
+                              'Có hướng dẫn chi tiết từ A-Z cho người mới bắt đầu',
+                              'Không yêu cầu tiếng Anh (giao diện và hướng dẫn 100% tiếng Việt)',
+                              'Thiết bị: Smartphone Android/iOS hoặc PC cơ bản',
+                            ]
+                        ).map((b, bIdx) => (
+                          <div key={bIdx} style={{ display: 'flex', gap: 7, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.45 }}>
+                            <span style={{ color: 'var(--accent-primary)', fontWeight: 800 }}>•</span>
+                            <span>{b}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Description & Note */}
+                      <div style={{ fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.45 }}>
+                        Phù hợp cho học sinh, sinh viên, game thủ và người tìm cơ hội online linh hoạt tại nhà.
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>
+                        * Tùy thuộc vào mức độ tham gia và hiệu quả công việc.
+                      </div>
+
+                      {/* Bottom Full-Width CTA Bar */}
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 6,
+                          background: '#0F172A',
+                          color: '#FFFFFF',
+                          padding: '11px 16px',
+                          borderRadius: 'var(--radius-sm)',
+                          textDecoration: 'none',
+                          fontWeight: 700,
+                          fontSize: 13,
+                          letterSpacing: 0.2,
+                          marginTop: 'auto',
+                          boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
+                        }}
+                      >
+                        <span>Tìm hiểu thêm & Ứng tuyển ngay</span>
+                        <span>&gt;</span>
+                      </a>
+                    </div>
+                  );
+                }
+
+                return (
                 <div key={item.id} className="news-digest-card">
                   {/* Thumbnail Image */}
                   <div className="news-thumb-wrapper">
@@ -2285,7 +2571,8 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
         )}

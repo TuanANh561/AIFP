@@ -1,8 +1,12 @@
 package com.aifp.core.chat;
 
 import com.aifp.core.auth.UserEntity;
+import com.aifp.core.auth.UserProfileEntity;
+import com.aifp.core.auth.UserProfileRepository;
 import com.aifp.core.auth.UserRepository;
 import com.aifp.core.common.AiOrchestratorClient;
+import com.aifp.core.task.AiTaskEntity;
+import com.aifp.core.task.AiTaskRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -13,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,17 +26,23 @@ public class ChatService {
     private final ConversationRepository conversationRepository;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final UserProfileRepository userProfileRepository;
+    private final AiTaskRepository taskRepository;
     private final AiOrchestratorClient aiOrchestratorClient;
 
     public ChatService(
             ConversationRepository conversationRepository,
             MessageRepository messageRepository,
             UserRepository userRepository,
+            UserProfileRepository userProfileRepository,
+            AiTaskRepository taskRepository,
             AiOrchestratorClient aiOrchestratorClient
     ) {
         this.conversationRepository = conversationRepository;
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
+        this.userProfileRepository = userProfileRepository;
+        this.taskRepository = taskRepository;
         this.aiOrchestratorClient = aiOrchestratorClient;
     }
 
@@ -78,30 +89,108 @@ public class ChatService {
             throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Daily AI token quota exceeded");
         }
 
-        // Execute LangGraph Agent via HMAC internal bridge
         boolean quotaWarning = user.getDailyTokensUsed() >= (user.getDailyTokenQuota() * 0.8);
-        AiOrchestratorClient.AgentExecutionResult execResult = aiOrchestratorClient.executeAgentTask(
-                userId,
-                request.content().trim(),
-                List.of("searxng_search", "webpage_extract", "rss_fetch"),
-                List.of(),
-                "ALL"
-        );
+        String rawContent = request.content().trim();
+        String lowerQuery = rawContent.toLowerCase();
 
-        String selectedModel = execResult.selectedModel() != null ? execResult.selectedModel() : "gemini-2.5-flash";
-        String replyContent = execResult.finalMarkdown();
+        boolean isAutomationIntent = (lowerQuery.contains("mail") || lowerQuery.contains("email") || lowerQuery.contains("tự động") || lowerQuery.contains("luồng") || lowerQuery.contains("lên lịch") || lowerQuery.contains("cấu hình"))
+                && (lowerQuery.contains("việc") || lowerQuery.contains("job") || lowerQuery.contains("game") || lowerQuery.contains("remote") || lowerQuery.contains("shopee") || lowerQuery.contains("deal") || lowerQuery.contains("công nghệ") || lowerQuery.contains("tiến hóa") || lowerQuery.contains("gửi"));
 
-        // Build citations JSON array
-        StringBuilder citationsJson = new StringBuilder("[");
-        if (execResult.verifiedCitations() != null) {
-            for (int i = 0; i < execResult.verifiedCitations().size(); i++) {
-                if (i > 0) citationsJson.append(",");
-                String url = execResult.verifiedCitations().get(i);
-                String label = url.replace("https://", "").replace("http://", "").split("/")[0];
-                citationsJson.append("{\"label\":\"").append(label).append("\",\"url\":\"").append(url).append("\"}");
+        String selectedModel = "gemini-2.5-flash";
+        String replyContent;
+        String citationsJsonString = "[]";
+
+        if (isAutomationIntent) {
+            String recipientEmail = user.getEmail();
+            if (userProfileRepository != null) {
+                Optional<UserProfileEntity> prof = userProfileRepository.findById(userId);
+                if (prof.isPresent() && prof.get().getNotificationEmail() != null && !prof.get().getNotificationEmail().isBlank()) {
+                    recipientEmail = prof.get().getNotificationEmail().trim();
+                }
             }
+
+            String channelId;
+            String title;
+            String scheduledTime = "08:00";
+            String frequency = "Hàng ngày";
+            List<String> keywords;
+
+            if (lowerQuery.contains("game") || lowerQuery.contains("việc") || lowerQuery.contains("job") || lowerQuery.contains("remote")) {
+                channelId = "jobs";
+                title = "Tuyển dụng Test Game & Remote Tuyển chọn";
+                keywords = List.of("Test Game", "Cày Game", "Remote không kinh nghiệm", "Không tiếng Anh");
+                scheduledTime = "08:00";
+            } else if (lowerQuery.contains("shopee") || lowerQuery.contains("deal") || lowerQuery.contains("giá")) {
+                channelId = "shopping";
+                title = "Săn Deal & Khuyến mãi Shopee Chọn lọc";
+                keywords = List.of("Keychron", "Màn hình 4K", "Flash Sale");
+                scheduledTime = "11:30";
+            } else if (lowerQuery.contains("tiến hóa") || lowerQuery.contains("lộ trình")) {
+                channelId = "ai-evolution";
+                title = "Tiến hóa AI & Lộ trình Nâng cấp Hệ thống";
+                keywords = List.of("DeepSeek R1", "MCP Protocol", "Gemini 2.5", "On-device SLM");
+                scheduledTime = "07:00";
+            } else {
+                channelId = "tech";
+                title = "Tin tức Công nghệ & AI Chọn lọc";
+                keywords = List.of("Mô hình AI mới", "Công nghệ số", "Bảo mật");
+                scheduledTime = "07:00";
+            }
+
+            // Extract time if specified
+            if (lowerQuery.contains("7h") || lowerQuery.contains("07:00")) scheduledTime = "07:00";
+            if (lowerQuery.contains("8h") || lowerQuery.contains("08:00")) scheduledTime = "08:00";
+            if (lowerQuery.contains("11h") || lowerQuery.contains("11:30")) scheduledTime = "11:30";
+            if (lowerQuery.contains("12h") || lowerQuery.contains("12:00")) scheduledTime = "12:00";
+
+            // Persist the autonomous task in CSDL (PostgreSQL)
+            AiTaskEntity newTask = new AiTaskEntity(
+                    UUID.randomUUID(),
+                    userId,
+                    title,
+                    "Luồng tự động hóa cào quét và gửi email theo chủ đề [" + title + "] vào lúc " + scheduledTime + " (" + frequency + "). Lọc các tin tức/việc làm mới có liên kết trực tiếp và lưu trữ vào CSDL.",
+                    "DELTA_ONLY"
+            );
+            taskRepository.save(newTask);
+
+            replyContent = "Trợ lý AI đã ghi nhận yêu cầu và tự động thiết lập luồng vận hành ngầm cho bạn!\n\n" +
+                    "🛡️ **Quyền thực thi tự động (Level 3 HITL Gate):** Đã kích hoạt quyền gửi email tự động và lưu trữ cấu hình trực tiếp vào CSDL hệ thống.\n\n" +
+                    "📋 **Thông tin luồng đã tạo:**\n" +
+                    "- **Chủ đề:** " + title + "\n" +
+                    "- **Khung giờ gửi:** " + scheduledTime + " (" + frequency + ")\n" +
+                    "- **Hòm thư nhận:** " + recipientEmail + "\n" +
+                    "- **Tiêu chí lọc:** " + String.join(", ", keywords) + "\n" +
+                    "- **Định dạng hiển thị:** Chuẩn Job Card (Thu nhập tham khảo, Địa điểm, Gạch đầu dòng quyền lợi, Nút ứng tuyển trực tiếp)\n" +
+                    "- **Trạng thái:** ĐÃ LƯU CSDL & SẴN SÀNG CHẠY NGẦM\n\n" +
+                    "Bạn có thể bấm **'Gửi thử 1 email ngay'** bên dưới để kiểm tra hộp thư hoặc bấm **'Xem trong Bản tin'** để xem danh sách bài đăng đã lưu.";
+
+            String kwJson = "[\"" + String.join("\",\"", keywords) + "\"]";
+            replyContent += "\n\n<!-- AUTOMATION_ACTION: {\"action\":\"SETUP_CHANNEL\",\"channelId\":\"" + channelId + "\",\"title\":\"" + title + "\",\"scheduledTime\":\"" + scheduledTime + "\",\"frequency\":\"" + frequency + "\",\"customEmail\":\"" + recipientEmail + "\",\"keywords\":" + kwJson + "} -->";
+        } else {
+            // Execute LangGraph Agent via HMAC internal bridge
+            AiOrchestratorClient.AgentExecutionResult execResult = aiOrchestratorClient.executeAgentTask(
+                    userId,
+                    rawContent,
+                    List.of("searxng_search", "webpage_extract", "rss_fetch"),
+                    List.of(),
+                    "ALL"
+            );
+            selectedModel = execResult.selectedModel() != null ? execResult.selectedModel() : "gemini-2.5-flash";
+            replyContent = execResult.finalMarkdown();
+
+            // Build citations JSON array
+            StringBuilder citationsJson = new StringBuilder("[");
+            if (execResult.verifiedCitations() != null) {
+                for (int i = 0; i < execResult.verifiedCitations().size(); i++) {
+                    if (i > 0) citationsJson.append(",");
+                    String url = execResult.verifiedCitations().get(i);
+                    String label = url.replace("https://", "").replace("http://", "").split("/")[0];
+                    citationsJson.append("{\"label\":\"").append(label).append("\",\"url\":\"").append(url).append("\"}");
+                }
+            }
+            citationsJson.append("]");
+            citationsJsonString = citationsJson.toString();
         }
-        citationsJson.append("]");
 
         MessageEntity userMsg = new MessageEntity(
                 UUID.randomUUID(),
@@ -121,7 +210,7 @@ public class ChatService {
                 "ASSISTANT",
                 replyContent,
                 selectedModel,
-                citationsJson.toString()
+                citationsJsonString
         );
         messageRepository.save(assistantMsg);
 

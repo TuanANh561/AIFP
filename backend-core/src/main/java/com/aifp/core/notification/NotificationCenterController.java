@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +27,16 @@ public class NotificationCenterController {
 
     private final NotificationCenterService notificationService;
     private final EmailCenterService emailCenterService;
+    private final LiveArticleRepository liveArticleRepository;
 
     public NotificationCenterController(
             NotificationCenterService notificationService,
-            EmailCenterService emailCenterService
+            EmailCenterService emailCenterService,
+            LiveArticleRepository liveArticleRepository
     ) {
         this.notificationService = notificationService;
         this.emailCenterService = emailCenterService;
+        this.liveArticleRepository = liveArticleRepository;
     }
 
     public record WebPushSubscriptionRequest(
@@ -187,6 +191,7 @@ public class NotificationCenterController {
     ) {
         String channel = (request.channelId() != null) ? request.channelId().toLowerCase().trim() : "shopping";
         List<EmailCenterService.DigestArticleCard> articles = new ArrayList<>();
+        List<EmailCenterService.JobCardItem> jobCards = new ArrayList<>();
         String emailSubject;
         String headerTitle;
 
@@ -221,35 +226,115 @@ public class NotificationCenterController {
                     "11:00 Trưa nay"
             ));
         } else if ("jobs".equals(channel) || "career".equals(channel)) {
-            emailSubject = "[AIFP Việc Làm] Cơ hội tuyển dụng IT & Công nghệ mới nhất";
-            headerTitle = "Bản tin Tuyển dụng IT & Cơ hội việc làm";
-            articles.add(new EmailCenterService.DigestArticleCard(
-                    "Tuyển dụng ITViec",
-                    "jobs",
-                    "Tuyển dụng Kỹ sư Lập trình Flutter & Mobile App (iOS / Android)",
-                    "Mức lương 25 - 45 triệu. Doanh nghiệp công nghệ tuyển dụng chuyên gia Flutter, yêu cầu vững State Management (Riverpod/Bloc), kết nối Clean Architecture.",
-                    "https://itviec.com/it-jobs/flutter",
-                    "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=1200&auto=format&fit=crop&q=80",
-                    "08:00 Sáng nay"
+            emailSubject = "[AIFP Việc Làm] Cơ hội Việc làm Online: Test Game & Remote không yêu cầu kinh nghiệm";
+            headerTitle = "Bản tin Cơ hội Việc làm & Remote Tuyển chọn";
+
+            jobCards.add(new EmailCenterService.JobCardItem(
+                    "Viec Lam Hub",
+                    "Được tài trợ",
+                    "CƠ HỘI VIỆC LÀM ONLINE: TESTER & TRẢI NGHIỆM GAME MOBILE",
+                    "Cơ hội linh hoạt",
+                    "Việt Nam",
+                    "Part-time / Full-time",
+                    "Thu nhập tham khảo: 1.100.000–5.800.000 VNĐ/ngày",
+                    List.of(
+                            "Hỗ trợ quảng bá thương hiệu, chơi thử và báo cáo lỗi game mobile",
+                            "Có hướng dẫn chi tiết cho người mới bắt đầu từ A-Z",
+                            "Quy trình đơn giản, không yêu cầu kinh nghiệm hay tiếng Anh"
+                    ),
+                    "Phù hợp cho ứng viên đang tìm cơ hội online linh hoạt và muốn tìm hiểu rõ hơn trước khi đăng ký.",
+                    "* Tùy thuộc vào mức độ tham gia và hiệu quả công việc.",
+                    "https://topcv.vn/viec-lam/game-tester"
             ));
-            articles.add(new EmailCenterService.DigestArticleCard(
-                    "Tuyển dụng ITViec",
-                    "jobs",
-                    "Senior Spring Boot & Java Cloud Backend Architect",
-                    "Mức lương 35 - 60 triệu. Xây dựng Modular Monolith, tích hợp pgvector, tối ưu truy vấn phân tán và kết nối LLM AI Orchestrator.",
-                    "https://itviec.com/it-jobs/java",
-                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200&auto=format&fit=crop&q=80",
-                    "07:45 Sáng nay"
+
+            jobCards.add(new EmailCenterService.JobCardItem(
+                    "Game Studio QA",
+                    "Đã xác thực",
+                    "TUYỂN CỘNG TÁC VIÊN CÀY GAME & REVIEW TỰA GAME MỚI",
+                    "Làm việc tại nhà · Linh hoạt",
+                    "Việt Nam · Remote",
+                    "Part-time linh hoạt (2–4 giờ/ngày)",
+                    "Thu nhập tham khảo: 800.000–3.200.000 VNĐ/tuần",
+                    List.of(
+                            "Chơi thử các bản game mobile mới phát hành và báo cáo lỗi phát sinh",
+                            "Không yêu cầu kinh nghiệm, hướng dẫn từng bước qua tài liệu tiếng Việt",
+                            "Không yêu cầu tiếng Anh, chỉ cần smartphone hoặc PC kết nối internet",
+                            "Nhận thù lao theo tuần qua tài khoản ngân hàng hoặc ví MoMo"
+                    ),
+                    "Dành cho các bạn trẻ đam mê game, có thời gian rảnh rỗi muốn vừa giải trí vừa có thêm thu nhập.",
+                    "* Thù lao thanh toán theo tuần dựa trên số lượng nhiệm vụ kiểm thử hoàn thành.",
+                    "https://gamehub.vn/tuyen-dung-game/"
             ));
-            articles.add(new EmailCenterService.DigestArticleCard(
-                    "TopCV Tuyển dụng",
-                    "jobs",
-                    "AI / LLM Application Engineer (FastAPI & LangGraph) Remote",
-                    "Mức lương $2,500 - $4,500. Thiết kế pipeline RAG, tích hợp công cụ kiểm chứng Citation Grounding và kiểm soát chi phí suy luận đa nhà cung cấp.",
-                    "https://itviec.com/it-jobs/python",
-                    "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&auto=format&fit=crop&q=80",
-                    "07:30 Sáng nay"
+
+            jobCards.add(new EmailCenterService.JobCardItem(
+                    "TopCV Remote Hub",
+                    "Đã kiểm duyệt",
+                    "NHÂN VIÊN NHẬP LIỆU & HỖ TRỢ KHÁCH HÀNG ONLINE",
+                    "Remote 100% không yêu cầu kinh nghiệm",
+                    "Toàn quốc · Làm tại nhà",
+                    "Part-time / Full-time",
+                    "Thu nhập tham khảo: 1.100.000–4.500.000 VNĐ/tuần",
+                    List.of(
+                            "Nhập liệu danh mục sản phẩm và phản hồi tin nhắn khách hàng theo kịch bản",
+                            "Không yêu cầu kinh nghiệm, đào tạo online 1 buổi là làm việc được ngay",
+                            "Không yêu cầu tiếng Anh, làm việc 100% bằng tiếng Việt",
+                            "Được chủ động đăng ký ca làm việc sáng, chiều hoặc tối linh hoạt"
+                    ),
+                    "Phù hợp cho ứng viên cần việc làm thêm ổn định tại nhà không gò bó thời gian.",
+                    "* Mức thu nhập lũy tiến theo khối lượng dữ liệu xử lý thực tế.",
+                    "https://www.topcv.vn/viec-lam-remote"
             ));
+
+            jobCards.add(new EmailCenterService.JobCardItem(
+                    "ITViec Hub",
+                    "Cơ hội thực tập",
+                    "THỰC TẬP SINH LẬP TRÌNH & JUNIOR DEV (INTERN / HYBRID)",
+                    "Có phụ cấp thực tập & đào tạo bài bản",
+                    "Hà Nội / TP.HCM · Hybrid",
+                    "Full-time / Part-time",
+                    "Phụ cấp: 5.000.000–12.000.000 VNĐ/tháng",
+                    List.of(
+                            "Tham gia phát triển dự án Flutter Mobile hoặc Java / Spring Boot Backend",
+                            "Được các Senior Engineer hướng dẫn trực tiếp kiến trúc dự án thực tế",
+                            "Cơ hội xem xét hợp đồng chính thức sau thời gian thực tập"
+                    ),
+                    "Dành cho sinh viên CNTT hoặc người mới học lập trình muốn trải nghiệm môi trường thực tế.",
+                    "* Yêu cầu tinh thần chủ động học hỏi và tư duy logic cơ bản.",
+                    "https://itviec.com/it-jobs/intern"
+            ));
+
+            // Persist jobs to live_articles in PostgreSQL
+            for (EmailCenterService.JobCardItem jc : jobCards) {
+                if (!liveArticleRepository.existsByUrl(jc.applyUrl())) {
+                    String bulletsCombined = String.join("\n• ", jc.bulletPoints());
+                    String summary = jc.subtitle() + " | " + jc.salaryRange() + "\n• " + bulletsCombined + "\n" + jc.note();
+                    liveArticleRepository.save(new LiveArticleEntity(
+                            UUID.randomUUID(),
+                            "jobs",
+                            jc.sourceName(),
+                            "tech",
+                            "Tuyển dụng Việc làm",
+                            jc.title(),
+                            summary,
+                            "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80",
+                            jc.applyUrl(),
+                            Instant.now()
+                    ));
+                }
+            }
+
+            // Also keep standard article list for backwards compatibility
+            for (EmailCenterService.JobCardItem jc : jobCards) {
+                articles.add(new EmailCenterService.DigestArticleCard(
+                        jc.sourceName(),
+                        "jobs",
+                        jc.title(),
+                        jc.salaryRange() + " — " + jc.description(),
+                        jc.applyUrl(),
+                        "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80",
+                        "08:00 Sáng nay"
+                ));
+            }
         } else if ("tech".equals(channel)) {
             emailSubject = "[AIFP Công Nghệ] Điểm tin Trí tuệ nhân tạo & Xu hướng số";
             headerTitle = "Bản tin Công nghệ & Trí tuệ nhân tạo";
@@ -364,7 +449,9 @@ public class NotificationCenterController {
         }
 
         String htmlBody;
-        if ("ai-evolution".equals(channel) || "ai".equals(channel)) {
+        if ("jobs".equals(channel) || "career".equals(channel)) {
+            htmlBody = emailCenterService.renderJobCardDigestHtml(headerTitle, request.recipientEmail(), jobCards);
+        } else if ("ai-evolution".equals(channel) || "ai".equals(channel)) {
             String pastSummary = "AIFP đã xây dựng vững chắc 16/16 module từ Sprint 1 đến Phase 3, giải quyết triệt để bài toán cô lập dữ liệu theo user_id, phân quyền 4 cấp độ, mã hóa Web Push AES-256-GCM, khử trùng lặp nội dung SHA256 (DELTA_ONLY) và tự động hóa ngầm Zero-App-Open.";
             String presentSummary = "Nền tảng vận hành với Spring Boot 3 Modular Monolith kết hợp Python LangGraph 7-node, bộ định tuyến Failover xoay vòng đa nhà cung cấp (Gemini -> Groq -> OpenRouter -> OpenAI -> Ollama), và Gmail SMTP tự động cào quét tin tức CSDL.";
             String futureRoadmap = "Cần chủ động đón đầu 4 đột phá công nghệ: (1) Chuẩn hóa MCP Server mở rộng kết nối; (2) Tích hợp On-Device SLM (Gemma 2B / Qwen 2.5) nhúng cục bộ để phân loại tin tức miễn phí 100%; (3) Trợ lý đàm thoại giọng nói 2 chiều (Voice Duplex Streaming); (4) Vector Memory Compaction tự động tối ưu hóa bộ nhớ dài hạn.";

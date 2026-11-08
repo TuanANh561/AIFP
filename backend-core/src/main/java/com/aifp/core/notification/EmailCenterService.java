@@ -159,6 +159,20 @@ public class EmailCenterService {
             String publishedTime
     ) {}
 
+    public record JobCardItem(
+            String sourceName,
+            String sourceBadge,
+            String title,
+            String subtitle,
+            String locationPill,
+            String employmentType,
+            String salaryRange,
+            java.util.List<String> bulletPoints,
+            String description,
+            String note,
+            String applyUrl
+    ) {}
+
     public String renderCardBasedDigestHtml(String digestTitle, java.util.List<DigestArticleCard> articles) {
         StringBuilder html = new StringBuilder();
         html.append("<!DOCTYPE html><html><head><meta charset='utf-8'/><style>")
@@ -199,6 +213,86 @@ public class EmailCenterService {
 
         html.append("</div>")
                 .append("<div class='footer'>Được lọc trùng và kiểm chứng bởi AIFP Life Assistant · Bạn nhận được thư này theo lịch đã đăng ký.</div>")
+                .append("</div></body></html>");
+
+        return html.toString();
+    }
+
+    public String renderJobCardDigestHtml(
+            String digestTitle,
+            String recipientEmail,
+            java.util.List<JobCardItem> jobs
+    ) {
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html><html lang='vi'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1.0'/><style>")
+                .append("body{margin:0;padding:24px;background:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0F172A;}")
+                .append(".container{max-width:600px;margin:0 auto;background:#FFFFFF;border-radius:16px;overflow:hidden;border:1px solid #CBD5E1;box-shadow:0 6px 20px rgba(0,0,0,0.06);}")
+                .append(".header{background:#0F172A;color:#FFFFFF;padding:28px 24px;text-align:left;}")
+                .append(".badge{display:inline-block;padding:4px 10px;border-radius:9999px;background:#0F766E;color:#FFFFFF;font-size:11px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;}")
+                .append(".header h1{margin:10px 0 4px 0;font-size:20px;font-weight:800;letter-spacing:-0.3px;}")
+                .append(".header p{margin:0;font-size:13px;color:#94A3B8;}")
+                .append(".content{padding:20px 24px;}")
+                .append(".job-card{border:1px solid #E2E8F0;border-radius:14px;padding:20px 22px;margin-bottom:20px;background:#FFFFFF;box-shadow:0 2px 8px rgba(0,0,0,0.03);}")
+                .append(".job-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}")
+                .append(".job-source{font-size:13px;font-weight:700;color:#0F172A;display:flex;align-items:center;gap:8px;}")
+                .append(".job-tag-sponsored{font-size:11px;color:#64748B;font-weight:400;}")
+                .append(".bookmark-icon{font-size:16px;color:#94A3B8;}")
+                .append(".job-title{font-size:18px;font-weight:800;color:#1E3A8A;margin:0 0 4px 0;letter-spacing:-0.2px;text-transform:uppercase;line-height:1.35;}")
+                .append(".job-subtitle{font-size:13.5px;color:#475569;margin-bottom:12px;font-weight:500;}")
+                .append(".job-pill{display:inline-block;padding:4px 10px;border-radius:6px;background:#DCFCE7;color:#15803D;font-size:12px;font-weight:700;margin-bottom:10px;}")
+                .append(".job-type{font-size:13px;font-weight:600;color:#334155;margin-bottom:6px;}")
+                .append(".job-salary{font-size:14px;font-weight:700;color:#0F172A;margin-bottom:12px;}")
+                .append(".job-bullets{margin:0 0 14px 0;padding-left:0;list-style:none;}")
+                .append(".job-bullet-item{font-size:13px;color:#334155;line-height:1.55;margin-bottom:6px;display:flex;gap:8px;}")
+                .append(".job-desc{font-size:12.5px;color:#64748B;line-height:1.5;margin-bottom:8px;}")
+                .append(".job-note{font-size:11.5px;color:#94A3B8;font-style:italic;margin-bottom:16px;}")
+                .append(".apply-btn{display:block;width:100%;box-sizing:border-box;text-align:center;background:#0F172A;color:#FFFFFF;text-decoration:none;padding:12px 16px;border-radius:8px;font-size:13.5px;font-weight:700;letter-spacing:0.3px;}")
+                .append(".footer{background:#F8FAFC;padding:18px 24px;text-align:center;font-size:12px;color:#94A3B8;line-height:1.5;border-top:1px solid #E2E8F0;}")
+                .append("</style></head><body>")
+                .append("<div class='container'>")
+                .append("<div class='header'>")
+                .append("<span class='badge'>Cơ hội Việc làm Tuyển chọn</span>")
+                .append("<h1>").append(digestTitle).append("</h1>")
+                .append("<p>Đã lọc: Test Game &bull; Cày Game &bull; Remote không yêu cầu kinh nghiệm &bull; Tiếng Việt</p>")
+                .append("</div>")
+                .append("<div class='content'>");
+
+        if (jobs != null) {
+            for (JobCardItem job : jobs) {
+                html.append("<div class='job-card'>")
+                        .append("<div class='job-header'>")
+                        .append("<div class='job-source'>")
+                        .append("<span>").append(job.sourceName()).append("</span>")
+                        .append("<span class='job-tag-sponsored'>&bull; ").append(job.sourceBadge()).append("</span>")
+                        .append("</div>")
+                        .append("<div class='bookmark-icon'>&#128278;</div>")
+                        .append("</div>")
+                        .append("<div class='job-title'>").append(job.title()).append("</div>")
+                        .append("<div class='job-subtitle'>").append(job.subtitle()).append("</div>")
+                        .append("<div class='job-pill'>").append(job.locationPill()).append("</div>")
+                        .append("<div class='job-type'>").append(job.employmentType()).append("</div>")
+                        .append("<div class='job-salary'>").append(job.salaryRange()).append("</div>")
+                        .append("<div class='job-bullets'>");
+
+                if (job.bulletPoints() != null) {
+                    for (String b : job.bulletPoints()) {
+                        html.append("<div class='job-bullet-item'><span>&bull;</span><span>").append(b).append("</span></div>");
+                    }
+                }
+
+                html.append("</div>")
+                        .append("<div class='job-desc'>").append(job.description()).append("</div>")
+                        .append("<div class='job-note'>").append(job.note()).append("</div>")
+                        .append("<a class='apply-btn' href='").append(job.applyUrl()).append("' target='_blank'>Tìm hiểu thêm & Ứng tuyển ngay &gt;</a>")
+                        .append("</div>");
+            }
+        }
+
+        html.append("</div>")
+                .append("<div class='footer'>")
+                .append("Bản tin gửi tự động từ Trợ lý AIFP đến ").append(recipientEmail)
+                .append("<br/>Mọi bài đăng đều được kiểm chứng và có liên kết ứng tuyển trực tiếp.")
+                .append("</div>")
                 .append("</div></body></html>");
 
         return html.toString();

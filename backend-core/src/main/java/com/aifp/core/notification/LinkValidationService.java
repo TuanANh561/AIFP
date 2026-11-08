@@ -176,7 +176,7 @@ public class LinkValidationService {
                     "Điểm tin Công nghệ & Trí tuệ nhân tạo cập nhật liên tục",
                     "Các bài viết công nghệ và trí tuệ nhân tạo chọn lọc mới nhất đã được kiểm chứng nguồn.",
                     "https://vnexpress.net/so-hoa",
-                    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "Hôm nay"
             ));
         }

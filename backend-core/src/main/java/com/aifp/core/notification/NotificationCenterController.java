@@ -121,7 +121,7 @@ public class NotificationCenterController {
                     "Tuyển dụng Kỹ sư Lập trình Flutter & Mobile App (iOS / Android)",
                     "Doanh nghiệp công nghệ tuyển dụng chuyên gia Flutter, yêu cầu vững State Management (Riverpod/Bloc), kết nối Clean Architecture và tối ưu hiệu năng PWA.",
                     "https://itviec.com/it-jobs/flutter",
-                    "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "06:30 Sáng nay"
             ));
         }
@@ -133,7 +133,7 @@ public class NotificationCenterController {
                     "Bàn phím cơ Keychron K2 Pro không dây giảm giá còn 1.890.000 đ",
                     "Đã đạt mức giá mục tiêu bạn theo dõi (tiết kiệm 160.000 đ so với giá thị trường), hỗ trợ bảo hành chính hãng 12 tháng và miễn phí vận chuyển.",
                     "https://shopee.vn/search?keyword=keychron+k2+pro",
-                    "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "06:00 Sáng nay"
             ));
         }
@@ -209,7 +209,7 @@ public class NotificationCenterController {
                     "Bàn phím cơ Keychron K2 Pro không dây giảm giá còn 1.890.000 đ",
                     "Đã đạt mức giá mục tiêu bạn theo dõi (tiết kiệm 160.000 đ so với giá thị trường), hỗ trợ bảo hành chính hãng 12 tháng và miễn phí vận chuyển toàn quốc.",
                     "https://shopee.vn/search?keyword=keychron+k2+pro",
-                    "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "11:30 Trưa nay"
             ));
             articles.add(new EmailCenterService.DigestArticleCard(
@@ -218,7 +218,7 @@ public class NotificationCenterController {
                     "Màn hình LG 27UP850N 4K UltraFine IPS giảm 18% còn 6.890.000 đ",
                     "Phiên bản chuẩn đồ họa DisplayHDR 400, tích hợp sạc Type-C 90W thích hợp cho MacBook và laptop đồ họa, số lượng ưu đãi có hạn.",
                     "https://shopee.vn/search?keyword=lg+27up850n",
-                    "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "11:15 Trưa nay"
             ));
             articles.add(new EmailCenterService.DigestArticleCard(
@@ -227,7 +227,7 @@ public class NotificationCenterController {
                     "Tai nghe chống ồn Sony WH-1000XM5 chính hãng flash sale còn 6.450.000 đ",
                     "Dòng tai nghe chống ồn cao cấp thế hệ 5 của Sony, hỗ trợ codec LDAC chuẩn âm thanh Hi-Res, thời lượng pin 30 giờ liên tục.",
                     "https://shopee.vn/search?keyword=sony+wh-1000xm5",
-                    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "11:00 Trưa nay"
             ));
         } else if ("jobs".equals(channel) || "career".equals(channel)) {
@@ -250,7 +250,7 @@ public class NotificationCenterController {
                     "Phù hợp cho ứng viên đang tìm cơ hội online linh hoạt và muốn tìm hiểu rõ hơn trước khi đăng ký.",
                     "* Tùy thuộc vào mức độ tham gia và hiệu quả công việc.",
                     "https://itviec.com/it-jobs/tester",
-                    "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80"
+                    ""
             ));
 
             jobCards.add(new EmailCenterService.JobCardItem(
@@ -270,7 +270,7 @@ public class NotificationCenterController {
                     "Dành cho các bạn trẻ đam mê game, có thời gian rảnh rỗi muốn vừa giải trí vừa có thêm thu nhập.",
                     "* Thù lao thanh toán theo tuần dựa trên số lượng nhiệm vụ kiểm thử hoàn thành.",
                     "https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?tu_khoa=game",
-                    "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80"
+                    ""
             ));
 
             jobCards.add(new EmailCenterService.JobCardItem(
@@ -290,7 +290,7 @@ public class NotificationCenterController {
                     "Phù hợp cho ứng viên cần việc làm thêm ổn định tại nhà không gò bó thời gian.",
                     "* Mức thu nhập lũy tiến theo khối lượng dữ liệu xử lý thực tế.",
                     "https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?tu_khoa=nhap+lieu",
-                    "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80"
+                    ""
             ));
 
             jobCards.add(new EmailCenterService.JobCardItem(
@@ -309,7 +309,7 @@ public class NotificationCenterController {
                     "Dành cho sinh viên CNTT hoặc người mới học lập trình muốn trải nghiệm môi trường thực tế.",
                     "* Yêu cầu tinh thần chủ động học hỏi và tư duy logic cơ bản.",
                     "https://itviec.com/it-jobs/intern",
-                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop&q=80"
+                    ""
             ));
 
             // Rigorously sanitize job links to guarantee 100% live status (no 404 or 403)
@@ -328,7 +328,7 @@ public class NotificationCenterController {
                             "Tuyển dụng Việc làm",
                             jc.title(),
                             summary,
-                            "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80",
+                            "",
                             jc.applyUrl(),
                             Instant.now()
                     ));
@@ -343,7 +343,7 @@ public class NotificationCenterController {
                         jc.title(),
                         jc.salaryRange() + " — " + jc.description(),
                         jc.applyUrl(),
-                        "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80",
+                        "",
                         "08:00 Sáng nay"
                 ));
             }
@@ -374,7 +374,7 @@ public class NotificationCenterController {
                     "Kiến trúc tự trị giảm thiểu rủi ro bảo mật cho trợ lý cá nhân",
                     "Phân tích giải pháp phân quyền công cụ 4 cấp độ và cách ly tuyệt đối nội dung bên ngoài để ngăn chặn tấn công Prompt Injection.",
                     "https://news.ycombinator.com/",
-                    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "07:00 Sáng nay"
             ));
         } else if ("finance".equals(channel)) {
@@ -395,7 +395,7 @@ public class NotificationCenterController {
                     "Thị trường chứng khoán phục hồi nhờ dòng tiền nội và nhóm cổ phiếu công nghệ",
                     "Chỉ số VN-Index tăng điểm tích cực với thanh khoản cải thiện, dòng tiền tập trung vào các doanh nghiệp đón đầu làn sóng số hóa.",
                     "https://cafef.vn/",
-                    "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "17:15 Chiều nay"
             ));
         } else if ("ai-evolution".equals(channel) || "ai".equals(channel)) {
@@ -407,7 +407,7 @@ public class NotificationCenterController {
                     "DeepSeek V3 / R1 và Cuộc cách mạng Reasoning mã nguồn mở",
                     "Kiến trúc Mixture-of-Experts (MoE) 671B với 37B active parameters chứng minh khả năng suy luận logic tương đương mô hình thương mại với chi phí inference giảm hơn 90%.",
                     "https://arxiv.org/abs/2412.19437",
-                    "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "07:00 Sáng nay"
             ));
             articles.add(new EmailCenterService.DigestArticleCard(
@@ -416,7 +416,7 @@ public class NotificationCenterController {
                     "Giao thức Model Context Protocol (MCP) trở thành tiêu chuẩn mở toàn cầu",
                     "Tiêu chuẩn hóa giao tiếp JSON-RPC bảo mật giữa AI Agents và hệ thống dữ liệu doanh nghiệp (GitHub, Google Workspace, PostgreSQL, Slack), loại bỏ nhu cầu viết custom API wrapper.",
                     "https://modelcontextprotocol.io/",
-                    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "06:45 Sáng nay"
             ));
             articles.add(new EmailCenterService.DigestArticleCard(
@@ -425,7 +425,7 @@ public class NotificationCenterController {
                     "Gemini 2.5 Flash / Pro và Cơ chế Context Caching tối ưu hóa ngân sách",
                     "Cơ chế lưu đệm ngữ cảnh giúp giảm 75% chi phí xử lý tài liệu lặp lại, mở đường cho trợ lý AI ghi nhớ vĩnh viễn dữ liệu người dùng mà không tăng chi phí suy luận theo thời gian.",
                     "https://deepmind.google/technologies/gemini/",
-                    "https://images.unsplash.com/photo-1677442136019-21780efad99a?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "06:30 Sáng nay"
             ));
             articles.add(new EmailCenterService.DigestArticleCard(
@@ -434,7 +434,7 @@ public class NotificationCenterController {
                     "Xu hướng On-Device SLM (Gemma 2B / Qwen 2.5): Xử lý cục bộ bảo mật 100%",
                     "Các mô hình ngôn ngữ nhỏ lượng tử hóa (4-bit quantization) chạy mượt mà trên chip di động và laptop cá nhân, cho phép phân loại tin tức và trích xuất thực thể ngoại tuyến hoàn toàn miễn phí.",
                     "https://huggingface.co/blog",
-                    "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "06:00 Sáng nay"
             ));
         } else if ("creator-ideas".equals(channel) || "monetization-ideas".equals(channel) || "creator".equals(channel)) {
@@ -501,7 +501,7 @@ public class NotificationCenterController {
                     "Thảo luận Giải pháp AI Agent tự hành trên di động: Cắt giảm 80% chi phí API",
                     "Bài viết phân tích kiến trúc kết hợp LangGraph trên server với Flutter Mobile, sử dụng mô hình nhỏ chạy offline và chuyển đổi thông minh đa nhà cung cấp.",
                     "https://www.facebook.com/groups/laptrinhflutter",
-                    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "20:00 Tối qua"
             ));
             articles.add(new EmailCenterService.DigestArticleCard(
@@ -510,7 +510,7 @@ public class NotificationCenterController {
                     "Kinh nghiệm xây dựng hệ thống tự động gửi tin tức không cần mở app",
                     "Chia sẻ cách thiết lập Cron Scheduler, Redis lock và tích hợp Gmail SMTP để trợ lý số vận hành hoàn toàn ngầm sau khi deploy.",
                     "https://www.facebook.com/groups/laptrinhvienvietnam",
-                    "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&auto=format&fit=crop&q=80",
+                    "",
                     "19:45 Tối qua"
             ));
         }

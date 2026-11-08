@@ -404,7 +404,7 @@ const INITIAL_NEWS: NewsCardItem[] = [
     category: 'Cơ hội việc làm online',
     title: 'CƠ HỘI VIỆC LÀM ONLINE: TESTER & TRẢI NGHIỆM GAME MOBILE',
     summary: 'Cơ hội linh hoạt · Không yêu cầu kinh nghiệm | Thu nhập tham khảo: 1.100.000–5.800.000 VNĐ/ngày\n• Hỗ trợ chơi thử và báo cáo lỗi game mobile (casual, nhập vai MMO)\n• Có hướng dẫn chi tiết từ A-Z cho người mới bắt đầu\n• Không yêu cầu tiếng Anh (giao diện và hướng dẫn 100% tiếng Việt)\n• Thiết bị: Smartphone Android/iOS hoặc PC cơ bản\n* Phù hợp cho ứng viên đang tìm cơ hội online linh hoạt tại nhà.',
-    imageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&auto=format&fit=crop&q=80',
+    imageUrl: '',
     url: 'https://topcv.vn/viec-lam/game-tester',
     publishedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
     fetchedAt: new Date().toISOString(),
@@ -417,7 +417,7 @@ const INITIAL_NEWS: NewsCardItem[] = [
     category: 'Cơ hội việc làm online',
     title: 'TUYỂN CỘNG TÁC VIÊN CÀY GAME & REVIEW TỰA GAME MỚI',
     summary: 'Chơi game kiếm thêm thu nhập tại nhà · Part-time linh hoạt | Thu nhập: 800.000–3.200.000 VNĐ/tuần\n• Tham gia cày cấp độ và kiểm thử tính năng server game mới ra mắt\n• Không yêu cầu kinh nghiệm, hướng dẫn từng bước qua tài liệu tiếng Việt\n• Không áp chỉ tiêu, nhận thưởng trực tiếp theo tiến độ hoàn thành\n• Nhận thanh toán theo tuần qua tài khoản ngân hàng hoặc ví MoMo.\n* Dành cho các bạn trẻ đam mê game, có thời gian rảnh rỗi tại nhà.',
-    imageUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
+    imageUrl: '',
     url: 'https://gamehub.vn/tuyen-dung-game/',
     publishedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
     fetchedAt: new Date().toISOString(),
@@ -430,7 +430,7 @@ const INITIAL_NEWS: NewsCardItem[] = [
     category: 'Cơ hội việc làm online',
     title: 'NHÂN VIÊN NHẬP LIỆU & HỖ TRỢ KHÁCH HÀNG ONLINE (REMOTE)',
     summary: 'Remote 100% không yêu cầu kinh nghiệm · Toàn quốc | Thu nhập: 1.100.000–4.500.000 VNĐ/tuần\n• Nhập liệu danh mục sản phẩm và phản hồi tin nhắn khách hàng theo kịch bản\n• Không yêu cầu kinh nghiệm, đào tạo online 1 buổi là làm việc được ngay\n• Không yêu cầu tiếng Anh, làm việc 100% bằng tiếng Việt\n• Chủ động đăng ký ca làm việc sáng, chiều hoặc tối linh hoạt.\n* Phù hợp cho người tìm việc làm thêm nghiêm túc, thu nhập đều đặn.',
-    imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80',
+    imageUrl: '',
     url: 'https://www.topcv.vn/viec-lam-remote',
     publishedAt: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
     fetchedAt: new Date().toISOString(),
@@ -443,7 +443,7 @@ const INITIAL_NEWS: NewsCardItem[] = [
     category: 'Săn Deal Khuyến mãi',
     title: 'Bàn phím cơ Keychron K2 Pro không dây giảm giá còn 1.890.000 đ',
     summary: 'Đạt mức giá mục tiêu bạn theo dõi (tiết kiệm 160.000 đ so với giá thị trường), hỗ trợ bảo hành chính hãng 12 tháng và miễn phí vận chuyển.',
-    imageUrl: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=1200&auto=format&fit=crop&q=80',
+    imageUrl: '',
     url: 'https://shopee.vn/search?keyword=keychron+k2+pro',
     publishedAt: new Date(Date.now() - 190 * 60 * 1000).toISOString(),
     fetchedAt: new Date().toISOString(),
@@ -456,7 +456,7 @@ const INITIAL_NEWS: NewsCardItem[] = [
     category: 'Mạng xã hội',
     title: 'Thảo luận Giải pháp AI Agent tự hành trên di động: Cắt giảm 80% chi phí API',
     summary: 'Bài viết phân tích kiến trúc kết hợp LangGraph trên server với Flutter Mobile, sử dụng mô hình nhỏ chạy offline và chuyển đổi thông minh đa nhà cung cấp.',
-    imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80',
+    imageUrl: '',
     url: 'https://www.facebook.com/groups/laptrinhflutter',
     publishedAt: new Date(Date.now() - 300 * 60 * 1000).toISOString(),
     fetchedAt: new Date().toISOString(),
@@ -739,9 +739,7 @@ export default function App() {
 
   // Vision OCR State
   const [visionImageName, setVisionImageName] = useState('hoa_don_ca_phe.jpg');
-  const [visionImagePreview, setVisionImagePreview] = useState(
-    'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&auto=format&fit=crop&q=80'
-  );
+  const [visionImagePreview, setVisionImagePreview] = useState('');
   const [visionResult, setVisionResult] = useState<string | null>(
     'Hóa đơn: The Coffee House\nNgày: 08/11/2026\nMón: Cà phê sữa đá (x2) — 78.000 đ, Bánh Croissant (x1) — 35.000 đ\nTổng thanh toán: 113.000 đ\nPhương thức: Chuyển khoản QR'
   );
@@ -782,7 +780,7 @@ export default function App() {
     channel: 'Công nghệ & Năng suất 4.0',
     duration: '14:28',
     platform: 'youtube',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
+    thumbnailUrl: '',
     summary30s: [
       'Thay vì cố học thuộc prompt, hãy xây dựng quy trình tư duy theo từng bước (Step-by-step reasoning).',
       'Tập trung tự động hóa các tác vụ lặp lại 15-30 phút mỗi ngày: tóm tắt email, lọc tin tức, phân loại ghi chú.',
@@ -812,9 +810,7 @@ export default function App() {
         channel: isTikTok ? '@taichinhthongminh' : 'Tech Insights VN',
         duration: isTikTok ? '01:45' : '12:10',
         platform: isTikTok ? 'tiktok' : 'youtube',
-        thumbnailUrl: isTikTok
-          ? 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=800&auto=format&fit=crop&q=80'
-          : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop&q=80',
+        thumbnailUrl: '',
         summary30s: [
           'Phân biệt rõ ràng giữa chi tiêu thiết yếu và chi tiêu theo cảm xúc tức thời.',
           'Ứng dụng công nghệ để tự động ghi chép và phân loại mọi khoản chi ngay sau khi thanh toán.',
@@ -1888,7 +1884,7 @@ export default function App() {
                       {topicChannels.filter((c) => c.isActive).length}/{topicChannels.length} bật
                     </span>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 260, overflowY: 'auto', paddingRight: 2 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {topicChannels.map((ch) => (
                       <div
                         key={ch.id}
@@ -2387,6 +2383,7 @@ export default function App() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 14 }}>
               {filteredNews.map((item) => {
                 const isJobItem = item.channelId === 'jobs' || item.category.toLowerCase().includes('việc') || item.title.includes('TESTER') || item.title.includes('CÀY GAME') || item.title.includes('NHẬP LIỆU') || item.title.includes('THỰC TẬP');
+                const hasRealImage = Boolean(item.imageUrl && !item.imageUrl.includes('unsplash.com') && item.imageUrl.trim().length > 0);
 
                 if (isJobItem) {
                   const isBookmarked = bookmarkedJobIds.includes(item.id);
@@ -2400,7 +2397,7 @@ export default function App() {
                       key={item.id}
                       className="card-surface card-interactive"
                       style={{
-                        padding: item.imageUrl ? '0 0 18px 0' : '20px 20px',
+                        padding: hasRealImage ? '0 0 18px 0' : '20px 20px',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 12,
@@ -2412,8 +2409,8 @@ export default function App() {
                         overflow: 'hidden',
                       }}
                     >
-                      {/* Job Header Cover Image (if available) */}
-                      {item.imageUrl ? (
+                      {/* Job Header Cover Image (ONLY if authentic photo exists) */}
+                      {hasRealImage ? (
                         <div
                           style={{
                             width: '100%',
@@ -2469,7 +2466,7 @@ export default function App() {
                           </button>
                         </div>
                       ) : (
-                        /* Top Row: Source, Verified & Bookmark */
+                        /* Top Row: Source, Verified & Bookmark (Zero fake image banner) */
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
                             <span>{item.source}</span>
@@ -2495,7 +2492,7 @@ export default function App() {
                       )}
 
                       {/* Inner Content Padding when image exists */}
-                      <div style={{ padding: item.imageUrl ? '0 18px' : '0', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
+                      <div style={{ padding: hasRealImage ? '0 18px' : '0', display: 'flex', flexDirection: 'column', gap: 11, flex: 1 }}>
                         {/* Job Title */}
                         <h3
                           style={{
@@ -2602,59 +2599,97 @@ export default function App() {
                   );
                 }
 
+                const hasRealNewsImage = Boolean(item.imageUrl && !item.imageUrl.includes('unsplash.com') && item.imageUrl.trim().length > 0);
+
                 return (
                 <div key={item.id} className="news-digest-card">
-                  {/* 1. Image Thumbnail */}
-                  <div className="news-thumb-wrapper">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="news-thumb-img"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLElement).style.display = 'none';
-                        const parent = (e.currentTarget as HTMLElement).parentElement;
-                        if (parent) {
-                          parent.style.background = 'linear-gradient(135deg, var(--bg-subtle) 0%, rgba(15, 118, 110, 0.08) 100%)';
-                        }
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: 10,
-                        left: 10,
-                        display: 'flex',
-                        gap: 6,
-                      }}
-                    >
-                      <span
-                        className={`source-badge-pill ${
-                          item.sourceType === 'fb'
-                            ? 'source-badge-fb'
-                            : item.sourceType === 'vn'
-                            ? 'source-badge-vn'
-                            : item.sourceType === 'tech'
-                            ? 'source-badge-tech'
-                            : 'source-badge-shop'
-                        }`}
-                      >
-                        {item.source}
-                      </span>
-                      <span
+                  {/* 1. Image Thumbnail (ONLY if verified genuine image exists) */}
+                  {hasRealNewsImage && (
+                    <div className="news-thumb-wrapper">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        className="news-thumb-img"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                      <div
                         style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          padding: '2px 6px',
-                          borderRadius: 4,
-                          background: 'rgba(16, 185, 129, 0.92)',
-                          color: '#FFFFFF',
-                          letterSpacing: 0.3,
+                          position: 'absolute',
+                          top: 10,
+                          left: 10,
+                          display: 'flex',
+                          gap: 6,
                         }}
                       >
-                        Mới
+                        <span
+                          className={`source-badge-pill ${
+                            item.sourceType === 'fb'
+                              ? 'source-badge-fb'
+                              : item.sourceType === 'vn'
+                              ? 'source-badge-vn'
+                              : item.sourceType === 'tech'
+                              ? 'source-badge-tech'
+                              : 'source-badge-shop'
+                          }`}
+                        >
+                          {item.source}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: '2px 6px',
+                            borderRadius: 4,
+                            background: 'rgba(16, 185, 129, 0.92)',
+                            color: '#FFFFFF',
+                            letterSpacing: 0.3,
+                          }}
+                        >
+                          Mới
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Top Metadata Row when NO image (Clean Editorial Layout) */}
+                  {!hasRealNewsImage && (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span
+                          className={`source-badge-pill ${
+                            item.sourceType === 'fb'
+                              ? 'source-badge-fb'
+                              : item.sourceType === 'vn'
+                              ? 'source-badge-vn'
+                              : item.sourceType === 'tech'
+                              ? 'source-badge-tech'
+                              : 'source-badge-shop'
+                          }`}
+                        >
+                          {item.source}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: '2px 6px',
+                            borderRadius: 4,
+                            background: 'var(--bg-subtle)',
+                            color: 'var(--text-secondary)',
+                            border: '1px solid var(--border-subtle)',
+                            letterSpacing: 0.3,
+                          }}
+                        >
+                          Mới
+                        </span>
+                      </div>
+                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                        {formatRelativeTime(item.publishedAt)}
                       </span>
                     </div>
-                  </div>
+                  )}
 
                   {/* 2. Card Content */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>

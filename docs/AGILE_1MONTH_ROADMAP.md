@@ -145,4 +145,5 @@ Once the core modules are live:
 - [x] **Month 4 (`COMPLETED EARLY`)**: `M14: AI Vision & Receipt OCR` (Camera/Photo upload analysis, receipt OCR, product attribute detection) -> **Achieved `14 / 16` modules (`87.50%`)**.
 - [x] **Month 5 (`COMPLETED EARLY`)**: `M15: Virtual Try-On` (Static image garment synthesis pipeline with strict 24h privacy auto-expiry) -> **Achieved `15 / 16` modules (`93.75%`)**.
 - [x] **Month 6 (`COMPLETED EARLY`)**: `M16: PC Companion` (Sandboxed local folder allowlist bridge + directory traversal defense) -> **Achieved `16 / 16` modules (`100.00%` FULL PLATFORM COMPLETED)**.
+- [ ] **Immediate Extension (`SPECIFIED`)**: `M18: Screen OCR & Live Translation Studio` (PC Transparent Overlay + Android Floating Bubble via MORT, LunaTranslator, ALSTMobile & RapidOCR) -> Detailed specification in [`docs/SCREEN_TRANSLATION_AND_OPEN_SOURCE_RADAR.md`](./SCREEN_TRANSLATION_AND_OPEN_SOURCE_RADAR.md).
 

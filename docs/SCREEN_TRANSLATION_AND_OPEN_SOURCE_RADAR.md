@@ -96,3 +96,4 @@ Khi người dùng ra lệnh *"Làm phần dịch màn hình MORT / Bong bóng n
 3. **Bước 3 (Flutter Mobile Companion)**:
    - Tích hợp plugin Android Floating Overlay (`dash_bubble`) vào `mobile-flutter` để tạo bong bóng nổi.
    - Thêm quyền `SYSTEM_ALERT_WINDOW` và `MediaProjection` để chụp vùng màn hình do người dùng chạm vào.
+

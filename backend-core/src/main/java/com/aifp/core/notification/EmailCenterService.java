@@ -93,6 +93,8 @@ public class EmailCenterService {
     }
 
     public String buildDigestHtml(String title, String content) {
+        String safeContent = (content != null) ? content.replace("\n", "<br/>") : "";
+        String safeTitle = (title != null) ? title : "AIFP Bản tin";
         return """
             <!DOCTYPE html>
             <html lang="vi">
@@ -105,12 +107,12 @@ public class EmailCenterService {
                 <tr>
                   <td style="padding:20px 24px;background:#0F766E;color:#FFFFFF;">
                     <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;opacity:0.85;">AIFP Personal Assistant</div>
-                    <div style="font-size:18px;font-weight:800;margin-top:4px;">%s</div>
+                    <div style="font-size:18px;font-weight:800;margin-top:4px;">{{TITLE}}</div>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding:24px;line-height:1.6;font-size:14px;color:#334155;">
-                    %s
+                    {{CONTENT}}
                   </td>
                 </tr>
                 <tr>
@@ -121,7 +123,9 @@ public class EmailCenterService {
               </table>
             </body>
             </html>
-            """.formatted(title, content.replace("\n", "<br/>"));
+            """
+            .replace("{{TITLE}}", safeTitle)
+            .replace("{{CONTENT}}", safeContent);
     }
 
     public boolean sendRealHtmlEmail(String recipientEmail, String subject, String htmlContent) {
@@ -195,6 +199,115 @@ public class EmailCenterService {
 
         html.append("</div>")
                 .append("<div class='footer'>Được lọc trùng và kiểm chứng bởi AIFP Life Assistant · Bạn nhận được thư này theo lịch đã đăng ký.</div>")
+                .append("</div></body></html>");
+
+        return html.toString();
+    }
+
+    public String renderAiEvolutionHtml(
+            String reportTitle,
+            String reportDate,
+            List<DigestArticleCard> breakthroughs,
+            String pastSummary,
+            String presentSummary,
+            String futureRoadmap,
+            List<String> suggestedImprovements
+    ) {
+        StringBuilder html = new StringBuilder();
+        html.append("<!DOCTYPE html><html lang='vi'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1.0'/><style>")
+                .append("body{margin:0;padding:24px;background:#F1F5F9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#0F172A;}")
+                .append(".container{max-width:680px;margin:0 auto;background:#FFFFFF;border-radius:14px;overflow:hidden;border:1px solid #CBD5E1;box-shadow:0 6px 20px rgba(0,0,0,0.06);}")
+                .append(".header{background:#0F172A;color:#FFFFFF;padding:32px 28px;text-align:left;}")
+                .append(".badge{display:inline-block;padding:4px 10px;border-radius:9999px;background:#2563EB;color:#FFFFFF;font-size:11px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;}")
+                .append(".header h1{margin:12px 0 6px 0;font-size:22px;font-weight:800;letter-spacing:-0.4px;line-height:1.3;}")
+                .append(".header p{margin:0;font-size:13.5px;color:#94A3B8;line-height:1.5;}")
+                .append(".section{padding:24px 28px;border-bottom:1px solid #E2E8F0;}")
+                .append(".section-title{font-size:13.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#1E293B;margin-bottom:16px;display:flex;align-items:center;gap:8px;}")
+                .append(".matrix-card{padding:16px 18px;border-radius:10px;border:1px solid #E2E8F0;background:#F8FAFC;margin-bottom:12px;}")
+                .append(".matrix-tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:8px;text-transform:uppercase;}")
+                .append(".tag-past{background:#E2E8F0;color:#334155;}")
+                .append(".tag-present{background:#DBEAFE;color:#1D4ED8;}")
+                .append(".tag-future{background:#DCFCE7;color:#15803D;}")
+                .append(".matrix-title{font-size:14.5px;font-weight:700;color:#0F172A;margin-bottom:6px;}")
+                .append(".matrix-desc{font-size:13px;color:#475569;line-height:1.55;margin:0;}")
+                .append(".action-box{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:16px 18px;margin-bottom:10px;}")
+                .append(".action-item{display:flex;gap:12px;margin-bottom:10px;font-size:13px;line-height:1.5;color:#1E293B;}")
+                .append(".action-num{width:22px;height:22px;border-radius:50%;background:#16A34A;color:#FFFFFF;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}")
+                .append(".article-card{border:1px solid #E2E8F0;border-radius:10px;padding:14px 16px;margin-bottom:12px;background:#FFFFFF;}")
+                .append(".article-card h4{margin:0 0 6px 0;font-size:14.5px;font-weight:700;line-height:1.4;}")
+                .append(".article-card h4 a{color:#0F172A;text-decoration:none;}")
+                .append(".article-card p{margin:0 0 8px 0;font-size:12.5px;color:#64748B;line-height:1.5;}")
+                .append(".article-meta{font-size:11.5px;color:#94A3B8;display:flex;align-items:center;gap:8px;}")
+                .append(".footer{background:#F8FAFC;padding:20px 28px;text-align:center;font-size:12px;color:#94A3B8;line-height:1.5;border-top:1px solid #E2E8F0;}")
+                .append("</style></head><body>")
+                .append("<div class='container'>")
+                .append("<div class='header'>")
+                .append("<span class='badge'>Báo cáo Chiến lược Tiến hóa AI</span>")
+                .append("<h1>").append(reportTitle).append("</h1>")
+                .append("<p>").append(reportDate).append(" &middot; Bản tin tự động phân tích đột phá AI và đề xuất nâng cấp nền tảng AIFP</p>")
+                .append("</div>")
+
+                // Section 1: Daily AI Breakthroughs
+                .append("<div class='section'>")
+                .append("<div class='section-title'>1. Biến Động & Đột Phá AI Hàng Ngày (Frontier AI Radar)</div>");
+
+        if (breakthroughs != null) {
+            for (DigestArticleCard item : breakthroughs) {
+                html.append("<div class='article-card'>")
+                        .append("<h4><a href='").append(item.url()).append("' target='_blank'>").append(item.title()).append("</a></h4>")
+                        .append("<p>").append(item.summary()).append("</p>")
+                        .append("<div class='article-meta'><span>Nguồn: ").append(item.sourceName()).append("</span><span>&bull;</span><span>").append(item.publishedTime()).append("</span></div>")
+                        .append("</div>");
+            }
+        }
+
+        html.append("</div>")
+
+                // Section 2: Past, Present, Future Matrix
+                .append("<div class='section'>")
+                .append("<div class='section-title'>2. Đối Chiếu Hệ Thống AIFP (Quá Khứ &middot; Hiện Tại &middot; Tương Lai)</div>")
+                .append("<div class='matrix-card'>")
+                .append("<span class='matrix-tag tag-past'>Quá khứ &middot; Nền móng đã hoàn thành</span>")
+                .append("<div class='matrix-title'>16/16 Module cốt lõi & Cơ chế Vận hành ngầm Zero-App-Open</div>")
+                .append("<p class='matrix-desc'>").append(pastSummary).append("</p>")
+                .append("</div>")
+
+                .append("<div class='matrix-card'>")
+                .append("<span class='matrix-tag tag-present'>Hiện tại &middot; Năng lực vận hành thực tế</span>")
+                .append("<div class='matrix-title'>Spring Boot 3 + Python LangGraph + Failover Router đa nhà cung cấp</div>")
+                .append("<p class='matrix-desc'>").append(presentSummary).append("</p>")
+                .append("</div>")
+
+                .append("<div class='matrix-card'>")
+                .append("<span class='matrix-tag tag-future'>Tương lai &middot; Cơ hội & Lộ trình bứt phá</span>")
+                .append("<div class='matrix-title'>Chuẩn MCP, Mô hình On-Device SLM & Voice Duplex Streaming</div>")
+                .append("<p class='matrix-desc'>").append(futureRoadmap).append("</p>")
+                .append("</div>")
+                .append("</div>")
+
+                // Section 3: Actionable System Improvements & New Features for AIFP
+                .append("<div class='section'>")
+                .append("<div class='section-title'>3. Đề Xuất Cải Tiến Kỹ Thuật & Chức Năng Mới Cho AIFP</div>")
+                .append("<div class='action-box'>");
+
+        if (suggestedImprovements != null) {
+            int idx = 1;
+            for (String action : suggestedImprovements) {
+                html.append("<div class='action-item'>")
+                        .append("<span class='action-num'>").append(idx++).append("</span>")
+                        .append("<div>").append(action).append("</div>")
+                        .append("</div>");
+            }
+        }
+
+        html.append("</div>")
+                .append("</div>")
+
+                // Footer
+                .append("<div class='footer'>")
+                .append("Bản tin Tiến hóa AI được tổng hợp & đối chiếu tự động bởi AIFP Autonomous Engine.<br/>")
+                .append("Gửi tự động tới <strong>").append(fromEmail).append("</strong> theo cấu hình tiến hóa hệ thống hàng ngày.")
+                .append("</div>")
                 .append("</div></body></html>");
 
         return html.toString();

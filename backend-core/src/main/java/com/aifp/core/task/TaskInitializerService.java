@@ -104,8 +104,29 @@ public class TaskInitializerService implements ApplicationRunner {
                 );
                 taskSocial.setStatus("PAUSED");
 
-                taskRepository.saveAll(List.of(taskShopee, taskJobs, taskTech, taskFinance, taskSocial));
-                log.info("[TaskInitializer] Successfully seeded 5 autonomous topic tasks.");
+                AiTaskEntity taskAiEvolution = new AiTaskEntity(
+                        UUID.fromString("33333333-3333-3333-3333-333333333306"),
+                        user.getId(),
+                        "Báo cáo Tiến hóa AI & Lộ trình Nâng cấp Hệ thống AIFP (Hàng ngày)",
+                        "Tự động phân tích đột phá AI mới nhất (arXiv, Hugging Face, MCP, On-device SLM), đối chiếu quá khứ - hiện tại - tương lai của AIFP và đề xuất lộ trình cải tiến hệ thống.",
+                        "DELTA_ONLY"
+                );
+
+                taskRepository.saveAll(List.of(taskShopee, taskJobs, taskTech, taskFinance, taskSocial, taskAiEvolution));
+                log.info("[TaskInitializer] Successfully seeded 6 autonomous topic tasks.");
+            } else {
+                UUID aiEvolutionId = UUID.fromString("33333333-3333-3333-3333-333333333306");
+                if (!taskRepository.existsById(aiEvolutionId)) {
+                    AiTaskEntity taskAiEvolution = new AiTaskEntity(
+                            aiEvolutionId,
+                            user.getId(),
+                            "Báo cáo Tiến hóa AI & Lộ trình Nâng cấp Hệ thống AIFP (Hàng ngày)",
+                            "Tự động phân tích đột phá AI mới nhất (arXiv, Hugging Face, MCP, On-device SLM), đối chiếu quá khứ - hiện tại - tương lai của AIFP và đề xuất lộ trình cải tiến hệ thống.",
+                            "DELTA_ONLY"
+                    );
+                    taskRepository.save(taskAiEvolution);
+                    log.info("[TaskInitializer] Seeded AI Evolution autonomous task for existing database.");
+                }
             }
         } catch (Exception ex) {
             log.warn("[TaskInitializer] Initial seeding skipped or already present: {}", ex.getMessage());

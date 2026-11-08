@@ -301,6 +301,45 @@ public class NotificationCenterController {
                     "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&auto=format&fit=crop&q=80",
                     "17:15 Chiều nay"
             ));
+        } else if ("ai-evolution".equals(channel) || "ai".equals(channel)) {
+            emailSubject = "[AIFP Tiến Hóa AI] Báo cáo biến động AI & Lộ trình nâng cấp hệ thống hàng ngày";
+            headerTitle = "Báo cáo Tiến hóa AI & Lộ trình Nâng cấp Hệ thống AIFP";
+            articles.add(new EmailCenterService.DigestArticleCard(
+                    "DeepSeek AI Research",
+                    "tech",
+                    "DeepSeek V3 / R1 và Cuộc cách mạng Reasoning mã nguồn mở",
+                    "Kiến trúc Mixture-of-Experts (MoE) 671B với 37B active parameters chứng minh khả năng suy luận logic tương đương mô hình thương mại với chi phí inference giảm hơn 90%.",
+                    "https://arxiv.org/abs/2412.19437",
+                    "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&auto=format&fit=crop&q=80",
+                    "07:00 Sáng nay"
+            ));
+            articles.add(new EmailCenterService.DigestArticleCard(
+                    "Anthropic Engineering",
+                    "tech",
+                    "Giao thức Model Context Protocol (MCP) trở thành tiêu chuẩn mở toàn cầu",
+                    "Tiêu chuẩn hóa giao tiếp JSON-RPC bảo mật giữa AI Agents và hệ thống dữ liệu doanh nghiệp (GitHub, Google Workspace, PostgreSQL, Slack), loại bỏ nhu cầu viết custom API wrapper.",
+                    "https://modelcontextprotocol.io/",
+                    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80",
+                    "06:45 Sáng nay"
+            ));
+            articles.add(new EmailCenterService.DigestArticleCard(
+                    "Google DeepMind & AI Blog",
+                    "tech",
+                    "Gemini 2.5 Flash / Pro và Cơ chế Context Caching tối ưu hóa ngân sách",
+                    "Cơ chế lưu đệm ngữ cảnh giúp giảm 75% chi phí xử lý tài liệu lặp lại, mở đường cho trợ lý AI ghi nhớ vĩnh viễn dữ liệu người dùng mà không tăng chi phí suy luận theo thời gian.",
+                    "https://deepmind.google/technologies/gemini/",
+                    "https://images.unsplash.com/photo-1677442136019-21780efad99a?w=1200&auto=format&fit=crop&q=80",
+                    "06:30 Sáng nay"
+            ));
+            articles.add(new EmailCenterService.DigestArticleCard(
+                    "Hugging Face & Ollama",
+                    "tech",
+                    "Xu hướng On-Device SLM (Gemma 2B / Qwen 2.5): Xử lý cục bộ bảo mật 100%",
+                    "Các mô hình ngôn ngữ nhỏ lượng tử hóa (4-bit quantization) chạy mượt mà trên chip di động và laptop cá nhân, cho phép phân loại tin tức và trích xuất thực thể ngoại tuyến hoàn toàn miễn phí.",
+                    "https://huggingface.co/blog",
+                    "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&auto=format&fit=crop&q=80",
+                    "06:00 Sáng nay"
+            ));
         } else {
             emailSubject = "[AIFP Cộng Đồng] Thảo luận & Bài viết chuyên sâu nổi bật";
             headerTitle = "Bản tin Cộng đồng & Thảo luận Xã hội";
@@ -324,7 +363,29 @@ public class NotificationCenterController {
             ));
         }
 
-        String htmlBody = emailCenterService.renderCardBasedDigestHtml(headerTitle, articles);
+        String htmlBody;
+        if ("ai-evolution".equals(channel) || "ai".equals(channel)) {
+            String pastSummary = "AIFP đã xây dựng vững chắc 16/16 module từ Sprint 1 đến Phase 3, giải quyết triệt để bài toán cô lập dữ liệu theo user_id, phân quyền 4 cấp độ, mã hóa Web Push AES-256-GCM, khử trùng lặp nội dung SHA256 (DELTA_ONLY) và tự động hóa ngầm Zero-App-Open.";
+            String presentSummary = "Nền tảng vận hành với Spring Boot 3 Modular Monolith kết hợp Python LangGraph 7-node, bộ định tuyến Failover xoay vòng đa nhà cung cấp (Gemini -> Groq -> OpenRouter -> OpenAI -> Ollama), và Gmail SMTP tự động cào quét tin tức CSDL.";
+            String futureRoadmap = "Cần chủ động đón đầu 4 đột phá công nghệ: (1) Chuẩn hóa MCP Server mở rộng kết nối; (2) Tích hợp On-Device SLM (Gemma 2B / Qwen 2.5) nhúng cục bộ để phân loại tin tức miễn phí 100%; (3) Trợ lý đàm thoại giọng nói 2 chiều (Voice Duplex Streaming); (4) Vector Memory Compaction tự động tối ưu hóa bộ nhớ dài hạn.";
+            List<String> suggestedImprovements = List.of(
+                    "[Backend Spring Boot] Xây dựng McpBridgeClient.java hỗ trợ giao thức Model Context Protocol (JSON-RPC) để kết nối AIFP với kho công cụ MCP toàn cầu (GitHub, Notion, Figma, Slack).",
+                    "[Python AI Service] Tích hợp engine cào quét tự động arXiv CS.AI và Hugging Face Daily Papers vào luồng cào quét ngầm, tự động chấm điểm độ liên quan đến kiến trúc AIFP.",
+                    "[Frontend Web & Mobile] Xây dựng Bảng điều khiển 'Chỉ số Tiến hóa AI' (AI Evolution Index) hiển thị trực quan các đề xuất nâng cấp được AI đề xuất và cho phép duyệt áp dụng 1-click.",
+                    "[Tối ưu Hiệu năng & Chi phí] Triển khai Context Caching cho các tác vụ tổng hợp tin tức lặp lại, giúp giảm thêm 60-75% chi phí gọi LLM hàng ngày."
+            );
+            htmlBody = emailCenterService.renderAiEvolutionHtml(
+                    headerTitle,
+                    "Hôm nay, 08/11/2026",
+                    articles,
+                    pastSummary,
+                    presentSummary,
+                    futureRoadmap,
+                    suggestedImprovements
+            );
+        } else {
+            htmlBody = emailCenterService.renderCardBasedDigestHtml(headerTitle, articles);
+        }
         boolean delivered = emailCenterService.sendRealHtmlEmail(request.recipientEmail(), emailSubject, htmlBody);
 
         Map<String, Object> responseData = Map.of(

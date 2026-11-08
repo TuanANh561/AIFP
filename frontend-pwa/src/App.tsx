@@ -484,6 +484,19 @@ const INITIAL_TOPIC_CHANNELS: TopicChannelConfig[] = [
     isActive: false,
     sourceSummary: 'Facebook Tech Groups',
   },
+  {
+    id: 'ai-evolution',
+    title: 'Tiến hóa AI',
+    subtitle: '',
+    badge: 'AI Roadmap',
+    badgeColor: '#2563EB',
+    scheduledTime: '07:00',
+    customEmail: '',
+    frequency: 'Hàng ngày',
+    keywords: ['DeepSeek R1', 'MCP Protocol', 'Gemini 2.5', 'On-device SLM', 'Lộ trình AIFP'],
+    isActive: true,
+    sourceSummary: 'arXiv, Hugging Face, DeepMind, Anthropic',
+  },
 ];
 
 export default function App() {
@@ -502,11 +515,25 @@ export default function App() {
   const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
 
   // Preference Profile State (Two-Tier Persistence: localStorage + Database)
+  const sanitizeProfileSlots = (p: UserPreferencesProfile): UserPreferencesProfile => {
+    const maxSlots = p.frequency === '1_DAILY' ? 1 : p.frequency === '2_DAILY' ? 2 : p.frequency === '3_DAILY' ? 3 : 0;
+    if (p.frequency === 'REALTIME') {
+      return { ...p, scheduledTimes: [] };
+    }
+    if (Array.isArray(p.scheduledTimes) && p.scheduledTimes.length > maxSlots) {
+      return { ...p, scheduledTimes: p.scheduledTimes.slice(0, maxSlots) };
+    }
+    if (!p.scheduledTimes || p.scheduledTimes.length === 0) {
+      return { ...p, scheduledTimes: ['07:30'] };
+    }
+    return p;
+  };
+
   const [profile, setProfile] = useState<UserPreferencesProfile>(() => {
     try {
       const saved = localStorage.getItem('aifp_user_profile');
       if (saved) {
-        return JSON.parse(saved);
+        return sanitizeProfileSlots(JSON.parse(saved));
       }
     } catch {}
     return INITIAL_PROFILE;
@@ -515,7 +542,7 @@ export default function App() {
     try {
       const saved = localStorage.getItem('aifp_user_profile');
       if (saved) {
-        return JSON.parse(saved);
+        return sanitizeProfileSlots(JSON.parse(saved));
       }
     } catch {}
     return INITIAL_PROFILE;
@@ -527,14 +554,21 @@ export default function App() {
     try {
       const saved = localStorage.getItem('aifp_topic_channels');
       if (saved) {
-        return JSON.parse(saved);
+        const parsed: TopicChannelConfig[] = JSON.parse(saved);
+        const missing = INITIAL_TOPIC_CHANNELS.filter((init) => !parsed.some((p) => p.id === init.id));
+        if (missing.length > 0) {
+          const merged = [...parsed, ...missing];
+          localStorage.setItem('aifp_topic_channels', JSON.stringify(merged));
+          return merged;
+        }
+        return parsed;
       }
     } catch {}
     return INITIAL_TOPIC_CHANNELS;
   });
   const [editingChannel, setEditingChannel] = useState<TopicChannelConfig | null>(null);
   const [sendingChannelId, setSendingChannelId] = useState<string | null>(null);
-  const [newsFilter, setNewsFilter] = useState<'all' | 'shopping' | 'jobs' | 'tech' | 'finance' | 'social'>('all');
+  const [newsFilter, setNewsFilter] = useState<'all' | 'shopping' | 'jobs' | 'tech' | 'finance' | 'social' | 'ai-evolution'>('all');
   const [showAddCustomChannelModal, setShowAddCustomChannelModal] = useState(false);
   const [newChannelForm, setNewChannelForm] = useState<{
     title: string;
@@ -1166,6 +1200,7 @@ export default function App() {
 
   const filteredNews = (liveNews && liveNews.length > 0 ? liveNews : INITIAL_NEWS).filter((item) => {
     if (newsFilter === 'all') return true;
+    if (newsFilter === 'ai-evolution') return item.channelId === 'ai-evolution' || item.title.includes('AI') || item.title.includes('DeepSeek') || item.title.includes('MCP') || item.summary.includes('AI') || item.category.includes('AI');
     if (newsFilter === 'shopping') return item.sourceType === 'shop' || item.channelId === 'shopping';
     if (newsFilter === 'jobs') return (item.sourceType === 'tech' && (item.category.includes('việc') || item.title.includes('Tuyển'))) || item.channelId === 'jobs';
     if (newsFilter === 'tech') return (item.sourceType === 'vn' || item.sourceType === 'tech') && !item.title.includes('Tuyển') && (item.channelId === 'tech' || item.category.includes('nghệ'));
@@ -2124,6 +2159,7 @@ export default function App() {
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
                   {[
                     { id: 'all', label: 'Tất cả' },
+                    { id: 'ai-evolution', label: 'Tiến hóa AI' },
                     { id: 'shopping', label: 'Shopee' },
                     { id: 'jobs', label: 'Việc làm' },
                     { id: 'tech', label: 'Công nghệ' },
@@ -3155,8 +3191,17 @@ export default function App() {
                         </span>
                       </div>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        {['07:00', '07:30', '08:00', '12:00', '18:30', '20:00'].map((time) => {
+                        {[
+                          { time: '07:00', label: '07:00 Sáng' },
+                          { time: '07:30', label: '07:30 Sáng' },
+                          { time: '08:00', label: '08:00 Sáng' },
+                          { time: '12:00', label: '12:00 Trưa' },
+                          { time: '18:30', label: '18:30 Tối' },
+                          { time: '20:00', label: '20:00 Tối' },
+                        ].map(({ time, label }) => {
                           const isTimeActive = tempProfile.scheduledTimes.includes(time);
+                          const maxSlots = getMaxSlotsForFrequency(tempProfile.frequency);
+                          const isLimitReached = !isTimeActive && tempProfile.scheduledTimes.length >= maxSlots;
                           return (
                             <button
                               key={time}
@@ -3165,11 +3210,17 @@ export default function App() {
                               className={`subtab-pill ${isTimeActive ? 'active' : ''}`}
                               style={{
                                 fontSize: 12,
-                                padding: '5px 12px',
+                                padding: '6px 12px',
                                 cursor: 'pointer',
+                                opacity: isLimitReached ? 0.75 : 1,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
                               }}
+                              title={isLimitReached ? `Bấm để đổi sang khung giờ ${label} (tối đa ${maxSlots} giờ)` : label}
                             >
-                              {time}
+                              {isTimeActive && <span style={{ fontSize: 11, fontWeight: 800 }}>✓</span>}
+                              <span>{label}</span>
                             </button>
                           );
                         })}

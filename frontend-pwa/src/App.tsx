@@ -1878,10 +1878,11 @@ export default function App() {
                     {topicChannels.filter((c) => c.isActive).length}/{topicChannels.length} bật
                   </span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {topicChannels.slice(0, 4).map((ch) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 260, overflowY: 'auto', paddingRight: 2 }}>
+                  {topicChannels.map((ch) => (
                     <div
                       key={ch.id}
+                      className="channel-quick-row"
                       onClick={() => handleToggleChannel(ch.id)}
                       style={{
                         display: 'flex',
@@ -1892,7 +1893,9 @@ export default function App() {
                         background: ch.isActive ? 'var(--bg-subtle)' : 'var(--bg-surface)',
                         border: '1px solid var(--border-subtle)',
                         cursor: 'pointer',
+                        userSelect: 'none',
                       }}
+                      title={`Bấm để ${ch.isActive ? 'tắt' : 'bật'} [${ch.title}]`}
                     >
                       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {ch.title}
@@ -1929,6 +1932,7 @@ export default function App() {
                       href={item.url}
                       target="_blank"
                       rel="noreferrer"
+                      className="drawer-news-item"
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -1940,7 +1944,7 @@ export default function App() {
                         color: 'inherit',
                       }}
                     >
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      <span className="drawer-news-title" style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {item.title}
                       </span>
                       <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
@@ -2053,9 +2057,10 @@ export default function App() {
 
               {/* Direct Quick Toggle Switches */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8 }}>
-                {topicChannels.slice(0, 4).map((ch) => (
+                {topicChannels.map((ch) => (
                   <div
                     key={ch.id}
+                    className="quick-toggle-pill"
                     onClick={() => handleToggleChannel(ch.id)}
                     style={{
                       display: 'flex',
@@ -2066,7 +2071,6 @@ export default function App() {
                       background: ch.isActive ? 'var(--bg-subtle)' : 'var(--bg-surface)',
                       border: `1px solid ${ch.isActive ? ch.badgeColor : 'var(--border-subtle)'}`,
                       cursor: 'pointer',
-                      transition: 'all 0.15s ease',
                       userSelect: 'none',
                     }}
                     title={`Bấm để ${ch.isActive ? 'tạm dừng' : 'kích hoạt'} nhận tin [${ch.title}]`}
@@ -2121,14 +2125,13 @@ export default function App() {
                   return (
                     <div
                       key={channel.id}
-                      className="card-surface"
+                      className="card-surface card-interactive"
                       style={{
                         padding: '16px 18px',
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 12,
                         opacity: channel.isActive ? 1 : 0.65,
-                        transition: 'all 0.15s ease',
                         height: '100%',
                         boxSizing: 'border-box',
                       }}
@@ -2314,7 +2317,7 @@ export default function App() {
 
                 {/* Dedicated Add Configuration Card */}
                 <div
-                  className="card-surface"
+                  className="card-surface card-dashed-interactive"
                   onClick={() => {
                     setNewChannelForm({
                       title: '',
@@ -2338,7 +2341,6 @@ export default function App() {
                     gap: 10,
                     cursor: 'pointer',
                     background: 'var(--bg-subtle)',
-                    transition: 'all 0.15s ease',
                     minHeight: 180,
                   }}
                   title="Bấm để thêm cấu hình nhận tin tự động mới"
@@ -2390,7 +2392,11 @@ export default function App() {
                   title="Tổng số bài viết cập nhật"
                 >
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
-                  <span>{liveNews.length} bài viết</span>
+                  <span>
+                    {newsFilter === 'all'
+                      ? `${liveNews.length} bài viết`
+                      : `${filteredNews.length}/${liveNews.length} bài viết`}
+                  </span>
                 </span>
                 {lastSyncTime && (
                   <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
@@ -2460,7 +2466,7 @@ export default function App() {
                   return (
                     <div
                       key={item.id}
-                      className="card-surface"
+                      className="card-surface card-interactive"
                       style={{
                         padding: item.imageUrl ? '0 0 18px 0' : '20px 20px',
                         display: 'flex',
@@ -2469,7 +2475,6 @@ export default function App() {
                         borderRadius: 'var(--radius-md)',
                         border: '1px solid var(--border-subtle)',
                         background: 'var(--bg-surface)',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
                         boxSizing: 'border-box',
                         height: '100%',
                         overflow: 'hidden',
@@ -2658,8 +2663,7 @@ export default function App() {
                             boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
                           }}
                         >
-                          <span>Tìm hiểu thêm & Ứng tuyển ngay</span>
-                          <span>&gt;</span>
+                          <span>Ứng tuyển ngay →</span>
                         </a>
                       </div>
                     </div>
@@ -2820,7 +2824,7 @@ export default function App() {
 
             <div className="desktop-2col-grid">
               {tasks.map((task) => (
-                <div key={task.id} className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', boxSizing: 'border-box' }}>
+                <div key={task.id} className="card-surface card-interactive" style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', boxSizing: 'border-box' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -3753,7 +3757,7 @@ export default function App() {
 
             <div className="desktop-2col-grid">
               {/* 1. Profile Overview Card */}
-              <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', boxSizing: 'border-box' }}>
+              <div className="card-surface card-interactive" style={{ display: 'flex', flexDirection: 'column', gap: 12, height: '100%', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -3799,7 +3803,7 @@ export default function App() {
             </div>
 
             {/* 2. System SMTP Email Status */}
-            <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="card-surface card-interactive" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ fontWeight: 700, fontSize: 15 }}>Hộp thư (Gmail SMTP)</div>
                 <span className="mono-pill" style={{ color: 'var(--status-running)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
@@ -3814,7 +3818,7 @@ export default function App() {
             </div>
 
             {/* 3. Neon Cloud PostgreSQL Database */}
-            <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="card-surface card-interactive" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ fontWeight: 700, fontSize: 15 }}>Cơ sở dữ liệu (PostgreSQL)</div>
                 <span className="mono-pill" style={{ color: 'var(--status-running)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
@@ -3829,7 +3833,7 @@ export default function App() {
             </div>
 
             {/* 4. AI Engine & Auto-failover Router */}
-            <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div className="card-surface card-interactive" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ fontWeight: 700, fontSize: 15 }}>Trí tuệ nhân tạo (AI Router)</div>
                 <span className="mono-pill" style={{ color: 'var(--accent-primary)', borderColor: 'var(--accent-primary)' }}>

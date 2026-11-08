@@ -1,8 +1,8 @@
 # 1-Month Agile Execution Roadmap (Target: >= 56% Platform Completion in 4 Sprints)
 
 **Methodology**: Agile Scrum (4 Sprints × 1 Week = 30 Days)  
-**Target Scope**: Complete **9 / 16 Total Platform Modules (56.25%)** = **100% of P0 MVP (7/7 modules)** + **2 High-Value P1 Modules (`AI Tools Registry`, `Document & Translation Assistant`)**  
-**Quality Bar**: Production-grade security (`user_id` isolation, 4-Level Tool Gate, Citation Grounding) + Bespoke Anti-AI-Slop UI + iOS Safari PWA.
+**Target Scope**: Complete **10 / 17 Total Platform Modules** = **100% of P0 MVP (7/7 modules)** + **3 High-Value P1 Modules (`AI Tools Registry`, `Document & Translation Assistant`, `M17: 3D Scene-to-Stylized Video Studio`)**  
+**Quality Bar**: Production-grade security (`user_id` isolation, 4-Level Tool Gate, Citation Grounding) + Bespoke Anti-AI-Slop UI + iOS Safari PWA + Zero AI Watermark.
 
 ---
 
@@ -99,6 +99,41 @@ flowchart LR
   - Implement `POST /api/v1/security/emergency-stop`: pause all active tasks, revoke all refresh tokens, increment `token_version`, and record immutable `CRITICAL` audit logs.
 - [x] **S4-T4: End-to-End Security & Reliability Verification (`Days 29–30`)**
   - Execute full automated test suite across all 4 subsystems: `10/10` JUnit integration tests in `backend-core`, `6/6` unit tests in `ai-service`, production bundle build in `frontend-pwa`, and `0 issues` + passing widget tests in `mobile-flutter`.
+
+---
+
+### Phase 1 Priority Extension (Sprint 4+): 3D Scene-to-Stylized Video Pipeline (`M17`)
+
+**Module Goal**: Enable transforming blocky 3D scenes (Argon / Voxel / 3D engine render passes & camera paths) into high-fidelity **3D Stylized Animation** or **Photorealistic Real-World** videos using open-source diffusion models, ControlNet geometry guides, clip chaining, and zero AI watermarks.
+
+```mermaid
+flowchart LR
+    A["Argon / Voxel 3D<br/>Blocky Scene & Camera Path"] --> B["Pre-processor Pass<br/>RGB Video + Depth-Anything V2 / Canny"]
+    B --> C{"Style Selector"}
+    C -->|"Style A"| D["3D Stylized Animation<br/>(Pixar/Disney 3D LoRA + Wan 2.2 / AnimateDiff)"]
+    C -->|"Style B"| E["Photorealistic Real-World<br/>(Cinematic Film LoRA + Wan 2.2 / ComfyUI)"]
+    D --> F["Temporal Consistency<br/>(EbSynth / Cross-Frame Attention / Clip Chaining)"]
+    E --> F
+    F --> G["FFmpeg Assembler<br/>(0.5s xfade + Audio TTS + 0 Watermark)"]
+    G --> H["Level 3 HITL Gate<br/>Email Alert + Download Link"]
+```
+
+- [ ] **P1-V1: 3D Render & Camera Motion Pass Extraction (`Argon/Voxel Input Preprocessor`)**
+  - Ingest raw 3D camera render passes: RGB frame sequence / video + depth pass (or auto-extract depth pass via `Depth-Anything-V2` / MiDaS).
+  - Extract ControlNet edge/depth guidance (Canny/LineArt + Depth) to lock camera perspective, spatial volume, and character blocking without 3D hallucination or morphing.
+- [ ] **P1-V2: Open-Source Video-to-Video Engine (`Wan 2.2 / AnimateDiff / ComfyUI`)**
+  - Integrate headless ComfyUI / Python Video-to-Video API pipeline in `ai-service/app/video_studio.py`.
+  - Dual-Style LoRA Matrix:
+    - *Style A (3D Stylized Animation)*: 3D Pixar/Disney aesthetic with smooth cellular shading and vibrant volumetric lighting.
+    - *Style B (Photorealism / Real World)*: Real-world skin/material textures, cinematic lighting, natural environmental physics.
+  - Hardware adapter: Local lightweight profile (AnimateDiff + SD1.5 ControlNet for low-VRAM machines) vs Cloud/Serverless GPU runner (Wan 2.2 / ComfyUI on RunPod/Modal/Vast.ai for 24GB+ VRAM).
+- [ ] **P1-V3: Temporal Consistency & Anti-Flicker Synthesizer**
+  - Cross-frame attention anchoring + optical flow / EbSynth blending to eliminate frame-to-frame temporal flickering.
+  - Scene clip chaining (last frame of scene $N$ seeds first frame of scene $N+1$) for smooth multi-shot narrative scenes (up to 5 minutes).
+- [ ] **P1-V4: AIFP Platform Integration, Level 3 HITL & Email Alert**
+  - Enforce Level 3 HITL Gate (`requires_approval=True`) before executing heavy GPU rendering jobs to prevent unwanted costs.
+  - Zero AI watermark / zero platform logo overlay on exported MP4.
+  - Asynchronous background worker dispatching completion email with direct download link and scene summary.
 
 ---
 

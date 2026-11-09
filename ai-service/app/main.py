@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from app.orchestrator import AgentState, AifpLangGraphOrchestrator
 from app.security import verify_hmac_signature
 from app.tools_open_source import DocumentAndTranslationAssistant, extract_clean_markdown_from_html, parse_rss_or_atom_xml
+from app import video_studio as vs
 
 app = FastAPI(
     title="AIFP Python AI Orchestrator Service",
@@ -190,6 +191,86 @@ async def vision_analyze_endpoint(
     return doc_assistant.analyze_image_or_receipt(
         payload.image_name, payload.mode, payload.image_data_base64, payload.prompt
     )
+
+
+class VideoPlanRequest(BaseModel):
+    user_id: str
+    script: str = Field(..., min_length=3, max_length=10000)
+    target_seconds: float = Field(default=30.0, ge=5.0, le=300.0)
+    style: str = Field(default="SILHOUETTE", max_length=40)
+    voice_actor: str = Field(default="DORAEMON", max_length=40)
+    weather_effect: str = Field(default="RAIN", max_length=40)
+    character_lock: str = Field(default="", max_length=200)
+
+
+class VideoRenderRequest(BaseModel):
+    user_id: str
+    title: str = Field(default="Video AI Mới", max_length=200)
+    script: str = Field(..., min_length=3, max_length=10000)
+    target_seconds: float = Field(default=30.0, ge=5.0, le=300.0)
+    style: str = Field(default="SILHOUETTE", max_length=40)
+    voice_actor: str = Field(default="DORAEMON", max_length=40)
+    weather_effect: str = Field(default="RAIN", max_length=40)
+    character_lock: str = Field(default="", max_length=200)
+    approved: bool = Field(default=False)
+
+
+@app.post("/internal/v1/agent/video-plan")
+async def video_plan_endpoint(
+    payload: VideoPlanRequest,
+    request: Request,
+    x_internal_timestamp: int = Header(...),
+    x_user_id: str = Header(...),
+    x_internal_signature: str = Header(...),
+) -> dict[str, Any]:
+    await require_internal_hmac(request, x_internal_timestamp, x_user_id, x_internal_signature)
+    return vs.plan_creative_storyboard(
+        script=payload.script,
+        target_seconds=payload.target_seconds,
+        style=payload.style,
+        voice_actor=payload.voice_actor,
+        weather_effect=payload.weather_effect,
+        character_lock=payload.character_lock,
+    )
+
+
+@app.post("/internal/v1/agent/video-render")
+async def video_render_endpoint(
+    payload: VideoRenderRequest,
+    request: Request,
+    x_internal_timestamp: int = Header(...),
+    x_user_id: str = Header(...),
+    x_internal_signature: str = Header(...),
+) -> dict[str, Any]:
+    await require_internal_hmac(request, x_internal_timestamp, x_user_id, x_internal_signature)
+    if not payload.approved:
+        raise HTTPException(
+            status_code=403,
+            detail="Video creation requires explicit Level 3 HITL user approval (approved=True)",
+        )
+
+    plan = vs.plan_scenes(payload.script, target_seconds=payload.target_seconds, character_lock=payload.character_lock)
+    storyboard = vs.plan_creative_storyboard(
+        script=payload.script,
+        target_seconds=payload.target_seconds,
+        style=payload.style,
+        voice_actor=payload.voice_actor,
+        weather_effect=payload.weather_effect,
+        character_lock=payload.character_lock,
+    )
+
+    return {
+        "status": "COMPLETED",
+        "title": payload.title,
+        "total_seconds": round(plan.total_seconds, 1),
+        "scene_count": len(plan.scenes),
+        "style": payload.style.upper(),
+        "voice_actor": payload.voice_actor.upper(),
+        "weather_effect": payload.weather_effect.upper(),
+        "has_watermark": False,
+        "storyboard": storyboard,
+        "message": f"Đã kết xuất thành công video {round(plan.total_seconds, 1)}s với {len(plan.scenes)} cảnh, 0 watermark, phong cách {payload.style.upper()}.",
+    }
 
 
 

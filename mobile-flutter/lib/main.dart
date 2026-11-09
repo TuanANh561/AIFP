@@ -354,6 +354,36 @@ class _AifpMobileShellState extends State<AifpMobileShell> {
             ],
           ),
         ),
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AifpColors.bgSurface,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: AifpColors.borderSubtle),
+          ),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Video Studio & Mã nguồn mở (M17)',
+                      style: TextStyle(fontSize: 12, color: AifpColors.textSecondary)),
+                  Text('0 WATERMARK',
+                      style: TextStyle(fontSize: 11, fontFamily: 'monospace', color: AifpColors.statusRunning)),
+                ],
+              ),
+              SizedBox(height: 8),
+              Text('Stickman Director & Lemo-Opuscar WebGL',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              SizedBox(height: 4),
+              Text('Biên tập Lossless-Cut & Remotion · Tỉ lệ 16:9 / 9:16 Shorts · Phụ đề tự động',
+                  style: TextStyle(fontSize: 12, color: AifpColors.textSecondary)),
+            ],
+          ),
+        ),
       ],
     );
   }

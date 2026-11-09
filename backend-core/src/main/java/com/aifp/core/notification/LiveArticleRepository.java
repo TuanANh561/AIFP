@@ -14,5 +14,7 @@ public interface LiveArticleRepository extends JpaRepository<LiveArticleEntity, 
     List<LiveArticleEntity> findAllByOrderByPublishedAtDesc();
     List<LiveArticleEntity> findTop30ByOrderByPublishedAtDesc();
     List<LiveArticleEntity> findByChannelIdOrderByPublishedAtDesc(String channelId);
+    List<LiveArticleEntity> findByIsPinnedTrueOrderByPublishedAtDesc();
+    void deleteByIsPinnedFalse();
 }
 

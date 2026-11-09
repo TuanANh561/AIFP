@@ -98,6 +98,9 @@ services:
       INTERNAL_SHARED_SECRET: ${INTERNAL_SHARED_SECRET:-aifp_default_dev_only_hmac_shared_secret_between_spring_and_python_2026}
       AES_MASTER_KEY: ${AES_MASTER_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
       AI_SERVICE_BASE_URL: http://ai-service:8001
+      AIFP_OWNER_EMAIL: ${AIFP_OWNER_EMAIL:-}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:-}
       CORS_ALLOWED_ORIGIN_PATTERNS: ${CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*,http://10.0.2.2:*,http://192.168.*:*,https://*}
     depends_on:
       postgres:

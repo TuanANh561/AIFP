@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="50%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#334155" />
+    </linearGradient>
+    <linearGradient id="hillGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Sky Background -->
+  <rect width="1280" height="720" fill="url(#skyGrad)" />
+
+  <!-- Moon / Ambient Light -->
+  <circle cx="950" cy="180" r="80" fill="#F8FAFC" opacity="0.85" filter="url(#glow)" />
+  <circle cx="950" cy="180" r="140" fill="#F8FAFC" opacity="0.08" />
+
+  <!-- Rain Streaks (Cinematic Ambience) -->
+  <g stroke="#94A3B8" stroke-width="1.2" opacity="0.35">
+    <line x1="120" y1="40" x2="100" y2="120" />
+    <line x1="280" y1="90" x2="260" y2="180" />
+    <line x1="450" y1="30" x2="430" y2="130" />
+    <line x1="620" y1="80" x2="600" y2="190" />
+    <line x1="780" y1="20" x2="760" y2="140" />
+    <line x1="1100" y1="70" x2="1080" y2="190" />
+    <line x1="340" y1="250" x2="320" y2="360" />
+    <line x1="710" y1="220" x2="690" y2="340" />
+    <line x1="880" y1="270" x2="860" y2="400" />
+  </g>
+
+  <!-- Distant Hill -->
+  <path d="M 0 540 Q 350 420 700 480 T 1280 460 L 1280 720 L 0 720 Z" fill="#0B132B" opacity="0.7" />
+
+  <!-- Foreground Hill -->
+  <path d="M 0 580 Q 400 490 850 560 T 1280 540 L 1280 720 L 0 720 Z" fill="url(#hillGrad)" />
+
+  <!-- Stickman Director Silhouette Standing Resiliently -->
+  <g stroke="#F8FAFC" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- Head -->
+    <circle cx="480" cy="460" r="16" fill="#F8FAFC" />
+    <!-- Torso -->
+    <line x1="480" y1="476" x2="480" y2="530" />
+    <!-- Arms -->
+    <line x1="480" y1="495" x2="455" y2="520" />
+    <line x1="480" y1="495" x2="510" y2="515" />
+    <!-- Legs -->
+    <line x1="480" y1="530" x2="460" y2="580" />
+    <line x1="480" y1="530" x2="505" y2="580" />
+  </g>
+
+  <!-- Play Badge in Center -->
+  <g transform="translate(640, 360)">
+    <circle cx="0" cy="0" r="48" fill="#0F766E" opacity="0.9" filter="url(#glow)" />
+    <polygon points="-12,-20 -12,20 22,0" fill="#FFFFFF" />
+  </g>
+
+  <!-- Text Overlay: High-Craft Editorial Title -->
+  <text x="640" y="650" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="700" fill="#F8FAFC" letter-spacing="-0.5">
+    Bóng người dưới mưa &amp; Bài học về sự kiên cường
+  </text>
+  <text x="640" y="685" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="500" fill="#94A3B8">
+    Aura AI Video Studio · 1080p HD · 0 Watermark AI
+  </text>
+</svg>
+

@@ -61,6 +61,9 @@ Instead of paying for expensive proprietary APIs for every sub-function, AIFP in
 | **Distributed Job Scheduling** | **JobRunr** (or **Quartz**) | LGPL / Apache-2.0 | Persistent background jobs in Spring Boot backed by PostgreSQL + Redis locks, supporting cron timezones and retry backoff. |
 | **Rate Limiting** | **Bucket4j** + Redis | Apache-2.0 | Token-bucket rate limiting per `user_id` and IP address at the Spring Boot API gateway filter. |
 | **Web Push Protocol** | **web-push-java** (`nl.martijndwars`) | MIT | Standards-compliant RFC 8030 / VAPID encrypted Web Push delivery directly to Safari iOS 16.4+ and desktop browsers without requiring Firebase on Web. |
+| **Video Motion & Procedural Animation** | **kaomei/stickman-video-director** + **lemomo-ai/lemo-opuscar** | MIT | Chuyển kịch bản văn bản thành video người que (Stickman) tối giản và hoạt ảnh chuyển động WebGL/Canvas cho các kênh nội dung Shorts/TikTok faceless. |
+| **Video Editing & Rendering Pipeline** | **Remotion** + **MoviePy** + **FFmpeg** + **Lossless-Cut** | MIT / GPL | Cắt ghép không suy hao, biên tập phụ đề tự động, thay đổi tốc độ và tỉ lệ khung hình (`16:9`, `9:16`, `1:1`), xuất MP4 không đóng watermark. |
+| **OCR & Vision Engine** | **RapidOCR** + **PaddleOCR** | Apache-2.0 | Nhận diện ký tự quang học siêu nhẹ trên CPU (<15MB), bóc tách hóa đơn, biên lai và chữ trên màn hình chi phí 0đ GPU. |
 
 ---
 

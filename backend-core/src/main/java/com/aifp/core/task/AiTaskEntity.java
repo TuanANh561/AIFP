@@ -67,6 +67,12 @@ public class AiTaskEntity {
     public String getDeliveryMode() { return deliveryMode; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public String getStructuredConfigJson() { return structuredConfigJson; }
+    public void setStructuredConfigJson(String structuredConfigJson) { this.structuredConfigJson = structuredConfigJson; }
+    public String getAllowedToolsJson() { return allowedToolsJson; }
+    public void setAllowedToolsJson(String allowedToolsJson) { this.allowedToolsJson = allowedToolsJson; }
+    public String getDeliveryChannelsJson() { return deliveryChannelsJson; }
+    public void setDeliveryChannelsJson(String deliveryChannelsJson) { this.deliveryChannelsJson = deliveryChannelsJson; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 }
 

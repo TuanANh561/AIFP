@@ -13,6 +13,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +34,10 @@ public class AutonomousSchedulerWorker {
     private final IdempotentTaskSchedulerService schedulerService;
     private final AiOrchestratorClient aiOrchestratorClient;
     private final com.aifp.core.notification.LiveNewsCrawlerService liveNewsCrawlerService;
+    private final com.aifp.core.notification.LinkValidationService linkValidationService;
+    private final com.aifp.core.opensource.OpenSourceDiscoveryService openSourceDiscoveryService;
     private final boolean schedulerEnabled;
+    private final boolean runHourly;
 
     public AutonomousSchedulerWorker(
             AiTaskRepository taskRepository,
@@ -40,14 +45,20 @@ public class AutonomousSchedulerWorker {
             IdempotentTaskSchedulerService schedulerService,
             AiOrchestratorClient aiOrchestratorClient,
             com.aifp.core.notification.LiveNewsCrawlerService liveNewsCrawlerService,
-            @Value("${aifp.scheduler.enabled:true}") boolean schedulerEnabled
+            com.aifp.core.notification.LinkValidationService linkValidationService,
+            com.aifp.core.opensource.OpenSourceDiscoveryService openSourceDiscoveryService,
+            @Value("${aifp.scheduler.enabled:true}") boolean schedulerEnabled,
+            @Value("${aifp.scheduler.run-hourly:false}") boolean runHourly
     ) {
         this.taskRepository = taskRepository;
         this.executionRepository = executionRepository;
         this.schedulerService = schedulerService;
         this.aiOrchestratorClient = aiOrchestratorClient;
         this.liveNewsCrawlerService = liveNewsCrawlerService;
+        this.linkValidationService = linkValidationService;
+        this.openSourceDiscoveryService = openSourceDiscoveryService;
         this.schedulerEnabled = schedulerEnabled;
+        this.runHourly = runHourly;
     }
 
     /**
@@ -73,9 +84,14 @@ public class AutonomousSchedulerWorker {
 
         Instant now = Instant.now();
         Instant currentSlot = now.truncatedTo(ChronoUnit.HOURS);
+        ZonedDateTime vnNow = now.atZone(ZoneId.of("Asia/Ho_Chi_Minh"));
 
         for (AiTaskEntity task : activeTasks) {
             try {
+                if (!isTaskScheduledForSlot(task, vnNow)) {
+                    continue; // Task is not scheduled for this current hour in Asia/Ho_Chi_Minh
+                }
+
                 String idempotencyKey = IdempotencyUtils.computeExecutionIdempotencyKey(task.getId(), currentSlot);
                 Optional<TaskExecutionEntity> existing = executionRepository.findByTaskIdAndIdempotencyKey(task.getId(), idempotencyKey);
                 if (existing.isPresent()) {
@@ -97,14 +113,18 @@ public class AutonomousSchedulerWorker {
                 List<IdempotentTaskSchedulerService.DiscoveredItem> discoveredItems = new ArrayList<>();
                 if (execResult.verifiedCitations() != null && !execResult.verifiedCitations().isEmpty()) {
                     for (String url : execResult.verifiedCitations()) {
-                        String title = url.replace("https://", "").replace("http://", "").split("/")[0];
-                        discoveredItems.add(new IdempotentTaskSchedulerService.DiscoveredItem(title, url));
+                        if (linkValidationService.isUrlLive(url)) {
+                            String title = url.replace("https://", "").replace("http://", "").split("/")[0];
+                            discoveredItems.add(new IdempotentTaskSchedulerService.DiscoveredItem(title, url));
+                        } else {
+                            log.warn("[AutonomousWorker] Filtered dead citation URL: {}", url);
+                        }
                     }
                 }
                 if (discoveredItems.isEmpty()) {
                     discoveredItems.add(new IdempotentTaskSchedulerService.DiscoveredItem(
                             task.getTitle(),
-                            "https://vnexpress.net/tin-moi-nhat"
+                            "https://vnexpress.net/tin-tuc-24h"
                     ));
                 }
 
@@ -117,11 +137,89 @@ public class AutonomousSchedulerWorker {
                         discoveredItems
                 );
 
+                // Auto-sync discovered open-source models & repos into user's database library
+                String lowerTitle = task.getTitle().toLowerCase();
+                String lowerPrompt = task.getNaturalLanguagePrompt().toLowerCase();
+                if (lowerTitle.contains("mã nguồn") || lowerTitle.contains("open source") ||
+                    lowerPrompt.contains("mã nguồn") || lowerPrompt.contains("open source") ||
+                    lowerPrompt.contains("github") || lowerPrompt.contains("mô hình")) {
+                    try {
+                        openSourceDiscoveryService.discoverAndPersist(
+                                task.getUserId(),
+                                task.getTitle(),
+                                task.getNaturalLanguagePrompt(),
+                                false,
+                                null
+                        );
+                        log.info("[AutonomousWorker] Open source items auto-synced into user DB: {}", task.getUserId());
+                    } catch (Exception ose) {
+                        log.warn("[AutonomousWorker] Open source auto-sync note: {}", ose.getMessage());
+                    }
+                }
+
                 log.info("[AutonomousWorker] Task execution completed: {} -> Status: {}", task.getTitle(), execution.getStatus());
             } catch (Exception ex) {
                 log.error("[AutonomousWorker] Failed executing task {}: {}", task.getTitle(), ex.getMessage());
             }
         }
+    }
+
+    public boolean isTaskScheduledForSlot(AiTaskEntity task, ZonedDateTime vnNow) {
+        if (runHourly) {
+            return true;
+        }
+
+        int currentHour = vnNow.getHour();
+        String config = task.getStructuredConfigJson();
+        if (config != null && !config.isBlank() && !config.equals("{}")) {
+            if (config.contains("\"scheduled_hours\"")) {
+                return config.contains(String.valueOf(currentHour));
+            }
+            if (config.contains("\"scheduled_time\"")) {
+                try {
+                    int idx = config.indexOf("\"scheduled_time\"");
+                    String sub = config.substring(idx);
+                    int colon = sub.indexOf(':');
+                    if (colon > 0) {
+                        String hh = sub.substring(colon - 2, colon).replaceAll("[^0-9]", "");
+                        if (!hh.isEmpty() && Integer.parseInt(hh) == currentHour) {
+                            return true;
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+            if (config.contains("\"cron\"")) {
+                String[] parts = config.split("\"cron\"\\s*:\\s*\"");
+                if (parts.length > 1) {
+                    String cron = parts[1].split("\"")[0].trim();
+                    String[] fields = cron.split("\\s+");
+                    if (fields.length >= 3 && !fields[2].equals("*")) {
+                        try {
+                            if (Integer.parseInt(fields[2]) == currentHour) {
+                                return true;
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+        }
+
+        String titleLower = task.getTitle().toLowerCase();
+        if (titleLower.contains("shopee") || titleLower.contains("deal")) {
+            return currentHour == 11;
+        } else if (titleLower.contains("tuyển dụng") || titleLower.contains("việc làm") || titleLower.contains("jobs")) {
+            return currentHour == 8;
+        } else if (titleLower.contains("tiến hóa ai") || titleLower.contains("evolution")) {
+            return currentHour == 7;
+        } else if (titleLower.contains("công nghệ") || titleLower.contains("tech")) {
+            return currentHour == 7;
+        } else if (titleLower.contains("tài chính") || titleLower.contains("chứng khoán")) {
+            return currentHour == 17;
+        } else if (titleLower.contains("kiếm tiền") || titleLower.contains("creator") || titleLower.contains("game")) {
+            return currentHour == 20;
+        }
+
+        return currentHour == 8;
     }
 }
 

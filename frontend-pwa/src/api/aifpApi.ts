@@ -7,6 +7,19 @@ export interface AuthSession {
   dailyTokensUsed: number;
 }
 
+export interface UserOpenSourceItem {
+  id: string;
+  userId: string;
+  name: string;
+  stars: string;
+  url: string;
+  tag: string;
+  summary: string;
+  queryKeyword?: string;
+  isPinned: boolean;
+  createdAt: string;
+}
+
 const ENV_BASE_URL: string =
   typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_API_BASE_URL
     ? String((import.meta as unknown as { env: Record<string, string> }).env.VITE_API_BASE_URL).replace(/\/+$/, '')
@@ -71,21 +84,63 @@ class AifpApiClient {
     return null;
   }
 
+  public async register(email: string, password: string, displayName: string): Promise<AuthSession | null> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/auth/register'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify({ email, password, displayName }),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      if (json.success && json.data) {
+        this.accessToken = json.data.accessToken;
+        return json.data as AuthSession;
+      }
+    } catch {
+      // Offline fallback
+    }
+    return null;
+  }
+
+  public async loginWithGoogle(idToken: string): Promise<AuthSession | null> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/auth/google'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify({ idToken }),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      if (json.success && json.data) {
+        this.accessToken = json.data.accessToken;
+        return json.data as AuthSession;
+      }
+    } catch {
+      // Offline fallback
+    }
+    return null;
+  }
+
   public async proposeCalendarEvent(
     title: string,
     startTime: string,
     endTime: string,
     location: string
-  ): Promise<boolean> {
+  ): Promise<any> {
     try {
       const resp = await fetch(this.resolveUrl('/api/v1/calendar/events'), {
         method: 'POST',
         headers: this.headers(),
         body: JSON.stringify({ title, startTime, endTime, location }),
       });
-      return resp.ok;
+      if (resp.ok) {
+        const json = await resp.json();
+        return json.data || json;
+      }
+      return null;
     } catch {
-      return false;
+      return null;
     }
   }
 
@@ -94,16 +149,20 @@ class AifpApiClient {
     docType: string,
     tone: string,
     promptBrief: string
-  ): Promise<boolean> {
+  ): Promise<any> {
     try {
       const resp = await fetch(this.resolveUrl('/api/v1/writing/draft'), {
         method: 'POST',
         headers: this.headers(),
         body: JSON.stringify({ title, docType, tone, promptBrief }),
       });
-      return resp.ok;
+      if (resp.ok) {
+        const json = await resp.json();
+        return json.data || json;
+      }
+      return null;
     } catch {
-      return false;
+      return null;
     }
   }
 
@@ -339,6 +398,19 @@ class AifpApiClient {
     }
   }
 
+  public async listTasks(): Promise<any[]> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/tasks'), {
+        headers: this.headers(),
+      });
+      if (!resp.ok) return [];
+      const json = await resp.json();
+      return json.data || [];
+    } catch {
+      return [];
+    }
+  }
+
   public async sendChannelDigest(
     recipientEmail: string,
     channelId: string,
@@ -398,6 +470,249 @@ class AifpApiClient {
       return null;
     }
   }
+
+  public async deleteNewsArticle(id: string): Promise<boolean> {
+    try {
+      const resp = await fetch(this.resolveUrl(`/api/v1/news/${id}`), {
+        method: 'DELETE',
+        headers: this.headers(),
+      });
+      return resp.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  public async togglePinNewsArticle(id: string): Promise<boolean> {
+    try {
+      const resp = await fetch(this.resolveUrl(`/api/v1/news/${id}/pin`), {
+        method: 'PUT',
+        headers: this.headers(),
+      });
+      return resp.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  public async clearUnpinnedNews(): Promise<number> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/news/clear-unpinned'), {
+        method: 'DELETE',
+        headers: this.headers(),
+      });
+      if (!resp.ok) return 0;
+      const json = await resp.json();
+      return json.data?.clearedCount || 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  public async getOpenSourceItems(pinnedOnly?: boolean): Promise<UserOpenSourceItem[]> {
+    try {
+      const q = pinnedOnly ? '?pinned=true' : '';
+      const resp = await fetch(this.resolveUrl(`/api/v1/open-source${q}`), {
+        method: 'GET',
+        headers: this.headers(),
+      });
+      if (!resp.ok) return [];
+      const json = await resp.json();
+      return json.success && json.data ? (json.data as UserOpenSourceItem[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  public async discoverOpenSource(
+    keywords: string,
+    goal?: string,
+    email?: string,
+    sendEmail?: boolean
+  ): Promise<UserOpenSourceItem[]> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/open-source/discover'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify({ keywords, goal, email, sendEmail: Boolean(sendEmail) }),
+      });
+      if (!resp.ok) return [];
+      const json = await resp.json();
+      return json.success && json.data ? (json.data as UserOpenSourceItem[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  public async togglePinOpenSource(id: string): Promise<UserOpenSourceItem | null> {
+    try {
+      const resp = await fetch(this.resolveUrl(`/api/v1/open-source/${id}/pin`), {
+        method: 'PUT',
+        headers: this.headers(),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      return json.success && json.data ? (json.data as UserOpenSourceItem) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  public async deleteOpenSourceItem(id: string): Promise<boolean> {
+    try {
+      const resp = await fetch(this.resolveUrl(`/api/v1/open-source/${id}`), {
+        method: 'DELETE',
+        headers: this.headers(),
+      });
+      return resp.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  public async clearUnpinnedOpenSource(): Promise<number> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/open-source/clear-unpinned'), {
+        method: 'DELETE',
+        headers: this.headers(),
+      });
+      if (!resp.ok) return 0;
+      const json = await resp.json();
+      return json.data?.clearedCount || 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  public async planVideo(params: {
+    script: string;
+    targetSeconds?: number;
+    style?: string;
+    voiceActor?: string;
+    weatherEffect?: string;
+    characterLock?: string;
+  }): Promise<VideoStoryboard | null> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/video/plan'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify(params),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      return json.data || null;
+    } catch {
+      return null;
+    }
+  }
+
+  public async createVideo(params: {
+    title: string;
+    script: string;
+    targetSeconds?: number;
+    style?: string;
+    voiceActor?: string;
+    weatherEffect?: string;
+    characterLock?: string;
+    approved: boolean;
+  }): Promise<VideoCreationResult | null> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/video/create'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify(params),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      return json.data || null;
+    } catch {
+      return null;
+    }
+  }
+
+  public async sendVideoEmail(params: {
+    title: string;
+    durationSeconds: number;
+    sceneCount: number;
+    style: string;
+    voiceActor: string;
+    weatherEffect: string;
+    downloadUrl: string;
+    customEmail?: string;
+  }): Promise<{ success: boolean; message: string }> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/video/send-email'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify(params),
+      });
+      if (!resp.ok) return { success: false, message: 'Lỗi phản hồi từ máy chủ.' };
+      const json = await resp.json();
+      return { success: true, message: json.data || 'Đã gửi thông báo video qua email!' };
+    } catch {
+      return { success: false, message: 'Không thể kết nối tới máy chủ backend.' };
+    }
+  }
+
+  public async editVideo(params: {
+    videoUrl: string;
+    trimStart?: number;
+    trimEnd?: number;
+    aspectRatio?: string;
+    playbackSpeed?: number;
+    captionsEnabled?: boolean;
+    colorFilter?: string;
+    musicVolumePercent?: number;
+  }): Promise<{ status: string; editedVideoUrl: string; finalDuration: number; aspectRatio: string; speed: number; message: string } | null> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/video/edit'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify(params),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      return json.data || null;
+    } catch {
+      return null;
+    }
+  }
+}
+
+export interface VideoSceneItem {
+  index: number;
+  sceneNumber: number;
+  narration: string;
+  prompt: string;
+  duration: number;
+  cameraMotion: string;
+  weatherOverlay: string;
+  audioCue: string;
+}
+
+export interface VideoStoryboard {
+  totalSeconds: number;
+  sceneCount: number;
+  style: string;
+  voiceActor: string;
+  voiceDescription: string;
+  weatherEffect: string;
+  weatherDescription: string;
+  scenes: VideoSceneItem[];
+}
+
+export interface VideoCreationResult {
+  status: string;
+  title: string;
+  totalSeconds: number;
+  sceneCount: number;
+  style: string;
+  voiceActor: string;
+  weatherEffect: string;
+  hasWatermark: boolean;
+  videoUrl: string;
+  storyboard: VideoStoryboard;
+  message: string;
 }
 
 export interface LiveArticle {
@@ -412,6 +727,7 @@ export interface LiveArticle {
   url: string;
   publishedAt: string;
   fetchedAt: string;
+  isPinned?: boolean;
 }
 
 export const aifpApi = new AifpApiClient();

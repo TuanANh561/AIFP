@@ -1,8 +1,8 @@
 # 1-Month Agile Execution Roadmap (Target: >= 56% Platform Completion in 4 Sprints)
 
 **Methodology**: Agile Scrum (4 Sprints × 1 Week = 30 Days)  
-**Target Scope**: Complete **9 / 16 Total Platform Modules (56.25%)** = **100% of P0 MVP (7/7 modules)** + **2 High-Value P1 Modules (`AI Tools Registry`, `Document & Translation Assistant`)**  
-**Quality Bar**: Production-grade security (`user_id` isolation, 4-Level Tool Gate, Citation Grounding) + Bespoke Anti-AI-Slop UI + iOS Safari PWA.
+**Target Scope**: Complete **10 / 17 Total Platform Modules** = **100% of P0 MVP (7/7 modules)** + **3 High-Value P1 Modules (`AI Tools Registry`, `Document & Translation Assistant`, `M17: 3D Scene-to-Stylized Video Studio`)**  
+**Quality Bar**: Production-grade security (`user_id` isolation, 4-Level Tool Gate, Citation Grounding) + Bespoke Anti-AI-Slop UI + iOS Safari PWA + Zero AI Watermark.
 
 ---
 
@@ -102,6 +102,42 @@ flowchart LR
 
 ---
 
+### Phase 1 Priority Extension (Sprint 4+): 3D Scene-to-Stylized Video Pipeline (`M17`)
+
+**Module Goal**: Enable transforming blocky 3D scenes (Argon / Voxel / 3D engine render passes & camera paths) into high-fidelity **3D Stylized Animation** or **Photorealistic Real-World** videos using open-source diffusion models, ControlNet geometry guides, clip chaining, and zero AI watermarks.
+
+```mermaid
+flowchart LR
+    A["Argon / Voxel 3D<br/>Blocky Scene & Camera Path"] --> B["Pre-processor Pass<br/>RGB Video + Depth-Anything V2 / Canny"]
+    B --> C{"Style Selector"}
+    C -->|"Style A"| D["3D Stylized Animation<br/>(Pixar/Disney 3D LoRA + Wan 2.2 / AnimateDiff)"]
+    C -->|"Style B"| E["Photorealistic Real-World<br/>(Cinematic Film LoRA + Wan 2.2 / ComfyUI)"]
+    D --> F["Temporal Consistency<br/>(EbSynth / Cross-Frame Attention / Clip Chaining)"]
+    E --> F
+    F --> G["FFmpeg Assembler<br/>(0.5s xfade + Audio TTS + 0 Watermark)"]
+    G --> H["Level 3 HITL Gate<br/>Email Alert + Download Link"]
+```
+
+- [x] **P1-V1: 3D Render & Camera Motion Pass Extraction (`Argon/Voxel Input Preprocessor`)**
+  - Ingest raw 3D camera render passes: RGB frame sequence / video + depth pass (or auto-extract depth pass via `Depth-Anything-V2` / MiDaS).
+  - Extract ControlNet edge/depth guidance (Canny/LineArt + Depth) to lock camera perspective, spatial volume, and character blocking without 3D hallucination or morphing.
+- [x] **P1-V2: Open-Source Video-to-Video Engine (`Wan 2.2 / AnimateDiff / ComfyUI / Lemo / Stickman`)**
+  - Integrate headless video pipeline in `ai-service/app/video_studio.py` and `backend-core/VideoStudioController.java`.
+  - Dual-Style LoRA Matrix:
+    - *Style A (3D Stylized Animation)*: 3D Pixar/Disney aesthetic with smooth cellular shading and vibrant volumetric lighting.
+    - *Style B (Photorealism / Real World)*: Real-world skin/material textures, cinematic lighting, natural environmental physics.
+  - Open-source suite integration: `kaomei/stickman-video-director` & `lemomo-ai/lemo-opuscar`.
+- [x] **P1-V3: Temporal Consistency, Lossless Trimming & Anti-Flicker Synthesizer**
+  - Cross-frame attention anchoring + optical flow / EbSynth blending to eliminate frame-to-frame temporal flickering.
+  - Scene clip chaining (last frame of scene $N$ seeds first frame of scene $N+1$) for smooth multi-shot narrative scenes.
+  - Lossless trimming (`trimStart`, `trimEnd`), aspect ratio conversion (`16:9`, `9:16`, `1:1`), speed control, and real-time canvas preview.
+- [x] **P1-V4: AIFP Platform Integration, Level 3 HITL & Email Alert**
+  - Enforce Level 3 HITL Gate (`requires_approval=True`) before executing heavy GPU rendering jobs to prevent unwanted costs.
+  - Zero AI watermark / zero platform logo overlay on exported MP4.
+  - Asynchronous background worker dispatching completion email with direct download link and scene summary.
+
+---
+
 ## 3. Post-Month-1 Expansion Roadmap (Months 2–6)
 
 Once the core modules are live:
@@ -110,4 +146,6 @@ Once the core modules are live:
 - [x] **Month 4 (`COMPLETED EARLY`)**: `M14: AI Vision & Receipt OCR` (Camera/Photo upload analysis, receipt OCR, product attribute detection) -> **Achieved `14 / 16` modules (`87.50%`)**.
 - [x] **Month 5 (`COMPLETED EARLY`)**: `M15: Virtual Try-On` (Static image garment synthesis pipeline with strict 24h privacy auto-expiry) -> **Achieved `15 / 16` modules (`93.75%`)**.
 - [x] **Month 6 (`COMPLETED EARLY`)**: `M16: PC Companion` (Sandboxed local folder allowlist bridge + directory traversal defense) -> **Achieved `16 / 16` modules (`100.00%` FULL PLATFORM COMPLETED)**.
+- [ ] **Immediate Extension (`SPECIFIED`)**: `M18: Screen OCR & Live Translation Studio` (PC Transparent Overlay + Android Floating Bubble via MORT, LunaTranslator, ALSTMobile & RapidOCR) -> Detailed specification in [`docs/SCREEN_TRANSLATION_AND_OPEN_SOURCE_RADAR.md`](./SCREEN_TRANSLATION_AND_OPEN_SOURCE_RADAR.md).
+- [ ] **Immediate Creative Extension (`SPECIFIED`)**: `M19: Narrative Video & Atmospheric Silhouette Studio` (Doraemon Voice Clone + Silhouette/Map Art + Rain/Wind VFX + Auto-Ducking SFX) -> Detailed specification in [`docs/AI_VIDEO_AND_CREATIVE_STUDIO_SPEC.md`](./AI_VIDEO_AND_CREATIVE_STUDIO_SPEC.md).
 

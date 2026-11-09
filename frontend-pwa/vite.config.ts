@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  envDir: path.resolve(__dirname, '..'),
   server: {
     host: true, // Bind 0.0.0.0 so iPhone Safari on local Wi-Fi can connect directly
     port: 5173,

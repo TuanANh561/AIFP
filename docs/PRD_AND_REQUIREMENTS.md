@@ -8,13 +8,15 @@
 
 ## 1. Product Vision & Core Philosophy
 
-**AI Life Assistant Platform (AIFP)** is a multi-purpose personal AI assistant platform where users describe their goals in natural language, and the system autonomously plans, selects appropriate AI models and registered tools, executes background schedules on the server, and delivers verified results via Web/PWA, Email, and Push Notifications.
+**AI Life Assistant Platform (AIFP)** is an autonomous, multi-purpose personal AI assistant and creative studio operating system where users describe their goals in natural language, and the system autonomously plans, selects appropriate AI models and registered tools, executes background schedules on the server, generates multimedia creative content, and delivers verified results via Web/PWA, Email, and Push Notifications.
 
 ### Core Design Pillars
-1. **One Platform, Multiple Personas**: Serves students, office workers, software engineers, business owners, shoppers, content creators, job seekers, and general users through configurable **Task Templates**, **Tool Packs**, and **Personal Memory**—without fragmenting into separate apps.
-2. **Server-Side Autonomy, Light Client Experience**: Heavy AI workflows, web research, and cron schedules run reliably on the server; the user's iPhone (via Safari PWA + Web Push) receives actionable digests without draining battery or fighting iOS background execution limits.
-3. **Zero-Trust AI Execution**: AI Agents never hold raw system credentials or unrestricted device access. Every action passes through a **4-Level Backend Permission Gate** with **Human-in-the-Loop (HITL)** approval for sensitive operations.
-4. **Human-Crafted Minimalist UI**: Calm, high-signal interface free of generic AI visual clichés (no neon purple gradients, no verbose helper text on every screen, concise 1–3 word action buttons).
+1. **One Platform, Multiple Personas & Studios**: Serves students, office workers, software engineers, business owners, shoppers, content creators, job seekers, and general users through configurable **Task Templates**, **Tool Packs**, **Video Creation Studio**, and **Personal Memory**—without fragmenting into separate apps.
+2. **Server-Side Autonomy, Light Client Experience**: Heavy AI workflows, web research, cron schedules, and video pipelines run reliably on the server; the user's iPhone (via Safari PWA + Web Push) receives actionable digests and creative deliverables without draining battery or fighting iOS background execution limits.
+3. **Zero-Trust AI Execution & Privacy Shield**: AI Agents never hold raw system credentials or unrestricted device access. Every action passes through a **4-Level Backend Permission Gate** with **Human-in-the-Loop (HITL)** approval for sensitive operations. Master Owner permissions are dynamically decoupled from the Git codebase via untracked `.env` variables (`AIFP_OWNER_EMAIL`).
+4. **Human-Crafted Minimalist UI & Editorial Pagination**: Calm, high-signal interface free of generic AI visual clichés (no neon purple gradients, no verbose helper text on every screen, concise 1–3 word action buttons, and 20-item editorial pagination with tactile monospace controls).
+5. **Interactive Conversational Intelligence**: A 7-tier intent engine recognizing social greetings, system feature navigation, video creation assistance, receipt OCR, job search, deals, and explicit background automation without misinterpreting casual chat as an email subscription request.
+6. **Integrated Open-Source Creative Suite**: Seamless integration of top-tier open-source tools (`kaomei/stickman-video-director`, `lemomo-ai/lemo-opuscar`, `remotion`, `moviepy/ffmpeg`, `lossless-cut`) enabling high-retention video generation with zero AI watermark overlay.
 
 ---
 
@@ -116,4 +118,8 @@ To prevent real-world failures common in AI Agent platforms, the following **10 
 | **7. Email Center** | Sends clean HTML/Plaintext digest via Resend/SMTP to verified user email; logs delivery status in `email_logs`. |
 | **8. Notification Center & iOS PWA** | In-app notification inbox + Web Push via VAPID Service Worker; tested on desktop and iPhone Home Screen PWA (`100dvh` responsive layout). |
 | **9. Personal Memory & Doc Assistant** | User can view, edit, approve/reject candidate memories, delete memories, and upload PDF/Markdown documents for cited Q&A and translation. |
+| **10. AI Video Studio & Shorts Director** | Scriptwriting, storyboard planning, multi-ratio preview (`16:9`, `9:16`, `1:1`), lossless trimming, auto-captions, open-source engine integration (`kaomei/stickman-video-director`, `lemomo-ai/lemo-opuscar`, `remotion`, `moviepy/ffmpeg`), 0-watermark MP4 export, and autonomous email dispatch upon generation. |
+| **11. Verified Job Intelligence & Editorial Pagination** | Real-time crawling of verified opportunities (game testing, cày game, junior dev, remote), active link validation (auto-swapping dead URLs), and 20-item editorial pagination with auto-scroll and item counters. |
+| **12. Multi-Purpose Conversational Agent** | 7-tier intent engine with casual social greetings, whole-system feature assistance, and 1-click interactive action buttons (`[Tạo video →]`, `[Xem việc làm →]`, `[Quét hóa đơn →]`, `[Săn deal Shopee →]`) directly in chat feed. |
+| **13. Multi-Tenant Google OAuth2 & Dynamic Owner Gate** | Secure Google OAuth2 for community users with isolated UUIDs; Master Owner dynamic binding via `.env` (`AIFP_OWNER_EMAIL`), proprietary channel lockdown, and 100% personal data sanitization from Git repository. |
 

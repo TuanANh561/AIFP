@@ -45,6 +45,9 @@ public class LiveArticleEntity {
     @Column(name = "fetched_at", nullable = false)
     private Instant fetchedAt = Instant.now();
 
+    @Column(name = "is_pinned", nullable = false)
+    private boolean isPinned = false;
+
     public LiveArticleEntity() {
     }
 
@@ -149,6 +152,14 @@ public class LiveArticleEntity {
 
     public void setFetchedAt(Instant fetchedAt) {
         this.fetchedAt = fetchedAt;
+    }
+
+    public boolean isPinned() {
+        return isPinned;
+    }
+
+    public void setPinned(boolean pinned) {
+        isPinned = pinned;
     }
 }
 

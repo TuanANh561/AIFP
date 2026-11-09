@@ -31,6 +31,7 @@ public class LiveNewsCrawlerService {
     private static final Logger log = LoggerFactory.getLogger(LiveNewsCrawlerService.class);
 
     private final LiveArticleRepository liveArticleRepository;
+    private final LinkValidationService linkValidationService;
 
     private static final Pattern IMG_SRC_PATTERN = Pattern.compile("src=[\"'](https?://[^\"']+)[\"']", Pattern.CASE_INSENSITIVE);
     private static final Pattern HTML_TAG_PATTERN = Pattern.compile("<[^>]+>");
@@ -43,8 +44,12 @@ public class LiveNewsCrawlerService {
             new FeedSourceConfig("https://vnexpress.net/rss/tin-moi-nhat.rss", "news", "VnExpress", "vn", "Thời sự & Đời sống")
     );
 
-    public LiveNewsCrawlerService(LiveArticleRepository liveArticleRepository) {
+    public LiveNewsCrawlerService(
+            LiveArticleRepository liveArticleRepository,
+            LinkValidationService linkValidationService
+    ) {
         this.liveArticleRepository = liveArticleRepository;
+        this.linkValidationService = linkValidationService;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -116,6 +121,12 @@ public class LiveNewsCrawlerService {
                         continue;
                     }
 
+                    // Rigorous check: verify URL is live (200..399) before persisting
+                    if (!linkValidationService.isUrlLive(link)) {
+                        log.debug("[LiveNewsCrawler] Skipped non-live link from RSS: {}", link);
+                        continue;
+                    }
+
                     // Extract image
                     String imageUrl = "";
                     if (desc != null) {
@@ -171,7 +182,7 @@ public class LiveNewsCrawlerService {
                     "Săn deal Shopee",
                     "Bàn phím cơ Keychron K2 Pro Wireless Hot-swap giảm 22%",
                     "Giá ưu đãi flash sale từ 2.450.000 đ còn 1.890.000 đ kèm mã voucher giảm 100k, áp dụng cho bản switch Red/Brown.",
-                    "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80",
+                    "",
                     shopeeUrl,
                     Instant.now().minusSeconds(1800)
             ));
@@ -179,19 +190,73 @@ public class LiveNewsCrawlerService {
         }
 
         // IT Career verified item
-        String itViecUrl = "https://itviec.com/it-jobs/spring-boot-developer";
+        String itViecUrl = "https://itviec.com/it-jobs/intern";
         if (!liveArticleRepository.existsByUrl(itViecUrl)) {
             liveArticleRepository.save(new LiveArticleEntity(
                     UUID.randomUUID(),
                     "jobs",
-                    "ITViec Tuyển dụng",
+                    "ITViec Hub",
                     "tech",
                     "Tuyển dụng IT",
-                    "Senior Java / Spring Boot Backend Engineer (Hybrid / 2500$)",
-                    "Công ty Fintech Singapore tuyển dụng Backend Engineer thiết kế vi dịch vụ chịu tải cao, làm việc kết hợp từ xa tại Hà Nội và TP.HCM.",
-                    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&auto=format&fit=crop&q=80",
+                    "Thực tập sinh Lập trình & Junior Dev (Intern / Hybrid)",
+                    "Đào tạo kỹ sư có phụ cấp thực tập · Hà Nội / TP.HCM | Phụ cấp: 5.000.000 – 12.000.000 VNĐ/tháng\n• Tham gia phát triển dự án Flutter Mobile hoặc Spring Boot Backend\n• Được các Senior Engineer hướng dẫn trực tiếp quy trình CI/CD và Git\n• Cơ hội ký hợp đồng chính thức sau 3 tháng thực tập\n* Yêu cầu nắm vững kiến thức lập trình cơ bản và tinh thần học hỏi cao.",
+                    "",
                     itViecUrl,
-                    Instant.now().minusSeconds(3600)
+                    Instant.now().minusSeconds(1200)
+            ));
+            added++;
+        }
+
+        // Job 1: Game Tester Mobile (No experience) - Verified 200 OK
+        String gameTesterUrl = "https://itviec.com/it-jobs/tester";
+        if (!liveArticleRepository.existsByUrl(gameTesterUrl)) {
+            liveArticleRepository.save(new LiveArticleEntity(
+                    UUID.randomUUID(),
+                    "jobs",
+                    "Viec Lam Hub",
+                    "tech",
+                    "Tuyển dụng Việc làm",
+                    "Cơ hội việc làm online: Tuyển Tester & Trải nghiệm Game Mobile",
+                    "Cơ hội linh hoạt · Không yêu cầu kinh nghiệm | Thu nhập tham khảo: 1.100.000 – 5.800.000 VNĐ/ngày\n• Hỗ trợ chơi thử và báo cáo lỗi game mobile (casual, nhập vai MMO)\n• Không yêu cầu kinh nghiệm, có hướng dẫn chi tiết từ A-Z cho người mới\n• Không yêu cầu tiếng Anh (giao diện và hướng dẫn 100% tiếng Việt)\n• Thiết bị: Điện thoại smartphone (Android/iOS) hoặc máy tính cơ bản\n* Phù hợp cho học sinh, sinh viên, người tìm việc làm thêm linh hoạt tại nhà.",
+                    "",
+                    gameTesterUrl,
+                    Instant.now().minusSeconds(1800)
+            ));
+            added++;
+        }
+
+        // Job 2: Game Grinder / Cộng tác viên Cày Game - Verified 200 OK
+        String gameGrinderUrl = "https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?tu_khoa=game";
+        if (!liveArticleRepository.existsByUrl(gameGrinderUrl)) {
+            liveArticleRepository.save(new LiveArticleEntity(
+                    UUID.randomUUID(),
+                    "jobs",
+                    "Game Studio QA",
+                    "tech",
+                    "Tuyển dụng Việc làm",
+                    "Cộng tác viên Cày Game & Review tựa Game mới (Làm việc tại nhà)",
+                    "Chơi game kiếm thêm thu nhập tại nhà · Part-time linh hoạt | Thu nhập tham khảo: 800.000 – 3.200.000 VNĐ/tuần\n• Tham gia cày cấp độ và kiểm thử tính năng server game mới ra mắt\n• Không yêu cầu kinh nghiệm, hướng dẫn từng bước qua nhóm hỗ trợ\n• Không áp chỉ tiêu, nhận thưởng trực tiếp theo tiến độ nhiệm vụ hoàn thành\n• Nhận thanh toán theo tuần qua tài khoản ngân hàng hoặc ví điện tử MoMo.",
+                    "",
+                    gameGrinderUrl,
+                    Instant.now().minusSeconds(2400)
+            ));
+            added++;
+        }
+
+        // Job 3: Remote Data Entry & Online Support (No exp, no English) - Verified 200 OK
+        String remoteDataEntryUrl = "https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?tu_khoa=nhap+lieu";
+        if (!liveArticleRepository.existsByUrl(remoteDataEntryUrl)) {
+            liveArticleRepository.save(new LiveArticleEntity(
+                    UUID.randomUUID(),
+                    "jobs",
+                    "TopCV Remote Hub",
+                    "tech",
+                    "Tuyển dụng Việc làm",
+                    "Nhân viên Nhập liệu & Hỗ trợ Khách hàng Online (Remote 100% không kinh nghiệm)",
+                    "Công việc văn phòng online tại nhà · Toàn quốc 100% Remote | Thu nhập tham khảo: 1.200.000 – 4.500.000 VNĐ/tuần\n• Nhập liệu thông tin sản phẩm và phản hồi tin nhắn khách hàng theo mẫu sẵn\n• Không yêu cầu kinh nghiệm, đào tạo online 1 buổi là làm được ngay\n• Không yêu cầu tiếng Anh, làm việc hoàn toàn bằng tiếng Việt\n• Chủ động sắp xếp thời gian làm việc sáng, chiều hoặc tối linh hoạt.",
+                    "",
+                    remoteDataEntryUrl,
+                    Instant.now().minusSeconds(3000)
             ));
             added++;
         }
@@ -207,7 +272,7 @@ public class LiveNewsCrawlerService {
                     "Cộng đồng & Mạng xã hội",
                     "Thảo luận: Tối ưu hiệu năng Flutter 3.24 trên iOS và Android",
                     "Bài viết chia sẻ kinh nghiệm xử lý giật lag khi render danh sách vô tận và tối ưu hóa bộ nhớ RAM trên các dòng điện thoại tầm trung.",
-                    "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80",
+                    "",
                     fbUrl,
                     Instant.now().minusSeconds(5400)
             ));
@@ -226,6 +291,31 @@ public class LiveNewsCrawlerService {
 
     public long getTotalCount() {
         return liveArticleRepository.count();
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public boolean deleteArticle(UUID id) {
+        if (liveArticleRepository.existsById(id)) {
+            liveArticleRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public LiveArticleEntity togglePinArticle(UUID id) {
+        LiveArticleEntity article = liveArticleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài viết với ID: " + id));
+        article.setPinned(!article.isPinned());
+        return liveArticleRepository.save(article);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public int clearUnpinnedArticles() {
+        long countBefore = liveArticleRepository.count();
+        liveArticleRepository.deleteByIsPinnedFalse();
+        long countAfter = liveArticleRepository.count();
+        return (int) (countBefore - countAfter);
     }
 
     private String getTagValue(Element element, String tagName) {

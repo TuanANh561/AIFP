@@ -62,21 +62,27 @@ public class AiWritingController {
                 ? request.tone().trim().toUpperCase()
                 : "CONCISE";
 
-        // Evaluate Level 2 tool permission (writing_draft_generate)
-        toolPermissionGateService.evaluateToolCall(
-                principal.userId(),
-                null,
-                "writing_draft_generate",
-                "{\"docType\":\"" + normalizedType + "\",\"tone\":\"" + normalizedTone + "\"}",
-                "{}"
-        );
+        UUID targetUserId = principal != null
+                ? principal.userId()
+                : UUID.fromString("00000000-0000-0000-0000-000000000001");
+
+        // Evaluate Level 2 tool permission (writing_draft_generate) if authenticated
+        if (principal != null) {
+            toolPermissionGateService.evaluateToolCall(
+                    targetUserId,
+                    null,
+                    "writing_draft_generate",
+                    "{\"docType\":\"" + normalizedType + "\",\"tone\":\"" + normalizedTone + "\"}",
+                    "{}"
+            );
+        }
 
         String brief = request.promptBrief().trim();
         String markdown = buildStructuredDraft(request.title().trim(), normalizedType, normalizedTone, brief);
 
         WritingDraftEntity entity = new WritingDraftEntity(
                 UUID.randomUUID(),
-                principal.userId(),
+                targetUserId,
                 request.title().trim(),
                 normalizedType,
                 normalizedTone,

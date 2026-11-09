@@ -19,20 +19,23 @@ public class TaskInitializerService implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(TaskInitializerService.class);
     public static final UUID DEFAULT_SYSTEM_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
-    public static final String DEFAULT_SYSTEM_EMAIL = "nguyentuananh11a1.lhpt@gmail.com";
+    public static final String DEFAULT_SYSTEM_EMAIL = "alex.dev@aifp.local";
 
     private final UserRepository userRepository;
     private final UserProfileRepository profileRepository;
     private final AiTaskRepository taskRepository;
+    private final String ownerNotificationEmail;
 
     public TaskInitializerService(
             UserRepository userRepository,
             UserProfileRepository profileRepository,
-            AiTaskRepository taskRepository
+            AiTaskRepository taskRepository,
+            @org.springframework.beans.factory.annotation.Value("${aifp.owner-email:}") String ownerNotificationEmail
     ) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
         this.taskRepository = taskRepository;
+        this.ownerNotificationEmail = ownerNotificationEmail == null ? "" : ownerNotificationEmail.trim();
     }
 
     @Override
@@ -53,8 +56,16 @@ public class TaskInitializerService implements ApplicationRunner {
             // 2. Ensure profile exists
             if (!profileRepository.existsById(user.getId())) {
                 UserProfileEntity profile = new UserProfileEntity(user.getId(), "Tuấn Anh (Kỹ sư)", "DEVELOPER");
-                profile.setNotificationEmail(DEFAULT_SYSTEM_EMAIL);
+                profile.setNotificationEmail(ownerNotificationEmail.isEmpty() ? DEFAULT_SYSTEM_EMAIL : ownerNotificationEmail);
                 profileRepository.save(profile);
+            } else if (!ownerNotificationEmail.isEmpty()) {
+                // Deployment: AIFP_OWNER_EMAIL always wins so scheduled digests reach the real inbox
+                profileRepository.findById(user.getId()).ifPresent(p -> {
+                    if (!ownerNotificationEmail.equals(p.getNotificationEmail())) {
+                        p.setNotificationEmail(ownerNotificationEmail);
+                        profileRepository.save(p);
+                    }
+                });
             }
 
             // 3. Seed default topic channels as persistent autonomous tasks if none exist
@@ -127,9 +138,58 @@ public class TaskInitializerService implements ApplicationRunner {
                     taskRepository.save(taskAiEvolution);
                     log.info("[TaskInitializer] Seeded AI Evolution autonomous task for existing database.");
                 }
+
+                UUID creatorIdeasId = UUID.fromString("33333333-3333-3333-3333-333333333307");
+                if (!taskRepository.existsById(creatorIdeasId)) {
+                    AiTaskEntity taskCreatorIdeas = new AiTaskEntity(
+                            creatorIdeasId,
+                            user.getId(),
+                            "Ý Tưởng Kiếm Tiền, Làm Game & Sáng Tạo Video Đa Nền Tảng (Aura)",
+                            "Tự động gửi email phân tích các ý tưởng kiếm tiền thực tế: phát triển game indie mini bằng Godot, kịch bản video YouTube Gaming thử thách kết hợp đòn bẩy AI, và chiến lược phân bổ đa nền tảng tối đa hóa doanh thu.",
+                            "DELTA_ONLY"
+                    );
+                    taskRepository.save(taskCreatorIdeas);
+                    log.info("[TaskInitializer] Seeded Creator Ideas autonomous task for existing database.");
+                }
             }
         } catch (Exception ex) {
             log.warn("[TaskInitializer] Initial seeding skipped or already present: {}", ex.getMessage());
+        }
+    }
+
+    @Transactional
+    public void seedDefaultTasksForUser(UUID userId) {
+        if (taskRepository.findByUserIdOrderByCreatedAtDesc(userId).isEmpty()) {
+            AiTaskEntity taskShopee = new AiTaskEntity(
+                    UUID.randomUUID(),
+                    userId,
+                    "Săn Deal & Khuyến mãi Shopee (Keychron, Màn hình 4K, Tai nghe ANC)",
+                    "Cào quét các chương trình giảm giá flash sale Shopee Mall, tìm kiếm bàn phím cơ Keychron, màn hình 4K LG và phụ kiện công nghệ",
+                    "DELTA_ONLY"
+            );
+            AiTaskEntity taskJobs = new AiTaskEntity(
+                    UUID.randomUUID(),
+                    userId,
+                    "Tuyển dụng Kỹ sư IT & Tech Jobs (Flutter, Spring Boot, AI Engineer)",
+                    "Tìm kiếm cơ hội việc làm tuyển dụng lập trình viên Flutter, Spring Boot Java và AI LangGraph trên ITViec và TopCV",
+                    "DELTA_ONLY"
+            );
+            AiTaskEntity taskTech = new AiTaskEntity(
+                    UUID.randomUUID(),
+                    userId,
+                    "Tin tức Công nghệ & AI Mới nhất (VnExpress, Dân Trí, HackerNews)",
+                    "Điểm tin thời sự công nghệ, trí tuệ nhân tạo và thiết bị mới nhất từ VnExpress Số Hóa",
+                    "DELTA_ONLY"
+            );
+            AiTaskEntity taskAiEvolution = new AiTaskEntity(
+                    UUID.randomUUID(),
+                    userId,
+                    "Báo cáo Tiến hóa AI & Lộ trình Nâng cấp Hệ thống AIFP (Hàng ngày)",
+                    "Tự động phân tích đột phá AI mới nhất (arXiv, Hugging Face, MCP, On-device SLM), đối chiếu quá khứ - hiện tại - tương lai của AIFP và đề xuất lộ trình cải tiến hệ thống.",
+                    "DELTA_ONLY"
+            );
+            taskRepository.saveAll(List.of(taskShopee, taskJobs, taskTech, taskAiEvolution));
+            log.info("[TaskInitializer] Seeded default topic tasks for new user: {}", userId);
         }
     }
 }

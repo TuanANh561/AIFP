@@ -1,7 +1,10 @@
 package com.aifp.core.notification;
 
 import com.aifp.core.common.ApiResponse;
+import com.aifp.core.security.CustomUserPrincipal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -14,9 +17,14 @@ import java.util.UUID;
 public class NewsFeedController {
 
     private final LiveNewsCrawlerService liveNewsCrawlerService;
+    private final String ownerEmail;
 
-    public NewsFeedController(LiveNewsCrawlerService liveNewsCrawlerService) {
+    public NewsFeedController(
+            LiveNewsCrawlerService liveNewsCrawlerService,
+            @Value("${aifp.owner-email:owner@aifp.local}") String ownerEmail
+    ) {
         this.liveNewsCrawlerService = liveNewsCrawlerService;
+        this.ownerEmail = (ownerEmail != null && !ownerEmail.isBlank()) ? ownerEmail.trim() : "owner@aifp.local";
     }
 
     public record LiveArticleDto(
@@ -30,7 +38,8 @@ public class NewsFeedController {
             String imageUrl,
             String url,
             Instant publishedAt,
-            Instant fetchedAt
+            Instant fetchedAt,
+            boolean isPinned
     ) {
         public static LiveArticleDto fromEntity(LiveArticleEntity entity) {
             return new LiveArticleDto(
@@ -44,16 +53,27 @@ public class NewsFeedController {
                     entity.getImageUrl(),
                     entity.getUrl(),
                     entity.getPublishedAt(),
-                    entity.getFetchedAt()
+                    entity.getFetchedAt(),
+                    entity.isPinned()
             );
         }
     }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<LiveArticleDto>>> getLiveNews(
-            @RequestParam(value = "channel", required = false) String channel) {
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            @RequestParam(value = "channel", required = false) String channel
+    ) {
         List<LiveArticleEntity> entities = liveNewsCrawlerService.getArticles(channel);
-        List<LiveArticleDto> dtos = entities.stream().map(LiveArticleDto::fromEntity).toList();
+        boolean isOwner = principal != null && (
+                (principal.userId() != null && principal.userId().equals(UUID.fromString("00000000-0000-0000-0000-000000000001"))) ||
+                (principal.email() != null && principal.email().trim().equalsIgnoreCase(ownerEmail.trim()))
+        );
+
+        List<LiveArticleDto> dtos = entities.stream()
+                .filter(e -> isOwner || (!"ai-evolution".equalsIgnoreCase(e.getChannelId()) && !"creator-ideas".equalsIgnoreCase(e.getChannelId())))
+                .map(LiveArticleDto::fromEntity)
+                .toList();
         return ResponseEntity.ok(ApiResponse.ok(dtos));
     }
 
@@ -66,6 +86,34 @@ public class NewsFeedController {
                 "totalInDatabase", total,
                 "syncedAt", Instant.now().toString(),
                 "status", "DATABASE_UPDATED"
+        )));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> deleteArticle(
+            @PathVariable("id") UUID id
+    ) {
+        boolean deleted = liveNewsCrawlerService.deleteArticle(id);
+        return ResponseEntity.ok(ApiResponse.ok(Map.of(
+                "deleted", deleted,
+                "id", id.toString()
+        )));
+    }
+
+    @PutMapping("/{id}/pin")
+    public ResponseEntity<ApiResponse<LiveArticleDto>> togglePinArticle(
+            @PathVariable("id") UUID id
+    ) {
+        LiveArticleEntity updated = liveNewsCrawlerService.togglePinArticle(id);
+        return ResponseEntity.ok(ApiResponse.ok(LiveArticleDto.fromEntity(updated)));
+    }
+
+    @DeleteMapping("/clear-unpinned")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> clearUnpinnedArticles() {
+        int deletedCount = liveNewsCrawlerService.clearUnpinnedArticles();
+        return ResponseEntity.ok(ApiResponse.ok(Map.of(
+                "clearedCount", deletedCount,
+                "status", "UNPINNED_ARTICLES_CLEARED"
         )));
     }
 }

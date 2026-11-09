@@ -1,22 +1,17 @@
 {
-  "name": "AIFP — Nền tảng Trợ lý AI Cá nhân",
-  "short_name": "AIFP",
-  "description": "Trợ lý AI cá nhân đa năng với lịch tự động và kiểm chứng nguồn.",
+  "name": "Aura — Nền tảng Trợ lý AI Cá nhân",
+  "short_name": "Aura",
+  "description": "Trợ lý AI cá nhân đa năng tự động ngầm 24/7 với công nghệ Zero-App-Open.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F8F7F4",
-  "theme_color": "#1F4E3D",
+  "theme_color": "#0F172A",
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ]
 }

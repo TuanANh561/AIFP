@@ -93,3 +93,4 @@ Tài liệu này được liên kết trực tiếp trong [`docs/PROJECT_STATE.m
 - *"Làm video kiểu Doraemon / Ken Burns / mưa gió bóng đen"* $\rightarrow$ Triển khai theo **Trụ cột 3 (Module 19)**.
 - *"Làm dịch màn hình MORT / Bong bóng nổi"* $\rightarrow$ Triển khai theo **Trụ cột 2 (Module 18)**.
 - *"Làm video 3D từ Argon / ComfyUI"* $\rightarrow$ Triển khai theo **Trụ cột 1 (Module 17)**.
+

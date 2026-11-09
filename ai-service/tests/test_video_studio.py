@@ -53,3 +53,23 @@ def test_end_to_end_no_gpu_pipeline_duration_and_no_audio(tmp_path: Path):
     probe = subprocess.run([ff, "-i", str(result.video)], capture_output=True, text=True).stderr
     assert "1280x720" in probe and "Duration: 00:00:14" in probe
 
+
+def test_plan_creative_storyboard_generates_scenes_and_styles():
+    storyboard = vs.plan_creative_storyboard(
+        script="Bóng một người đứng dưới mưa. Tiếng sấm vang lên xa xa. Anh bước đi trong tĩnh lặng.",
+        target_seconds=15,
+        style="SILHOUETTE",
+        voice_actor="DORAEMON",
+        weather_effect="RAIN",
+    )
+    assert storyboard["style"] == "SILHOUETTE"
+    assert storyboard["voice_actor"] == "DORAEMON"
+    assert storyboard["weather_effect"] == "RAIN"
+    assert storyboard["scene_count"] >= 2
+    assert len(storyboard["scenes"]) == storyboard["scene_count"]
+    for scene in storyboard["scenes"]:
+        assert "SILHOUETTE" in scene["prompt"] or "silhouette" in scene["prompt"].lower()
+        assert "camera_motion" in scene
+        assert "weather_overlay" in scene
+        assert "audio_cue" in scene
+

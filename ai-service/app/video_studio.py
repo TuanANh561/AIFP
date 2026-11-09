@@ -19,7 +19,7 @@ import shutil
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
 MAX_TOTAL_SECONDS = 300.0
 DEFAULT_CLIP_SECONDS = 5.0
@@ -113,6 +113,76 @@ def extract_last_frame(video: Path, out_png: Path) -> Path:
     if not out_png.exists():
         raise RuntimeError("Could not extract last frame")
     return out_png
+
+
+def plan_creative_storyboard(
+    script: str,
+    target_seconds: float = 30.0,
+    style: str = "SILHOUETTE",
+    voice_actor: str = "DORAEMON",
+    weather_effect: str = "RAIN",
+    character_lock: str = "",
+) -> dict[str, Any]:
+    """Plans a rich storyboard with styled prompts, camera motions, and audio cues."""
+    plan = plan_scenes(script, target_seconds=target_seconds, character_lock=character_lock)
+    camera_motions = [
+        "Lia máy ngang từ trái sang phải (Slow Pan Right)",
+        "Phóng to nhẹ vào trung tâm chủ thể (Slow Zoom-In 1.15x)",
+        "Thu nhỏ mở rộng bối cảnh toàn cảnh (Slow Zoom-Out)",
+        "Lia chéo từ dưới lên góc rộng (Low Angle Pan)",
+        "Khóa chủ thể trung tâm, nền trôi nhẹ (Parallax 2.5D)",
+    ]
+    style_prompts = {
+        "SILHOUETTE": "Cinematic wide angle, minimalist black silhouette of figure, moody atmospheric lighting, high contrast, muted earth tones, 8k",
+        "ANIME_2D": "Vibrant 2D anime animation aesthetic, expressive lighting, hand-drawn detailing, Ghibli colors",
+        "VOXEL_3D": "Argon 3D voxel blocky diorama, clean geometry, soft ambient occlusion, isometric view",
+        "REALISTIC": "Photorealistic 8k cinema camera, 35mm lens, natural film grain, volumetric god rays, realistic textures",
+    }
+    base_style = style_prompts.get(style.upper(), style_prompts["SILHOUETTE"])
+
+    weather_labels = {
+        "RAIN": "Mưa rơi điện ảnh (Screen blend overlay + Sound FX)",
+        "WIND": "Gió & Bụi chuyển động (Wind particles)",
+        "FOG": "Sương mù huyền ảo (Rolling fog overlay)",
+        "NONE": "Không hiệu ứng hạt",
+    }
+    weather_desc = weather_labels.get(weather_effect.upper(), "Không hiệu ứng hạt")
+
+    voice_labels = {
+        "DORAEMON": "Lồng tiếng Doraemon HTV3 (Vui nhộn, biểu cảm cao)",
+        "NOBITA": "Lồng tiếng Nobita (Thân thuộc, tâm sự)",
+        "DOCUMENTARY": "Người dẫn chuyện tài liệu (Trầm ấm, hào hùng)",
+        "GENTLE_FEMALE": "Giọng nữ nhẹ nhàng (Truyền cảm, chậm rãi)",
+    }
+    voice_desc = voice_labels.get(voice_actor.upper(), "Người dẫn chuyện tài liệu")
+
+    scene_cards = []
+    for s in plan.scenes:
+        motion = camera_motions[s.index % len(camera_motions)]
+        full_prompt = f"{base_style}. {s.prompt}"
+        scene_cards.append({
+            "index": s.index,
+            "scene_number": s.index + 1,
+            "narration": s.narration,
+            "prompt": full_prompt,
+            "duration": s.duration,
+            "camera_motion": motion,
+            "weather_overlay": weather_desc,
+            "audio_cue": f"Giọng đọc: {voice_desc} + Auto-ducking nhạc nền (-12dB)",
+        })
+
+    return {
+        "total_seconds": round(plan.total_seconds, 1),
+        "scene_count": len(scene_cards),
+        "style": style.upper(),
+        "voice_actor": voice_actor.upper(),
+        "voice_description": voice_desc,
+        "weather_effect": weather_effect.upper(),
+        "weather_description": weather_desc,
+        "clip_seconds": plan.clip_seconds,
+        "crossfade_seconds": plan.crossfade_seconds,
+        "scenes": scene_cards,
+    }
 
 
 def build_xfade_filter(n: int, clip_seconds: float, crossfade: float) -> str:

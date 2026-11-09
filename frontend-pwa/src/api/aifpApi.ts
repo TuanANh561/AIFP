@@ -398,6 +398,112 @@ class AifpApiClient {
       return null;
     }
   }
+
+  public async planVideo(params: {
+    script: string;
+    targetSeconds?: number;
+    style?: string;
+    voiceActor?: string;
+    weatherEffect?: string;
+    characterLock?: string;
+  }): Promise<VideoStoryboard | null> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/video/plan'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify(params),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      return json.data || null;
+    } catch {
+      return null;
+    }
+  }
+
+  public async createVideo(params: {
+    title: string;
+    script: string;
+    targetSeconds?: number;
+    style?: string;
+    voiceActor?: string;
+    weatherEffect?: string;
+    characterLock?: string;
+    approved: boolean;
+  }): Promise<VideoCreationResult | null> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/video/create'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify(params),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      return json.data || null;
+    } catch {
+      return null;
+    }
+  }
+
+  public async sendVideoEmail(params: {
+    title: string;
+    durationSeconds: number;
+    sceneCount: number;
+    style: string;
+    voiceActor: string;
+    weatherEffect: string;
+    downloadUrl: string;
+    customEmail?: string;
+  }): Promise<{ success: boolean; message: string }> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/video/send-email'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify(params),
+      });
+      if (!resp.ok) return { success: false, message: 'Lỗi phản hồi từ máy chủ.' };
+      const json = await resp.json();
+      return { success: true, message: json.data || 'Đã gửi thông báo video qua email!' };
+    } catch {
+      return { success: false, message: 'Không thể kết nối tới máy chủ backend.' };
+    }
+  }
+}
+
+export interface VideoSceneItem {
+  index: number;
+  sceneNumber: number;
+  narration: string;
+  prompt: string;
+  duration: number;
+  cameraMotion: string;
+  weatherOverlay: string;
+  audioCue: string;
+}
+
+export interface VideoStoryboard {
+  totalSeconds: number;
+  sceneCount: number;
+  style: string;
+  voiceActor: string;
+  voiceDescription: string;
+  weatherEffect: string;
+  weatherDescription: string;
+  scenes: VideoSceneItem[];
+}
+
+export interface VideoCreationResult {
+  status: string;
+  title: string;
+  totalSeconds: number;
+  sceneCount: number;
+  style: string;
+  voiceActor: string;
+  weatherEffect: string;
+  hasWatermark: boolean;
+  videoUrl: string;
+  storyboard: VideoStoryboard;
+  message: string;
 }
 
 export interface LiveArticle {

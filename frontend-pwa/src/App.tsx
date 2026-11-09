@@ -587,6 +587,22 @@ export default function App() {
   });
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showPreferencesModal, setShowPreferencesModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [mockGoogleEmail, setMockGoogleEmail] = useState('');
+  const [authSession, setAuthSession] = useState<{
+    userId: string;
+    email: string;
+    displayName: string;
+    accessToken: string;
+  } | null>(() => {
+    try {
+      const saved = localStorage.getItem('aifp_auth_session');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [killSwitchTriggered, setKillSwitchTriggered] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
@@ -1436,6 +1452,39 @@ export default function App() {
     showToast(`Đã lưu cấu hình! Trợ lý sẽ tự động gửi bản tin tới ${tempProfile.deliveryEmail}.`);
   };
 
+  const handleGoogleLogin = async (idToken: string) => {
+    setIsLoggingIn(true);
+    try {
+      const res = await aifpApi.loginWithGoogle(idToken);
+      if (res) {
+        setAuthSession(res);
+        try {
+          localStorage.setItem('aifp_auth_session', JSON.stringify(res));
+        } catch {}
+        setProfile((prev) => ({
+          ...prev,
+          deliveryEmail: res.email,
+        }));
+        setShowLoginModal(false);
+        showToast(`Đăng nhập thành công: ${res.displayName || res.email}!`);
+      } else {
+        showToast('Đăng nhập không thành công. Vui lòng kiểm tra lại token.');
+      }
+    } catch {
+      showToast('Lỗi kết nối khi xác thực tài khoản Google.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setAuthSession(null);
+    try {
+      localStorage.removeItem('aifp_auth_session');
+    } catch {}
+    showToast('Đã đăng xuất khỏi tài khoản.');
+  };
+
   const loadLiveNews = async (channel?: string) => {
     try {
       const articles = await aifpApi.getLiveNews(channel);
@@ -1904,14 +1953,44 @@ export default function App() {
                   gap: 10,
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, flexWrap: 'wrap' }}>
                   <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Trợ lý</span>
                   <span className="mono-pill" style={{ fontSize: 11 }}>{profile.personaTitle}</span>
                   <span style={{ color: 'var(--text-tertiary)', fontSize: 12 }}>
                     {profile.scheduledTimes[0]} · {profile.deliveryEmail}
                   </span>
+                  {authSession && (
+                    <span className="mono-pill" style={{ fontSize: 11, color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                      Tài khoản: {authSession.displayName || authSession.email}
+                    </span>
+                  )}
                 </div>
-                <div style={{ display: 'flex', gap: 6 }}>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  {authSession ? (
+                    <button
+                      className="btn btn-secondary"
+                      onClick={handleLogout}
+                      style={{ minHeight: 28, fontSize: 12, padding: '0 10px' }}
+                      title="Đăng xuất khỏi hệ thống"
+                    >
+                      <span>Đăng xuất</span>
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setShowLoginModal(true)}
+                      style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 5, borderColor: 'var(--border-subtle)' }}
+                      title="Đăng nhập tài khoản Google"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                      </svg>
+                      <span>Google</span>
+                    </button>
+                  )}
                   <button
                     className="btn btn-secondary"
                     onClick={() => setShowCompanionDrawer(!showCompanionDrawer)}
@@ -5878,6 +5957,137 @@ export default function App() {
                   <IconCheck />
                   <span>Tạo cấu hình</span>
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ========================================================================= */}
+      {/* MODAL 5: GOOGLE OAUTH & MULTI-TENANT ACCOUNT                               */}
+      {/* ========================================================================= */}
+      {showLoginModal && (
+        <div className="email-modal-overlay" onClick={() => setShowLoginModal(false)}>
+          <div
+            className="email-modal-container"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: 440 }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px 18px',
+                borderBottom: '1px solid var(--border-subtle)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontWeight: 800, fontSize: 15, color: 'var(--text-primary)' }}>
+                  Đăng nhập tài khoản
+                </span>
+                <span className="mono-pill" style={{ fontSize: 10.5, color: 'var(--accent-primary)' }}>
+                  Multi-Tenant
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLoginModal(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-secondary)' }}
+                title="Đóng"
+              >
+                <IconClose />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <p style={{ margin: 0, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                Mỗi tài khoản đăng nhập sở hữu không gian dữ liệu riêng biệt 100% trong CSDL (Lịch trình, tin nhắn, nhiệm vụ và video).
+              </p>
+
+              {/* Primary Google Login Button */}
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  const googleClientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
+                  if (googleClientId && (window as any).google?.accounts?.id) {
+                    (window as any).google.accounts.id.initialize({
+                      client_id: googleClientId,
+                      callback: (res: any) => handleGoogleLogin(res.credential),
+                    });
+                    (window as any).google.accounts.id.prompt();
+                  } else {
+                    handleGoogleLogin(`mock_google_${mockGoogleEmail.trim() || 'user.demo@gmail.com'}`);
+                  }
+                }}
+                disabled={isLoggingIn}
+                style={{
+                  width: '100%',
+                  height: 40,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 10,
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>{isLoggingIn ? 'Đang xác thực...' : 'Đăng nhập với Google'}</span>
+              </button>
+
+              {/* Dev / Test Account Input */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 8,
+                  padding: '12px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--bg-subtle)',
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--text-secondary)' }}>
+                    Kiểm thử nhanh (Dev / CSDL Test)
+                  </span>
+                  <span className="mono-pill" style={{ fontSize: 10 }}>0 Cần Key</span>
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <input
+                    type="email"
+                    value={mockGoogleEmail}
+                    onChange={(e) => setMockGoogleEmail(e.target.value)}
+                    placeholder="ban_be_1@gmail.com"
+                    style={{
+                      flex: 1,
+                      height: 32,
+                      fontSize: 12,
+                      padding: '0 8px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                      background: 'var(--bg-surface)',
+                      color: 'var(--text-primary)',
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => handleGoogleLogin(`mock_google_${mockGoogleEmail.trim() || 'test_user@gmail.com'}`)}
+                    disabled={isLoggingIn}
+                    style={{ fontSize: 11.5, minHeight: 32, padding: '0 10px' }}
+                  >
+                    <span>Vào thử</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

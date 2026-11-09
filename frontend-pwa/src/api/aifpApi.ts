@@ -71,6 +71,25 @@ class AifpApiClient {
     return null;
   }
 
+  public async loginWithGoogle(idToken: string): Promise<AuthSession | null> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/auth/google'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify({ idToken }),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      if (json.success && json.data) {
+        this.accessToken = json.data.accessToken;
+        return json.data as AuthSession;
+      }
+    } catch {
+      // Offline fallback
+    }
+    return null;
+  }
+
   public async proposeCalendarEvent(
     title: string,
     startTime: string,

@@ -23,6 +23,10 @@ public final class AuthDtos {
             @NotBlank String refreshToken
     ) {}
 
+    public record GoogleLoginRequest(
+            @NotBlank String idToken
+    ) {}
+
     public record AuthTokenResponse(
             UUID userId,
             String email,

@@ -156,5 +156,41 @@ public class TaskInitializerService implements ApplicationRunner {
             log.warn("[TaskInitializer] Initial seeding skipped or already present: {}", ex.getMessage());
         }
     }
+
+    @Transactional
+    public void seedDefaultTasksForUser(UUID userId) {
+        if (taskRepository.findByUserIdOrderByCreatedAtDesc(userId).isEmpty()) {
+            AiTaskEntity taskShopee = new AiTaskEntity(
+                    UUID.randomUUID(),
+                    userId,
+                    "Săn Deal & Khuyến mãi Shopee (Keychron, Màn hình 4K, Tai nghe ANC)",
+                    "Cào quét các chương trình giảm giá flash sale Shopee Mall, tìm kiếm bàn phím cơ Keychron, màn hình 4K LG và phụ kiện công nghệ",
+                    "DELTA_ONLY"
+            );
+            AiTaskEntity taskJobs = new AiTaskEntity(
+                    UUID.randomUUID(),
+                    userId,
+                    "Tuyển dụng Kỹ sư IT & Tech Jobs (Flutter, Spring Boot, AI Engineer)",
+                    "Tìm kiếm cơ hội việc làm tuyển dụng lập trình viên Flutter, Spring Boot Java và AI LangGraph trên ITViec và TopCV",
+                    "DELTA_ONLY"
+            );
+            AiTaskEntity taskTech = new AiTaskEntity(
+                    UUID.randomUUID(),
+                    userId,
+                    "Tin tức Công nghệ & AI Mới nhất (VnExpress, Dân Trí, HackerNews)",
+                    "Điểm tin thời sự công nghệ, trí tuệ nhân tạo và thiết bị mới nhất từ VnExpress Số Hóa",
+                    "DELTA_ONLY"
+            );
+            AiTaskEntity taskAiEvolution = new AiTaskEntity(
+                    UUID.randomUUID(),
+                    userId,
+                    "Báo cáo Tiến hóa AI & Lộ trình Nâng cấp Hệ thống AIFP (Hàng ngày)",
+                    "Tự động phân tích đột phá AI mới nhất (arXiv, Hugging Face, MCP, On-device SLM), đối chiếu quá khứ - hiện tại - tương lai của AIFP và đề xuất lộ trình cải tiến hệ thống.",
+                    "DELTA_ONLY"
+            );
+            taskRepository.saveAll(List.of(taskShopee, taskJobs, taskTech, taskAiEvolution));
+            log.info("[TaskInitializer] Seeded default topic tasks for new user: {}", userId);
+        }
+    }
 }
 

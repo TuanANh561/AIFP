@@ -59,6 +59,9 @@ class SecurityAndTenantIsolationTest {
     private TaskController taskController;
 
     @Autowired
+    private com.aifp.core.task.AiTaskRepository taskRepository;
+
+    @Autowired
     private ToolPermissionGateService toolPermissionGateService;
 
     @Autowired
@@ -772,6 +775,31 @@ class SecurityAndTenantIsolationTest {
         List<EmailCenterService.DigestArticleCard> sanitizedArticles = linkValidationService.sanitizeArticles(List.of(deadArticle, liveArticle));
         assertEquals(1, sanitizedArticles.size());
         assertEquals("https://vnexpress.net/so-hoa", sanitizedArticles.get(0).url());
+    }
+
+    @Test
+    @DisplayName("17. Google OAuth Login & Multi-Tenant Provisioning: Automatic account creation, token pair and task seeding")
+    void test17_GoogleOAuthLoginAndMultiTenantProvisioning() {
+        String googleEmail = "google_user_" + UUID.randomUUID() + "@gmail.com";
+        String mockToken = "mock_google_" + googleEmail;
+
+        // 1. First login -> Auto-creates account and seeds default tasks
+        AuthDtos.AuthTokenResponse res1 = authService.loginWithGoogle(new AuthDtos.GoogleLoginRequest(mockToken));
+        assertNotNull(res1);
+        assertNotNull(res1.accessToken());
+        assertNotNull(res1.refreshToken());
+        assertEquals(googleEmail, res1.email());
+        assertTrue(res1.displayName().contains("Google User"));
+
+        // 2. Verify tasks seeded for this new user in database
+        var tasks = taskRepository.findByUserIdOrderByCreatedAtDesc(res1.userId());
+        assertFalse(tasks.isEmpty(), "Default topic tasks must be automatically provisioned for new Google user");
+        assertTrue(tasks.size() >= 4, "Should have at least Shopee, Jobs, Tech and AI Evolution tasks");
+
+        // 3. Second login with same Google account -> Logs in existing user with identical UUID
+        AuthDtos.AuthTokenResponse res2 = authService.loginWithGoogle(new AuthDtos.GoogleLoginRequest(mockToken));
+        assertEquals(res1.userId(), res2.userId(), "Subsequent Google logins must resolve to the same user entity");
+        assertEquals(res1.email(), res2.email());
     }
 }
 

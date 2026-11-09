@@ -13,6 +13,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,7 @@ public class AutonomousSchedulerWorker {
     private final com.aifp.core.notification.LiveNewsCrawlerService liveNewsCrawlerService;
     private final com.aifp.core.notification.LinkValidationService linkValidationService;
     private final boolean schedulerEnabled;
+    private final boolean runHourly;
 
     public AutonomousSchedulerWorker(
             AiTaskRepository taskRepository,
@@ -42,7 +45,8 @@ public class AutonomousSchedulerWorker {
             AiOrchestratorClient aiOrchestratorClient,
             com.aifp.core.notification.LiveNewsCrawlerService liveNewsCrawlerService,
             com.aifp.core.notification.LinkValidationService linkValidationService,
-            @Value("${aifp.scheduler.enabled:true}") boolean schedulerEnabled
+            @Value("${aifp.scheduler.enabled:true}") boolean schedulerEnabled,
+            @Value("${aifp.scheduler.run-hourly:false}") boolean runHourly
     ) {
         this.taskRepository = taskRepository;
         this.executionRepository = executionRepository;
@@ -51,6 +55,7 @@ public class AutonomousSchedulerWorker {
         this.liveNewsCrawlerService = liveNewsCrawlerService;
         this.linkValidationService = linkValidationService;
         this.schedulerEnabled = schedulerEnabled;
+        this.runHourly = runHourly;
     }
 
     /**
@@ -76,9 +81,14 @@ public class AutonomousSchedulerWorker {
 
         Instant now = Instant.now();
         Instant currentSlot = now.truncatedTo(ChronoUnit.HOURS);
+        ZonedDateTime vnNow = now.atZone(ZoneId.of("Asia/Ho_Chi_Minh"));
 
         for (AiTaskEntity task : activeTasks) {
             try {
+                if (!isTaskScheduledForSlot(task, vnNow)) {
+                    continue; // Task is not scheduled for this current hour in Asia/Ho_Chi_Minh
+                }
+
                 String idempotencyKey = IdempotencyUtils.computeExecutionIdempotencyKey(task.getId(), currentSlot);
                 Optional<TaskExecutionEntity> existing = executionRepository.findByTaskIdAndIdempotencyKey(task.getId(), idempotencyKey);
                 if (existing.isPresent()) {
@@ -129,6 +139,64 @@ public class AutonomousSchedulerWorker {
                 log.error("[AutonomousWorker] Failed executing task {}: {}", task.getTitle(), ex.getMessage());
             }
         }
+    }
+
+    public boolean isTaskScheduledForSlot(AiTaskEntity task, ZonedDateTime vnNow) {
+        if (runHourly) {
+            return true;
+        }
+
+        int currentHour = vnNow.getHour();
+        String config = task.getStructuredConfigJson();
+        if (config != null && !config.isBlank() && !config.equals("{}")) {
+            if (config.contains("\"scheduled_hours\"")) {
+                return config.contains(String.valueOf(currentHour));
+            }
+            if (config.contains("\"scheduled_time\"")) {
+                try {
+                    int idx = config.indexOf("\"scheduled_time\"");
+                    String sub = config.substring(idx);
+                    int colon = sub.indexOf(':');
+                    if (colon > 0) {
+                        String hh = sub.substring(colon - 2, colon).replaceAll("[^0-9]", "");
+                        if (!hh.isEmpty() && Integer.parseInt(hh) == currentHour) {
+                            return true;
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+            if (config.contains("\"cron\"")) {
+                String[] parts = config.split("\"cron\"\\s*:\\s*\"");
+                if (parts.length > 1) {
+                    String cron = parts[1].split("\"")[0].trim();
+                    String[] fields = cron.split("\\s+");
+                    if (fields.length >= 3 && !fields[2].equals("*")) {
+                        try {
+                            if (Integer.parseInt(fields[2]) == currentHour) {
+                                return true;
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+        }
+
+        String titleLower = task.getTitle().toLowerCase();
+        if (titleLower.contains("shopee") || titleLower.contains("deal")) {
+            return currentHour == 11;
+        } else if (titleLower.contains("tuyển dụng") || titleLower.contains("việc làm") || titleLower.contains("jobs")) {
+            return currentHour == 8;
+        } else if (titleLower.contains("tiến hóa ai") || titleLower.contains("evolution")) {
+            return currentHour == 7;
+        } else if (titleLower.contains("công nghệ") || titleLower.contains("tech")) {
+            return currentHour == 7;
+        } else if (titleLower.contains("tài chính") || titleLower.contains("chứng khoán")) {
+            return currentHour == 17;
+        } else if (titleLower.contains("kiếm tiền") || titleLower.contains("creator") || titleLower.contains("game")) {
+            return currentHour == 20;
+        }
+
+        return currentHour == 8;
     }
 }
 

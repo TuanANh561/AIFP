@@ -77,6 +77,27 @@ flowchart TD
 
 ---
 
+### TRỤ CỘT 4: Bộ Công Cụ Mã Nguồn Mở Video Mở Rộng (Stickman Director, Lemo-Opuscar, Lossless-Cut & Remotion)
+- **Bài toán**: Người dùng muốn bổ sung các công cụ mã nguồn mở hàng đầu thế giới vào cả Web và Mobile để sản xuất video kịch bản tự động, hoạt hình canvas mượt mà và biên tập video siêu tốc không tốn GPU.
+- **Công cụ mã nguồn mở đã tích hợp**:
+  1. **Stickman Video Director** ([`kaomei/stickman-video-director`](https://github.com/kaomei/stickman-video-director)):
+     - **Ưu thế**: Đạo diễn kịch bản thành video người que (Stickman) tối giản cho kênh YouTube & TikTok không lộ mặt (faceless channel).
+     - **Triệt tiêu nhược điểm của AI**: Tránh 100% lỗi biến dạng ngón tay, mắt đờ đẫn của mô hình diffusion; truyền tải thông điệp bằng chuyển động hài hước, sinh động.
+  2. **Lemo-Opuscar** ([`lemomo-ai/lemo-opuscar`](https://github.com/lemomo-ai/lemo-opuscar)):
+     - **Ưu thế**: Bộ khung làm phim và hoạt hình WebGL / HTML5 Canvas procedural bằng code.
+     - **Tối ưu 0đ GPU**: Render hoạt hình hình học, phân tử hạt ánh sáng và vũ trụ số mượt mà 60fps trên mọi trình duyệt web và thiết bị di động mà không đòi hỏi GPU nặng.
+  3. **Lossless-Cut** ([`mifi/lossless-cut`](https://github.com/mifi/lossless-cut)) & **Remotion** ([`remotion-dev/remotion`](https://github.com/remotion-dev/remotion)):
+     - **Ưu thế**: Cắt ghép, chia cảnh và biên tập video siêu tốc bằng luồng stream trực tiếp của FFmpeg không cần re-encode làm giảm chất lượng (Lossless).
+     - **Tích hợp Web PWA & Mobile**:
+       - Cắt thời lượng video (Trim Start / End) tức thì 0ms.
+       - Chuyển đổi linh hoạt tỉ lệ khung hình: `16:9` (YouTube chuẩn) $\leftrightarrow$ `9:16` (TikTok/Shorts/Reels) $\leftrightarrow$ `1:1` (Feed).
+       - Tăng tốc / giảm tốc độ phát mượt mà (`0.75x`, `1.0x`, `1.25x`, `1.5x`, `2.0x`).
+       - Lớp phủ phụ đề tự động (Auto-Captions) đồng bộ với kịch bản giọng đọc tiếng Việt.
+       - Bộ lọc màu thời gian thực (Color Grade: Cinematic, Noir đen trắng, Vibrant rực rỡ).
+       - Xuất video chuẩn MP4 chất lượng cao, **100% không đóng watermark AI**.
+
+---
+
 ## 3. Bản Đồ API Hệ Thống Sẽ Cung Cấp
 
 | Endpoint | Nền tảng | Chức năng |

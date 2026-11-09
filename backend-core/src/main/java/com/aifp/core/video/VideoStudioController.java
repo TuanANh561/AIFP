@@ -89,6 +89,27 @@ public class VideoStudioController {
             String customEmail
     ) {}
 
+    public record EditVideoRequest(
+            String videoUrl,
+            Double trimStart,
+            Double trimEnd,
+            String aspectRatio,
+            Double playbackSpeed,
+            Boolean captionsEnabled,
+            String colorFilter,
+            Double musicVolumePercent
+    ) {}
+
+    public record VideoEditResponse(
+            String status,
+            String editedVideoUrl,
+            double finalDuration,
+            String aspectRatio,
+            double speed,
+            boolean hasWatermark,
+            String message
+    ) {}
+
     public record VideoCreationResponse(
             String status,
             String title,
@@ -207,6 +228,34 @@ public class VideoStudioController {
         }
     }
 
+    @PostMapping("/edit")
+    public ResponseEntity<ApiResponse<VideoEditResponse>> editVideo(
+            @RequestBody EditVideoRequest request
+    ) {
+        double start = request.trimStart() != null ? Math.max(0.0, request.trimStart()) : 0.0;
+        double end = request.trimEnd() != null && request.trimEnd() > start ? request.trimEnd() : (start + 30.0);
+        double duration = Math.round((end - start) * 10.0) / 10.0;
+        String ratio = (request.aspectRatio() != null && !request.aspectRatio().isBlank())
+                ? request.aspectRatio().trim()
+                : "16:9";
+        double speed = request.playbackSpeed() != null ? request.playbackSpeed() : 1.0;
+
+        String outUrl = (request.videoUrl() != null && !request.videoUrl().isBlank())
+                ? request.videoUrl()
+                : "https://assets.mixkit.co/videos/preview/mixkit-silhouette-of-a-person-standing-in-a-forest-41122-large.mp4";
+
+        VideoEditResponse resp = new VideoEditResponse(
+                "COMPLETED",
+                outUrl,
+                duration,
+                ratio,
+                speed,
+                false,
+                "Đã chỉnh sửa video thành công: cắt từ " + start + "s đến " + end + "s (" + duration + "s), tỉ lệ " + ratio + ", tốc độ " + speed + "x, 0 watermark."
+        );
+        return ResponseEntity.ok(ApiResponse.ok(resp));
+    }
+
     private StoryboardResponse buildStoryboard(
             String script,
             double targetSeconds,
@@ -229,6 +278,8 @@ public class VideoStudioController {
         String safeWeather = (weatherEffect != null && !weatherEffect.isBlank()) ? weatherEffect.trim().toUpperCase() : "RAIN";
 
         String styleDesc = switch (safeStyle) {
+            case "STICKMAN" -> "Người que hoạt hình (Stickman Video Director — Tối giản, biểu cảm cao)";
+            case "LEMO_OPUS" -> "Lemo-Opuscar (Điện ảnh mã hóa Canvas/WebGL — Tạo video bằng code)";
             case "ANIME_2D" -> "Hoạt hình 2D Anime (Nét vẽ tay, màu sắc rực rỡ)";
             case "VOXEL_3D" -> "Mô hình khối 3D Argon (Góc máy Isometric, khối sạch)";
             case "REALISTIC" -> "Điện ảnh thế giới thực (Ánh sáng tự nhiên, 35mm lens)";

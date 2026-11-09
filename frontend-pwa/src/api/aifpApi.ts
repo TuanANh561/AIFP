@@ -468,6 +468,30 @@ class AifpApiClient {
       return { success: false, message: 'Không thể kết nối tới máy chủ backend.' };
     }
   }
+
+  public async editVideo(params: {
+    videoUrl: string;
+    trimStart?: number;
+    trimEnd?: number;
+    aspectRatio?: string;
+    playbackSpeed?: number;
+    captionsEnabled?: boolean;
+    colorFilter?: string;
+    musicVolumePercent?: number;
+  }): Promise<{ status: string; editedVideoUrl: string; finalDuration: number; aspectRatio: string; speed: number; message: string } | null> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/video/edit'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify(params),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      return json.data || null;
+    } catch {
+      return null;
+    }
+  }
 }
 
 export interface VideoSceneItem {

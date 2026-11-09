@@ -133,6 +133,8 @@ def plan_creative_storyboard(
         "Khóa chủ thể trung tâm, nền trôi nhẹ (Parallax 2.5D)",
     ]
     style_prompts = {
+        "STICKMAN": "Stickman Video Director animation aesthetic, expressive minimalist stick figure characters, clean black lineart on crisp background, dynamic hand-drawn emotion, faceless YouTube viral style",
+        "LEMO_OPUS": "Lemo-Opuscar film aesthetic, programmatic generative canvas WebGL code animation, procedural geometric motion design, cinematic film composition",
         "SILHOUETTE": "Cinematic wide angle, minimalist black silhouette of figure, moody atmospheric lighting, high contrast, muted earth tones, 8k",
         "ANIME_2D": "Vibrant 2D anime animation aesthetic, expressive lighting, hand-drawn detailing, Ghibli colors",
         "VOXEL_3D": "Argon 3D voxel blocky diorama, clean geometry, soft ambient occlusion, isometric view",

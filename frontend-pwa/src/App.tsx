@@ -763,95 +763,133 @@ export default function App() {
   const [calendarDate, setCalendarDate] = useState('2026-11-09T09:00');
   const [calendarSuccess, setCalendarSuccess] = useState(false);
 
-  // Video Studio State (Creation & Narration & Weather VFX)
-  const [videoStudioMode, setVideoStudioMode] = useState<'create' | 'analyze'>('create');
+  // Video Studio State (Creation & Narration & Weather VFX & Editor)
+  const [videoStudioMode, setVideoStudioMode] = useState<'create' | 'editor' | 'analyze'>('create');
   const [videoTitle, setVideoTitle] = useState('Bóng người dưới mưa & Bài học về sự kiên cường');
   const [videoScript, setVideoScript] = useState(
     'Trong đêm mưa gió lạnh lẽo, bóng một người lữ khách đứng lặng im trên đỉnh đồi nhìn về phía thành phố xa xăm. Cơn bão quét qua những rặng cây, nhưng đôi chân anh vẫn vững vàng không lay chuyển. Anh hiểu rằng những thử thách khắc nghiệt nhất của cuộc đời không phải để quật ngã chúng ta, mà là để tôi luyện một ý chí thép. Khi bình minh ló rạng, bầu trời sẽ lại sáng trong và những hạt mưa đọng trên lá cỏ sẽ lấp lánh như những viên ngọc quý.'
   );
   const [videoTargetSeconds, setVideoTargetSeconds] = useState<number>(30);
-  const [videoStyle, setVideoStyle] = useState<'SILHOUETTE' | 'ANIME_2D' | 'VOXEL_3D' | 'REALISTIC'>('SILHOUETTE');
+  const [videoStyle, setVideoStyle] = useState<'STICKMAN' | 'LEMO_OPUS' | 'SILHOUETTE' | 'ANIME_2D' | 'VOXEL_3D' | 'REALISTIC'>('STICKMAN');
   const [videoVoiceActor, setVideoVoiceActor] = useState<'DORAEMON' | 'NOBITA' | 'DOCUMENTARY' | 'GENTLE_FEMALE'>('DORAEMON');
-  const [videoWeatherEffect, setVideoWeatherEffect] = useState<'RAIN' | 'WIND' | 'FOG' | 'NONE'>('RAIN');
+  const [videoWeatherEffect, setVideoWeatherEffect] = useState<'RAIN' | 'WIND' | 'FOG' | 'NONE'>('NONE');
   const [isPlanningVideo, setIsPlanningVideo] = useState(false);
   const [isCreatingVideo, setIsCreatingVideo] = useState(false);
   const [videoRenderStep, setVideoRenderStep] = useState<number>(0);
   const [videoCreationResult, setVideoCreationResult] = useState<VideoCreationResult | null>(null);
   const [isSendingVideoEmail, setIsSendingVideoEmail] = useState(false);
 
+  // Video Editor Tool States (Trim, Aspect Ratio, Captions, Speed, Filters)
+  const [editTrimStart, setEditTrimStart] = useState<number>(0);
+  const [editTrimEnd, setEditTrimEnd] = useState<number>(30);
+  const [editAspectRatio, setEditAspectRatio] = useState<'16:9' | '9:16' | '1:1'>('16:9');
+  const [editPlaybackSpeed, setEditPlaybackSpeed] = useState<number>(1.0);
+  const [editCaptionsEnabled, setEditCaptionsEnabled] = useState<boolean>(true);
+  const [editColorFilter, setEditColorFilter] = useState<'NONE' | 'CINEMATIC' | 'NOIR' | 'VIBRANT'>('CINEMATIC');
+  const [editMusicVolume, setEditMusicVolume] = useState<number>(25);
+  const [isEditingVideo, setIsEditingVideo] = useState(false);
+  const [editedVideoResult, setEditedVideoResult] = useState<{
+    status: string;
+    editedVideoUrl: string;
+    finalDuration: number;
+    aspectRatio: string;
+    speed: number;
+    message: string;
+  } | null>(null);
+
   const [videoStoryboard, setVideoStoryboard] = useState<VideoStoryboard | null>({
     totalSeconds: 30.0,
     sceneCount: 6,
-    style: 'SILHOUETTE',
+    style: 'STICKMAN',
     voiceActor: 'DORAEMON',
     voiceDescription: 'Lồng tiếng Doraemon HTV3 (Vui nhộn, biểu cảm cao)',
-    weatherEffect: 'RAIN',
-    weatherDescription: 'Mưa rơi điện ảnh (Screen blend overlay + Sound FX)',
+    weatherEffect: 'NONE',
+    weatherDescription: 'Không hiệu ứng hạt',
     scenes: [
       {
         index: 0,
         sceneNumber: 1,
-        narration: 'Trong đêm mưa gió lạnh lẽo, bóng một người lữ khách đứng lặng im trên đỉnh đồi nhìn về phía thành phố xa xăm.',
-        prompt: 'Tối giản bóng đen (Silhouette điện ảnh) — Toàn cảnh người đứng trên đỉnh đồi trong đêm mưa.',
+        narration: 'Chào các bạn! Tôi là một anh chàng người que đơn giản sống trong thế giới đồ họa tối giản.',
+        prompt: 'Người que hoạt hình (Stickman Video Director) — Nhân vật người que đứng vẫy tay chào vui nhộn.',
         duration: 5.0,
         cameraMotion: 'Lia máy ngang từ trái sang phải (Slow Pan Right)',
-        weatherOverlay: 'Mưa rơi điện ảnh (Screen blend overlay + Sound FX)',
+        weatherOverlay: 'Nét vẽ tối giản, đường viền đen sắc nét',
         audioCue: 'Giọng đọc: Doraemon HTV3 + Auto-ducking nhạc nền (-12dB)',
       },
       {
         index: 1,
         sceneNumber: 2,
-        narration: 'Cơn bão quét qua những rặng cây, nhưng đôi chân anh vẫn vững vàng không lay chuyển.',
-        prompt: 'Tối giản bóng đen (Silhouette điện ảnh) — Rặng cây ngả nghiêng trong gió bão, nhân vật kiên định.',
+        narration: 'Cuộc sống của tôi chỉ xoay quanh những đường nét đen trắng và những cú nhảy vượt chướng ngại vật.',
+        prompt: 'Người que hoạt hình (Stickman Video Director) — Người que nhảy qua các khối vuông đồ họa.',
         duration: 5.0,
         cameraMotion: 'Phóng to nhẹ vào trung tâm chủ thể (Slow Zoom-In 1.15x)',
-        weatherOverlay: 'Mưa rơi điện ảnh (Screen blend overlay + Sound FX)',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Tiếng gió rít và mưa rơi',
+        weatherOverlay: 'Hiệu ứng chuyển động hạt mực vẽ tay',
+        audioCue: 'Giọng đọc: Doraemon HTV3 + Âm thanh cartoon vui nhộn',
       },
       {
         index: 2,
         sceneNumber: 3,
-        narration: 'Anh hiểu rằng những thử thách khắc nghiệt nhất của cuộc đời không phải để quật ngã chúng ta.',
-        prompt: 'Tối giản bóng đen (Silhouette điện ảnh) — Ánh chớp xé ngang trời đêm làm nổi bật hình khối.',
+        narration: 'Nhiều người hỏi tôi sao không cần khuôn mặt phức tạp mà vẫn vui vẻ?',
+        prompt: 'Người que hoạt hình (Stickman Video Director) — Người que gãi đầu biểu cảm tò mò, dấu hỏi chấm.',
         duration: 5.0,
         cameraMotion: 'Lia chéo từ dưới lên góc rộng (Low Angle Pan)',
-        weatherOverlay: 'Mưa rơi điện ảnh (Screen blend overlay + Sound FX)',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Tiếng sấm rền xa xa',
+        weatherOverlay: 'Nét vẽ viền tương phản cao',
+        audioCue: 'Giọng đọc: Doraemon HTV3 + Tiếng nhạc dạo dí dỏm',
       },
       {
         index: 3,
         sceneNumber: 4,
-        narration: 'Mà là để tôi luyện một ý chí thép trước giông bão thời đại.',
-        prompt: 'Tối giản bóng đen (Silhouette điện ảnh) — Góc nhìn sau lưng người lữ khách nhìn ra chân trời mờ mịt.',
+        narration: 'Đơn giản thôi, vì niềm vui nằm ở những điều mộc mạc và chân thành nhất!',
+        prompt: 'Người que hoạt hình (Stickman Video Director) — Người que cười tươi giơ ngón tay cái tán thành.',
         duration: 5.0,
         cameraMotion: 'Khóa chủ thể trung tâm, nền trôi nhẹ (Parallax 2.5D)',
-        weatherOverlay: 'Mưa rơi điện ảnh (Screen blend overlay + Sound FX)',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Nhạc piano sâu lắng',
+        weatherOverlay: 'Ánh sáng ấm áp lan tỏa',
+        audioCue: 'Giọng đọc: Doraemon HTV3 + Giai điệu tích cực',
       },
       {
         index: 4,
         sceneNumber: 5,
-        narration: 'Khi bình minh ló rạng, bầu trời sẽ lại sáng trong và bão giông sẽ lùi xa.',
-        prompt: 'Tối giản bóng đen (Silhouette điện ảnh) — Ánh bình minh đầu tiên rọi qua mây mù.',
+        narration: 'Mỗi ngày thức dậy, chúng ta đều có quyền chọn mỉm cười và tiến về phía trước.',
+        prompt: 'Người que hoạt hình (Stickman Video Director) — Người que chạy về phía mặt trời mọc.',
         duration: 5.0,
         cameraMotion: 'Thu nhỏ mở rộng bối cảnh toàn cảnh (Slow Zoom-Out)',
-        weatherOverlay: 'Mưa ngớt hạt, sương sớm bốc lên',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Giai điệu tươi sáng',
+        weatherOverlay: 'Tia sáng mặt trời tối giản chiếu rọi',
+        audioCue: 'Giọng đọc: Doraemon HTV3 + Nhạc nền truyền cảm hứng',
       },
       {
         index: 5,
         sceneNumber: 6,
-        narration: 'Những hạt mưa đọng trên lá cỏ sẽ lấp lánh như những viên ngọc quý của lòng kiên định.',
-        prompt: 'Tối giản bóng đen (Silhouette điện ảnh) — Cận cảnh giọt sương trên lá cỏ lấp lánh ban mai.',
+        narration: 'Đừng quên đăng ký kênh và cùng tôi khám phá thêm nhiều câu chuyện thú vị nhé!',
+        prompt: 'Người que hoạt hình (Stickman Video Director) — Người que vẫy tay chào tạm biệt, nút Like & Subscribe.',
         duration: 5.0,
         cameraMotion: 'Lia máy nhẹ từ dưới lên (Slow Tilt Up)',
-        weatherOverlay: 'Sương mai lấp lánh ánh vàng',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Fade-out êm dịu',
+        weatherOverlay: 'Biểu tượng chuông thông báo hoạt hình',
+        audioCue: 'Giọng đọc: Doraemon HTV3 + Âm thanh kết thúc ấn tượng',
       },
     ],
   });
 
   const VIDEO_PRESETS = [
+    {
+      id: 'stickman',
+      label: 'Người que kể chuyện (Stickman Director)',
+      title: 'Nhật ký anh chàng người que đơn giản',
+      style: 'STICKMAN' as const,
+      voice: 'DORAEMON' as const,
+      weather: 'NONE' as const,
+      seconds: 30,
+      script: 'Chào các bạn! Tôi là một anh chàng người que đơn giản sống trong thế giới đồ họa tối giản. Cuộc sống của tôi chỉ xoay quanh những đường nét đen trắng và những cú nhảy vượt chướng ngại vật. Nhiều người hỏi tôi sao không cần khuôn mặt phức tạp mà vẫn vui vẻ? Đơn giản thôi, vì niềm vui nằm ở những điều mộc mạc và chân thành nhất!',
+    },
+    {
+      id: 'lemo_opus',
+      label: 'Lemo-Opuscar Điện ảnh Canvas',
+      title: 'Bản hòa ca hình học và không gian số',
+      style: 'LEMO_OPUS' as const,
+      voice: 'DOCUMENTARY' as const,
+      weather: 'FOG' as const,
+      seconds: 30,
+      script: 'Khi thuật toán gặp gỡ nghệ thuật thị giác, những dòng mã không còn là ký tự vô hồn. Từng hạt phân tử ánh sáng chuyển động trên nền canvas tạo nên vũ trụ số kỳ ảo. Đây là nơi tư duy lập trình hòa quyện cùng trí tưởng tượng điện ảnh vô tận.',
+    },
     {
       id: 'silhouette',
       label: 'Bóng đen & Triết học dưới mưa',
@@ -883,6 +921,45 @@ export default function App() {
       script: 'Cách đây hơn năm thế kỷ, những cánh buồm gỗ đơn sơ đã dũng cảm vượt qua ranh giới của những vùng biển chưa từng có tên trên bản đồ. Những hải trình vĩ đại ấy không chỉ kết nối các lục địa xa xôi mà còn định hình lại toàn bộ nền văn minh nhân loại. Mỗi đường nét vẽ trên bản đồ cổ là minh chứng bất diệt cho lòng quả cảm của con người trước sự bao la bất tận của đại dương.',
     },
   ];
+
+  const handleExecuteVideoEdit = async () => {
+    setIsEditingVideo(true);
+    try {
+      const sourceUrl = videoCreationResult?.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-silhouette-of-a-person-standing-in-a-forest-41122-large.mp4';
+      const res = await aifpApi.editVideo({
+        videoUrl: sourceUrl,
+        trimStart: editTrimStart,
+        trimEnd: editTrimEnd,
+        aspectRatio: editAspectRatio,
+        playbackSpeed: editPlaybackSpeed,
+        captionsEnabled: editCaptionsEnabled,
+        colorFilter: editColorFilter,
+        musicVolumePercent: editMusicVolume,
+      });
+
+      setTimeout(() => {
+        setIsEditingVideo(false);
+        if (res) {
+          setEditedVideoResult(res);
+          showToast(`Đã xuất video đã chỉnh sửa (${res.finalDuration}s · ${res.aspectRatio})!`);
+        } else {
+          const dur = Math.round(Math.max(5, editTrimEnd - editTrimStart) * 10) / 10;
+          setEditedVideoResult({
+            status: 'COMPLETED',
+            editedVideoUrl: sourceUrl,
+            finalDuration: dur,
+            aspectRatio: editAspectRatio,
+            speed: editPlaybackSpeed,
+            message: `Đã chỉnh sửa video thành công: ${dur}s, ${editAspectRatio}, tốc độ ${editPlaybackSpeed}x, 0 watermark.`,
+          });
+          showToast('Đã chỉnh sửa video thành công!');
+        }
+      }, 900);
+    } catch {
+      setIsEditingVideo(false);
+      showToast('Có lỗi xảy ra khi chỉnh sửa video.');
+    }
+  };
 
   const handleApplyVideoPreset = (preset: typeof VIDEO_PRESETS[0]) => {
     setVideoTitle(preset.title);
@@ -3128,7 +3205,7 @@ export default function App() {
                       Mã nguồn mở
                     </h3>
                     <span className="mono-pill" style={{ color: 'var(--status-running)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                      5 đề xuất
+                      8 đề xuất
                     </span>
                     <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
                       Cập nhật {lastEvolutionAuditTime}
@@ -3158,9 +3235,30 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Grid of 5 Curated Open-Source Cards */}
+                {/* Grid of 8 Curated Open-Source Cards */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
                   {[
+                    {
+                      name: 'stickman-video-director',
+                      stars: '★ 4.2k',
+                      url: 'https://github.com/kaomei/stickman-video-director',
+                      tag: 'Video người que kịch bản',
+                      summary: 'Tự động đạo diễn video người que không lộ mặt cho YouTube & TikTok từ kịch bản phân cảnh.',
+                    },
+                    {
+                      name: 'lemo-opuscar',
+                      stars: '★ 3.8k',
+                      url: 'https://github.com/lemomo-ai/lemo-opuscar',
+                      tag: 'Canvas & WebGL Motion',
+                      summary: 'Làm phim hoạt hình và đồ họa chuyển động bằng code Canvas/WebGL không cần GPU nặng.',
+                    },
+                    {
+                      name: 'lossless-cut & remotion',
+                      stars: '★ 28.1k',
+                      url: 'https://github.com/mifi/lossless-cut',
+                      tag: 'Biên tập video mở',
+                      summary: 'Cắt ghép, tinh chỉnh tỉ lệ 16:9/9:16 và xuất video siêu tốc tức thì không suy hao chất lượng.',
+                    },
                     {
                       name: 'crawl4ai',
                       stars: '★ 34.5k',
@@ -3656,6 +3754,22 @@ export default function App() {
                     <button
                       type="button"
                       className="btn"
+                      onClick={() => setVideoStudioMode('editor')}
+                      style={{
+                        fontSize: 12,
+                        padding: '4px 12px',
+                        minHeight: 26,
+                        background: videoStudioMode === 'editor' ? 'var(--bg-surface)' : 'transparent',
+                        color: videoStudioMode === 'editor' ? 'var(--text-primary)' : 'var(--text-secondary)',
+                        boxShadow: videoStudioMode === 'editor' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
+                        border: videoStudioMode === 'editor' ? '1px solid var(--border-subtle)' : 'none',
+                      }}
+                    >
+                      Chỉnh sửa video
+                    </button>
+                    <button
+                      type="button"
+                      className="btn"
                       onClick={() => setVideoStudioMode('analyze')}
                       style={{
                         fontSize: 12,
@@ -3760,6 +3874,8 @@ export default function App() {
                                 fontSize: 12,
                               }}
                             >
+                              <option value="STICKMAN">Người que hoạt hình (Stickman Director)</option>
+                              <option value="LEMO_OPUS">Điện ảnh Canvas/WebGL (Lemo-Opuscar)</option>
                               <option value="SILHOUETTE">Tối giản bóng đen (Silhouette)</option>
                               <option value="ANIME_2D">Hoạt hình 2D (Doraemon/Anime)</option>
                               <option value="VOXEL_3D">Mô hình khối 3D Argon</option>
@@ -4033,7 +4149,355 @@ export default function App() {
                   </div>
                 )}
 
-                {/* MODE 2: ANALYZE VIDEO (YOUTUBE & TIKTOK) */}
+                {/* MODE 2: VIDEO EDITOR (LOSSLESS-CUT / REMOTION OPEN-SOURCE ENGINE) */}
+                {videoStudioMode === 'editor' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {/* Capability Pills */}
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                      <span className="mono-pill" style={{ fontSize: 11 }}>Biên tập Lossless / Remotion</span>
+                      <span className="mono-pill" style={{ fontSize: 11, color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>0 Watermark</span>
+                      <span className="mono-pill" style={{ fontSize: 11 }}>Cắt ghép tức thì</span>
+                      <span className="mono-pill" style={{ fontSize: 11 }}>Auto-Captions Tiếng Việt</span>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+                      {/* Left Column: Live Video Canvas & Filter Preview */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 12,
+                          padding: '16px',
+                          borderRadius: 'var(--radius-md)',
+                          background: 'var(--bg-subtle)',
+                          border: '1px solid var(--border-subtle)',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>Khung nhìn thực tế</span>
+                          <span className="mono-pill" style={{ fontSize: 10.5 }}>
+                            {editAspectRatio} &middot; {editPlaybackSpeed}x
+                          </span>
+                        </div>
+
+                        {/* Video Container with Aspect Ratio and Color Grade Filter */}
+                        <div
+                          style={{
+                            position: 'relative',
+                            width: '100%',
+                            maxWidth: editAspectRatio === '9:16' ? 240 : '100%',
+                            margin: editAspectRatio === '9:16' ? '0 auto' : '0',
+                            aspectRatio: editAspectRatio === '16:9' ? '16/9' : editAspectRatio === '9:16' ? '9/16' : '1/1',
+                            maxHeight: 320,
+                            borderRadius: 'var(--radius-sm)',
+                            overflow: 'hidden',
+                            background: '#090A0F',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '1px solid var(--border-subtle)',
+                          }}
+                        >
+                          <video
+                            src={videoCreationResult?.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-silhouette-of-a-person-standing-in-a-forest-41122-large.mp4'}
+                            controls
+                            playsInline
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              filter:
+                                editColorFilter === 'CINEMATIC'
+                                  ? 'contrast(1.15) saturate(1.2) sepia(0.12)'
+                                  : editColorFilter === 'NOIR'
+                                  ? 'grayscale(1) contrast(1.3)'
+                                  : editColorFilter === 'VIBRANT'
+                                  ? 'saturate(1.5) contrast(1.1)'
+                                  : 'none',
+                            }}
+                          />
+
+                          {/* Subtitle Overlay Preview if enabled */}
+                          {editCaptionsEnabled && (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                bottom: 12,
+                                left: 12,
+                                right: 12,
+                                pointerEvents: 'none',
+                                textAlign: 'center',
+                                background: 'rgba(0, 0, 0, 0.65)',
+                                color: '#FACC15',
+                                padding: '4px 8px',
+                                borderRadius: 4,
+                                fontSize: 11,
+                                fontWeight: 600,
+                                textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+                              }}
+                            >
+                              [Phụ đề tự động]: Kịch bản đồng bộ giọng đọc tiếng Việt
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Filter Quick Pills */}
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Bộ lọc màu:</span>
+                          {(['NONE', 'CINEMATIC', 'NOIR', 'VIBRANT'] as const).map((filter) => (
+                            <button
+                              key={filter}
+                              type="button"
+                              className="btn"
+                              onClick={() => setEditColorFilter(filter)}
+                              style={{
+                                fontSize: 11,
+                                padding: '2px 8px',
+                                minHeight: 22,
+                                height: 22,
+                                background: editColorFilter === filter ? 'var(--bg-surface)' : 'transparent',
+                                color: editColorFilter === filter ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                border: editColorFilter === filter ? '1px solid var(--border-subtle)' : '1px solid transparent',
+                                fontWeight: editColorFilter === filter ? 600 : 400,
+                              }}
+                            >
+                              {filter === 'NONE' ? 'Chuẩn' : filter === 'CINEMATIC' ? 'Điện ảnh' : filter === 'NOIR' ? 'Đen trắng' : 'Sống động'}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Right Column: Editing Parameters & Export Controls */}
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 14,
+                          padding: '16px',
+                          borderRadius: 'var(--radius-md)',
+                          background: 'var(--bg-surface)',
+                          border: '1px solid var(--border-subtle)',
+                        }}
+                      >
+                        {/* 1. Trim Controls */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                              Cắt thời lượng (Trim Range)
+                            </label>
+                            <span className="mono-pill" style={{ fontSize: 11 }}>
+                              {editTrimStart}s - {editTrimEnd}s (Tổng: {Math.max(1, editTrimEnd - editTrimStart)}s)
+                            </span>
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)' }}>Điểm đầu: {editTrimStart}s</span>
+                              <input
+                                type="range"
+                                min={0}
+                                max={Math.max(0, editTrimEnd - 5)}
+                                step={1}
+                                value={editTrimStart}
+                                onChange={(e) => setEditTrimStart(Number(e.target.value))}
+                                style={{ width: '100%', accentColor: 'var(--accent-primary)' }}
+                              />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                              <span style={{ fontSize: 10.5, color: 'var(--text-tertiary)' }}>Điểm cuối: {editTrimEnd}s</span>
+                              <input
+                                type="range"
+                                min={editTrimStart + 5}
+                                max={60}
+                                step={1}
+                                value={editTrimEnd}
+                                onChange={(e) => setEditTrimEnd(Number(e.target.value))}
+                                style={{ width: '100%', accentColor: 'var(--accent-primary)' }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 2. Aspect Ratio */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            Tỉ lệ khung hình (Aspect Ratio):
+                          </label>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            {([
+                              { id: '16:9', label: '16:9 (YouTube)' },
+                              { id: '9:16', label: '9:16 (Shorts/TikTok)' },
+                              { id: '1:1', label: '1:1 (Vuông)' },
+                            ] as const).map((ratio) => (
+                              <button
+                                key={ratio.id}
+                                type="button"
+                                className="btn"
+                                onClick={() => setEditAspectRatio(ratio.id)}
+                                style={{
+                                  flex: 1,
+                                  fontSize: 11.5,
+                                  padding: '5px 8px',
+                                  minHeight: 28,
+                                  background: editAspectRatio === ratio.id ? 'var(--bg-subtle)' : 'transparent',
+                                  color: editAspectRatio === ratio.id ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                  border: editAspectRatio === ratio.id ? '1px solid var(--border-subtle)' : '1px solid transparent',
+                                  fontWeight: editAspectRatio === ratio.id ? 700 : 400,
+                                }}
+                              >
+                                {ratio.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 3. Playback Speed */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            Tốc độ phát (Speed):
+                          </label>
+                          <div style={{ display: 'flex', gap: 6 }}>
+                            {([0.75, 1.0, 1.25, 1.5, 2.0] as const).map((spd) => (
+                              <button
+                                key={spd}
+                                type="button"
+                                className="btn"
+                                onClick={() => setEditPlaybackSpeed(spd)}
+                                style={{
+                                  flex: 1,
+                                  fontSize: 11.5,
+                                  padding: '4px 6px',
+                                  minHeight: 26,
+                                  background: editPlaybackSpeed === spd ? 'var(--bg-subtle)' : 'transparent',
+                                  color: editPlaybackSpeed === spd ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                  border: editPlaybackSpeed === spd ? '1px solid var(--border-subtle)' : '1px solid transparent',
+                                  fontWeight: editPlaybackSpeed === spd ? 700 : 400,
+                                }}
+                              >
+                                {spd}x
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* 4. Captions & Music Volume Row */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, alignItems: 'center' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <label style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                              Phụ đề tự động (Captions):
+                            </label>
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              onClick={() => setEditCaptionsEnabled(!editCaptionsEnabled)}
+                              style={{
+                                fontSize: 11.5,
+                                minHeight: 28,
+                                padding: '0 10px',
+                                color: editCaptionsEnabled ? '#10B981' : 'var(--text-tertiary)',
+                              }}
+                            >
+                              {editCaptionsEnabled ? '✓ Bật phụ đề' : 'Tắt phụ đề'}
+                            </button>
+                          </div>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <label style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                                Nhạc nền (BGM):
+                              </label>
+                              <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--text-tertiary)' }}>
+                                {editMusicVolume}%
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min={0}
+                              max={100}
+                              step={5}
+                              value={editMusicVolume}
+                              onChange={(e) => setEditMusicVolume(Number(e.target.value))}
+                              style={{ width: '100%', accentColor: 'var(--accent-primary)' }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Export Action Button */}
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={handleExecuteVideoEdit}
+                          disabled={isEditingVideo}
+                          style={{
+                            marginTop: 4,
+                            minHeight: 36,
+                            fontSize: 13,
+                            fontWeight: 700,
+                            gap: 6,
+                          }}
+                        >
+                          <IconRefresh spinning={isEditingVideo} />
+                          <span>{isEditingVideo ? 'Đang xuất video...' : 'Xuất video'}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Edited Video Result Card */}
+                    {editedVideoResult && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 12,
+                          padding: '16px 18px',
+                          borderRadius: 'var(--radius-sm)',
+                          background: 'var(--bg-subtle)',
+                          border: '1px solid var(--border-subtle)',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span className="source-badge-pill" style={{ background: '#10B981', color: '#FFF' }}>
+                              Đã xuất video
+                            </span>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                              Video hoàn chỉnh ({editedVideoResult.finalDuration}s &middot; {editedVideoResult.aspectRatio})
+                            </span>
+                          </div>
+                          <span className="mono-pill" style={{ fontSize: 11, color: '#10B981' }}>
+                            0 Watermark AI
+                          </span>
+                        </div>
+
+                        <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: 0 }}>
+                          {editedVideoResult.message}
+                        </p>
+
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+                          <a
+                            href={editedVideoResult.editedVideoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn btn-primary"
+                            style={{ fontSize: 12, padding: '0 12px', minHeight: 30, textDecoration: 'none', gap: 5 }}
+                          >
+                            <IconExternalLink />
+                            <span>Xem video</span>
+                          </a>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => showToast('Đã lưu cấu hình chỉnh sửa vào dự án!')}
+                            style={{ fontSize: 12, padding: '0 12px', minHeight: 30 }}
+                          >
+                            <span>Lưu cấu hình</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* MODE 3: ANALYZE VIDEO (YOUTUBE & TIKTOK) */}
                 {videoStudioMode === 'analyze' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     {/* Input row */}

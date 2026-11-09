@@ -358,6 +358,19 @@ class AifpApiClient {
     }
   }
 
+  public async listTasks(): Promise<any[]> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/tasks'), {
+        headers: this.headers(),
+      });
+      if (!resp.ok) return [];
+      const json = await resp.json();
+      return json.data || [];
+    } catch {
+      return [];
+    }
+  }
+
   public async sendChannelDigest(
     recipientEmail: string,
     channelId: string,

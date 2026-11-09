@@ -1,7 +1,10 @@
 package com.aifp.core.notification;
 
 import com.aifp.core.common.ApiResponse;
+import com.aifp.core.security.CustomUserPrincipal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -14,9 +17,14 @@ import java.util.UUID;
 public class NewsFeedController {
 
     private final LiveNewsCrawlerService liveNewsCrawlerService;
+    private final String ownerEmail;
 
-    public NewsFeedController(LiveNewsCrawlerService liveNewsCrawlerService) {
+    public NewsFeedController(
+            LiveNewsCrawlerService liveNewsCrawlerService,
+            @Value("${aifp.owner-email:nguyentuananh11a1.lhpt@gmail.com}") String ownerEmail
+    ) {
         this.liveNewsCrawlerService = liveNewsCrawlerService;
+        this.ownerEmail = (ownerEmail != null && !ownerEmail.isBlank()) ? ownerEmail.trim() : "nguyentuananh11a1.lhpt@gmail.com";
     }
 
     public record LiveArticleDto(
@@ -51,9 +59,17 @@ public class NewsFeedController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<LiveArticleDto>>> getLiveNews(
-            @RequestParam(value = "channel", required = false) String channel) {
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            @RequestParam(value = "channel", required = false) String channel
+    ) {
         List<LiveArticleEntity> entities = liveNewsCrawlerService.getArticles(channel);
-        List<LiveArticleDto> dtos = entities.stream().map(LiveArticleDto::fromEntity).toList();
+        boolean isOwner = principal != null && principal.email() != null &&
+                principal.email().trim().equalsIgnoreCase(ownerEmail.trim());
+
+        List<LiveArticleDto> dtos = entities.stream()
+                .filter(e -> isOwner || (!"ai-evolution".equalsIgnoreCase(e.getChannelId()) && !"creator-ideas".equalsIgnoreCase(e.getChannelId())))
+                .map(LiveArticleDto::fromEntity)
+                .toList();
         return ResponseEntity.ok(ApiResponse.ok(dtos));
     }
 

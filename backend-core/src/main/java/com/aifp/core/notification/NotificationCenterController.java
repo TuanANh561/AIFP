@@ -5,6 +5,7 @@ import com.aifp.core.security.CustomUserPrincipal;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -29,17 +31,20 @@ public class NotificationCenterController {
     private final EmailCenterService emailCenterService;
     private final LiveArticleRepository liveArticleRepository;
     private final LinkValidationService linkValidationService;
+    private final String ownerEmail;
 
     public NotificationCenterController(
             NotificationCenterService notificationService,
             EmailCenterService emailCenterService,
             LiveArticleRepository liveArticleRepository,
-            LinkValidationService linkValidationService
+            LinkValidationService linkValidationService,
+            @Value("${aifp.owner-email:nguyentuananh11a1.lhpt@gmail.com}") String ownerEmail
     ) {
         this.notificationService = notificationService;
         this.emailCenterService = emailCenterService;
         this.liveArticleRepository = liveArticleRepository;
         this.linkValidationService = linkValidationService;
+        this.ownerEmail = (ownerEmail != null && !ownerEmail.isBlank()) ? ownerEmail.trim() : "nguyentuananh11a1.lhpt@gmail.com";
     }
 
     public record WebPushSubscriptionRequest(
@@ -194,6 +199,15 @@ public class NotificationCenterController {
             @Valid @RequestBody SendChannelDigestRequest request
     ) {
         String channel = (request.channelId() != null) ? request.channelId().toLowerCase().trim() : "shopping";
+
+        boolean isProprietaryChannel = "ai-evolution".equals(channel) || "ai".equals(channel)
+                || "creator-ideas".equals(channel) || "monetization-ideas".equals(channel) || "creator".equals(channel);
+        boolean isOwner = request.recipientEmail() != null && request.recipientEmail().trim().equalsIgnoreCase(ownerEmail.trim());
+
+        if (isProprietaryChannel && !isOwner) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Kênh nghiên cứu và ý tưởng phát triển thuộc quyền sở hữu riêng của Master Owner");
+        }
+
         List<EmailCenterService.DigestArticleCard> articles = new ArrayList<>();
         List<EmailCenterService.JobCardItem> jobCards = new ArrayList<>();
         List<EmailCenterService.MonetizationIdeaItem> monetizationIdeas = new ArrayList<>();

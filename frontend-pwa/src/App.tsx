@@ -679,6 +679,47 @@ export default function App() {
       ? topicChannels
       : topicChannels.filter((ch: TopicChannelConfig) => ch.id !== 'ai-evolution' && ch.id !== 'creator-ideas');
   }, [isOwner, topicChannels]);
+
+  // Available Tool subtabs based on ownership: proprietary open-source research is exclusively for master owner
+  const availableToolSubTabs = useMemo(() => {
+    const tabs: { id: ToolSubTab; label: string }[] = [];
+    if (isOwner) {
+      tabs.push({ id: 'evolution', label: 'Mã nguồn mở' });
+    }
+    tabs.push(
+      { id: 'video', label: 'Video & Shorts' },
+      { id: 'vision', label: 'Hóa đơn' },
+      { id: 'shopping', label: 'Mua sắm' },
+      { id: 'writing', label: 'Soạn thảo' },
+      { id: 'docs', label: 'Tài liệu' },
+      { id: 'calendar', label: 'Lịch hẹn' }
+    );
+    return tabs;
+  }, [isOwner]);
+
+  useEffect(() => {
+    if (!isOwner && toolSubTab === 'evolution') {
+      setToolSubTab('video');
+    }
+  }, [isOwner, toolSubTab]);
+
+  // Sub-filter pills for news feed
+  const newsFilterOptions = useMemo(() => {
+    return [
+      { id: 'all', label: 'Tất cả' },
+      ...(isOwner
+        ? [
+            { id: 'creator-ideas', label: 'Ý tưởng kiếm tiền' },
+            { id: 'ai-evolution', label: 'Tiến hóa AI' },
+          ]
+        : []),
+      { id: 'shopping', label: 'Shopee' },
+      { id: 'jobs', label: 'Việc làm' },
+      { id: 'tech', label: 'Công nghệ' },
+      { id: 'finance', label: 'Tài chính' },
+      { id: 'social', label: 'Cộng đồng' },
+    ];
+  }, [isOwner]);
   const [editingChannel, setEditingChannel] = useState<TopicChannelConfig | null>(null);
   const [sendingChannelId, setSendingChannelId] = useState<string | null>(null);
   const [newsFilter, setNewsFilter] = useState<'all' | 'shopping' | 'jobs' | 'tech' | 'finance' | 'social' | 'ai-evolution' | 'creator-ideas'>('all');
@@ -1766,9 +1807,12 @@ export default function App() {
   };
 
   const filteredNews = (liveNews && liveNews.length > 0 ? liveNews : INITIAL_NEWS).filter((item) => {
+    if (!isOwner && (item.channelId === 'ai-evolution' || item.channelId === 'creator-ideas')) {
+      return false;
+    }
     if (newsFilter === 'all') return true;
-    if (newsFilter === 'ai-evolution') return item.channelId === 'ai-evolution' || item.title.includes('AI') || item.title.includes('DeepSeek') || item.title.includes('MCP') || item.summary.includes('AI') || item.category.includes('AI');
-    if (newsFilter === 'creator-ideas') return item.channelId === 'creator-ideas' || item.title.includes('Game') || item.title.includes('Video') || item.title.includes('YouTube') || item.title.includes('Kiếm tiền') || item.summary.includes('Game');
+    if (newsFilter === 'ai-evolution') return isOwner && (item.channelId === 'ai-evolution' || item.title.includes('AI') || item.title.includes('DeepSeek') || item.title.includes('MCP') || item.summary.includes('AI') || item.category.includes('AI'));
+    if (newsFilter === 'creator-ideas') return isOwner && (item.channelId === 'creator-ideas' || item.title.includes('Game') || item.title.includes('Video') || item.title.includes('YouTube') || item.title.includes('Kiếm tiền') || item.summary.includes('Game'));
     if (newsFilter === 'shopping') return item.sourceType === 'shop' || item.channelId === 'shopping';
     if (newsFilter === 'jobs') return (item.sourceType === 'tech' && (item.category.includes('việc') || item.title.includes('Tuyển'))) || item.channelId === 'jobs';
     if (newsFilter === 'tech') return (item.sourceType === 'vn' || item.sourceType === 'tech') && !item.title.includes('Tuyển') && (item.channelId === 'tech' || item.category.includes('nghệ'));
@@ -2151,7 +2195,7 @@ export default function App() {
                               style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5 }}
                             >
                               <IconSend />
-                              <span>Gửi thử 1 email ngay</span>
+                              <span>Gửi thử ngay</span>
                             </button>
 
                             <button
@@ -2161,7 +2205,7 @@ export default function App() {
                               style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5 }}
                             >
                               <IconEye />
-                              <span>Xem trong Bản tin</span>
+                              <span>Xem bản tin</span>
                             </button>
                           </div>
                         </div>
@@ -2763,16 +2807,7 @@ export default function App() {
 
                 {/* Sub Filter Pills */}
                 <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                  {[
-                    { id: 'all', label: 'Tất cả' },
-                    { id: 'creator-ideas', label: 'Ý tưởng kiếm tiền' },
-                    { id: 'ai-evolution', label: 'Tiến hóa AI' },
-                    { id: 'shopping', label: 'Shopee' },
-                    { id: 'jobs', label: 'Việc làm' },
-                    { id: 'tech', label: 'Công nghệ' },
-                    { id: 'finance', label: 'Tài chính' },
-                    { id: 'social', label: 'Cộng đồng' },
-                  ].map((f) => (
+                  {newsFilterOptions.map((f) => (
                     <button
                       key={f.id}
                       onClick={() => setNewsFilter(f.id as any)}
@@ -3274,15 +3309,7 @@ export default function App() {
 
             {/* Sub-Tabs (Clean Pills) */}
             <div style={{ display: 'flex', gap: 6, marginBottom: 18, flexWrap: 'wrap' }}>
-              {[
-                { id: 'evolution', label: 'Mã nguồn mở' },
-                { id: 'video', label: 'Video & Shorts' },
-                { id: 'vision', label: 'Hóa đơn' },
-                { id: 'shopping', label: 'Mua sắm' },
-                { id: 'writing', label: 'Soạn thảo' },
-                { id: 'docs', label: 'Tài liệu' },
-                { id: 'calendar', label: 'Lịch hẹn' },
-              ].map((tab) => (
+              {availableToolSubTabs.map((tab) => (
                 <button
                   key={tab.id}
                   className={`subtab-pill ${toolSubTab === tab.id ? 'active' : ''}`}
@@ -4286,9 +4313,9 @@ export default function App() {
                                     &ldquo;{sc.narration}&rdquo;
                                   </div>
                                   <div style={{ fontSize: 11, color: 'var(--text-secondary)', display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 2 }}>
-                                    <span>🌧 {sc.weatherOverlay.split('(')[0].trim()}</span>
+                                    <span>Hiệu ứng: {sc.weatherOverlay.split('(')[0].trim()}</span>
                                     <span>•</span>
-                                    <span>🎙 {sc.audioCue.split('+')[0].replace('Giọng đọc:', '').trim()}</span>
+                                    <span>Giọng: {sc.audioCue.split('+')[0].replace('Giọng đọc:', '').trim()}</span>
                                   </div>
                                 </div>
                               ))}
@@ -6112,7 +6139,7 @@ export default function App() {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
-                <span>{isLoggingIn ? 'Đang xác thực...' : 'Đăng nhập với Google'}</span>
+                <span>{isLoggingIn ? 'Đang xác thực...' : 'Đăng nhập Google'}</span>
               </button>
 
               {/* Dev / Test Account Input */}

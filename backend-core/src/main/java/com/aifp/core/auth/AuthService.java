@@ -54,7 +54,7 @@ public class AuthService {
             ObjectMapper objectMapper,
             @Value("${aifp.security.refresh-token-ttl-seconds:604800}") long refreshTokenTtlSeconds,
             @Value("${aifp.security.google-client-id:}") String googleClientId,
-            @Value("${aifp.owner-email:nguyentuananh11a1.lhpt@gmail.com}") String ownerEmail
+            @Value("${aifp.owner-email:owner@aifp.local}") String ownerEmail
     ) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
@@ -66,7 +66,7 @@ public class AuthService {
         this.objectMapper = objectMapper;
         this.refreshTokenTtlSeconds = refreshTokenTtlSeconds;
         this.googleClientId = googleClientId != null ? googleClientId.trim() : "";
-        this.ownerEmail = (ownerEmail != null && !ownerEmail.isBlank()) ? ownerEmail.trim() : "nguyentuananh11a1.lhpt@gmail.com";
+        this.ownerEmail = (ownerEmail != null && !ownerEmail.isBlank()) ? ownerEmail.trim() : "owner@aifp.local";
     }
 
     @Transactional
@@ -133,8 +133,8 @@ public class AuthService {
             userRepository.save(user);
 
             UserProfileEntity profile = profileRepository.findById(user.getId()).orElseGet(() ->
-                    new UserProfileEntity(user.getId(), "Tuấn Anh (Chủ sở hữu)", normalizedEmail));
-            profile.setDisplayName(googleUser.name() != null ? googleUser.name() : "Tuấn Anh (Chủ sở hữu)");
+                    new UserProfileEntity(user.getId(), "Chủ sở hữu (Master Owner)", normalizedEmail));
+            profile.setDisplayName(googleUser.name() != null ? googleUser.name() : "Chủ sở hữu (Master Owner)");
             profile.setNotificationEmail(normalizedEmail);
             profileRepository.save(profile);
             auditService.logEvent(user.getId(), "LOGIN_OWNER_GOOGLE_SUCCESS", "INFO", "USER", user.getId().toString(), "{}");

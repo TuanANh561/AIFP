@@ -801,9 +801,9 @@ class SecurityAndTenantIsolationTest {
         assertEquals(res1.userId(), res2.userId(), "Subsequent Google logins must resolve to the same user entity");
         assertEquals(res1.email(), res2.email());
 
-        // 4. Master Owner login with nguyentuananh11a1.lhpt@gmail.com strictly maps to DEFAULT_SYSTEM_USER_ID
+        // 4. Master Owner login with owner@aifp.local strictly maps to DEFAULT_SYSTEM_USER_ID
         AuthDtos.AuthTokenResponse ownerRes = authService.loginWithGoogle(
-                new AuthDtos.GoogleLoginRequest("mock_google_nguyentuananh11a1.lhpt@gmail.com")
+                new AuthDtos.GoogleLoginRequest("mock_google_owner@aifp.local")
         );
         assertEquals(com.aifp.core.task.TaskInitializerService.DEFAULT_SYSTEM_USER_ID, ownerRes.userId(),
                 "Master owner email MUST map directly to the system owner UUID to access all historic data");

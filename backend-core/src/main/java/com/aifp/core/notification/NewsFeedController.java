@@ -21,10 +21,10 @@ public class NewsFeedController {
 
     public NewsFeedController(
             LiveNewsCrawlerService liveNewsCrawlerService,
-            @Value("${aifp.owner-email:nguyentuananh11a1.lhpt@gmail.com}") String ownerEmail
+            @Value("${aifp.owner-email:owner@aifp.local}") String ownerEmail
     ) {
         this.liveNewsCrawlerService = liveNewsCrawlerService;
-        this.ownerEmail = (ownerEmail != null && !ownerEmail.isBlank()) ? ownerEmail.trim() : "nguyentuananh11a1.lhpt@gmail.com";
+        this.ownerEmail = (ownerEmail != null && !ownerEmail.isBlank()) ? ownerEmail.trim() : "owner@aifp.local";
     }
 
     public record LiveArticleDto(
@@ -63,8 +63,10 @@ public class NewsFeedController {
             @RequestParam(value = "channel", required = false) String channel
     ) {
         List<LiveArticleEntity> entities = liveNewsCrawlerService.getArticles(channel);
-        boolean isOwner = principal != null && principal.email() != null &&
-                principal.email().trim().equalsIgnoreCase(ownerEmail.trim());
+        boolean isOwner = principal != null && (
+                (principal.userId() != null && principal.userId().equals(UUID.fromString("00000000-0000-0000-0000-000000000001"))) ||
+                (principal.email() != null && principal.email().trim().equalsIgnoreCase(ownerEmail.trim()))
+        );
 
         List<LiveArticleDto> dtos = entities.stream()
                 .filter(e -> isOwner || (!"ai-evolution".equalsIgnoreCase(e.getChannelId()) && !"creator-ideas".equalsIgnoreCase(e.getChannelId())))

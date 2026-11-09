@@ -40,7 +40,7 @@ spring:
           writetimeout: 5000
 
 aifp:
-  owner-email: ${AIFP_OWNER_EMAIL:nguyentuananh11a1.lhpt@gmail.com}
+  owner-email: ${AIFP_OWNER_EMAIL:owner@aifp.local}
   security:
     google-client-id: ${GOOGLE_CLIENT_ID:}
     jwt-secret: ${JWT_SIGNING_SECRET:aifp_default_dev_only_jwt_signing_secret_minimum_64_bytes_long_2026_key}

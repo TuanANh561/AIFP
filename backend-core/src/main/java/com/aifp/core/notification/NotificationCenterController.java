@@ -38,13 +38,13 @@ public class NotificationCenterController {
             EmailCenterService emailCenterService,
             LiveArticleRepository liveArticleRepository,
             LinkValidationService linkValidationService,
-            @Value("${aifp.owner-email:nguyentuananh11a1.lhpt@gmail.com}") String ownerEmail
+            @Value("${aifp.owner-email:owner@aifp.local}") String ownerEmail
     ) {
         this.notificationService = notificationService;
         this.emailCenterService = emailCenterService;
         this.liveArticleRepository = liveArticleRepository;
         this.linkValidationService = linkValidationService;
-        this.ownerEmail = (ownerEmail != null && !ownerEmail.isBlank()) ? ownerEmail.trim() : "nguyentuananh11a1.lhpt@gmail.com";
+        this.ownerEmail = (ownerEmail != null && !ownerEmail.isBlank()) ? ownerEmail.trim() : "owner@aifp.local";
     }
 
     public record WebPushSubscriptionRequest(
@@ -196,13 +196,16 @@ public class NotificationCenterController {
 
     @PostMapping("/send-channel-digest")
     public ResponseEntity<ApiResponse<Map<String, Object>>> sendChannelDigest(
+            @AuthenticationPrincipal CustomUserPrincipal principal,
             @Valid @RequestBody SendChannelDigestRequest request
     ) {
         String channel = (request.channelId() != null) ? request.channelId().toLowerCase().trim() : "shopping";
 
         boolean isProprietaryChannel = "ai-evolution".equals(channel) || "ai".equals(channel)
                 || "creator-ideas".equals(channel) || "monetization-ideas".equals(channel) || "creator".equals(channel);
-        boolean isOwner = request.recipientEmail() != null && request.recipientEmail().trim().equalsIgnoreCase(ownerEmail.trim());
+        boolean isOwner = (principal != null && principal.userId() != null && principal.userId().equals(UUID.fromString("00000000-0000-0000-0000-000000000001")))
+                || (principal != null && principal.email() != null && principal.email().trim().equalsIgnoreCase(ownerEmail.trim()))
+                || (request.recipientEmail() != null && request.recipientEmail().trim().equalsIgnoreCase(ownerEmail.trim()));
 
         if (isProprietaryChannel && !isOwner) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Kênh nghiên cứu và ý tưởng phát triển thuộc quyền sở hữu riêng của Master Owner");

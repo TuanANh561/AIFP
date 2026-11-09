@@ -236,7 +236,7 @@ const IconShield = () => (
   </svg>
 );
 
-export const MASTER_OWNER_EMAIL = 'nguyentuananh11a1.lhpt@gmail.com';
+export const MASTER_OWNER_EMAIL = (import.meta as any).env?.VITE_OWNER_EMAIL || localStorage.getItem('aifp_owner_email') || 'owner@aifp.local';
 
 // ============================================================================
 // DATA TYPES & PRESETS FOR MULTI-AUDIENCE GROUPS
@@ -669,8 +669,9 @@ export default function App() {
     return INITIAL_TOPIC_CHANNELS;
   });
 
-  // Master Owner Gate: Certain proprietary discoveries belong exclusively to nguyentuananh11a1.lhpt@gmail.com
-  const isOwner = (authSession?.email?.toLowerCase() === MASTER_OWNER_EMAIL.toLowerCase()) ||
+  // Master Owner Gate: Proprietary research & channels belong exclusively to the Master Owner
+  const isOwner = authSession?.userId === '00000000-0000-0000-0000-000000000001' ||
+    (Boolean(authSession?.email) && authSession?.email?.toLowerCase() === MASTER_OWNER_EMAIL.toLowerCase()) ||
     (!authSession && profile.deliveryEmail.toLowerCase() === MASTER_OWNER_EMAIL.toLowerCase());
 
   // Filter channels based on ownership: proprietary channels are exclusively for the master owner

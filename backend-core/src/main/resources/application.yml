@@ -9,10 +9,9 @@ spring:
   application:
     name: aifp-backend-core
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:aifp_db}
-    username: ${POSTGRES_USER:aifp_user}
-    password: ${POSTGRES_PASSWORD:change_me_postgres_local_password}
-    driver-class-name: org.postgresql.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:aifp_db}}
+    username: ${SPRING_DATASOURCE_USERNAME:${POSTGRES_USER:aifp_user}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${POSTGRES_PASSWORD:change_me_postgres_local_password}}
   jpa:
     hibernate:
       ddl-auto: validate

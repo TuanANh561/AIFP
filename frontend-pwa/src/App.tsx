@@ -593,6 +593,22 @@ export default function App() {
     } catch {}
     return false;
   });
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('aifp_sidebar_collapsed') === 'true';
+    } catch {}
+    return false;
+  });
+
+  const handleToggleSidebar = () => {
+    setIsSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('aifp_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showPreferencesModal, setShowPreferencesModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -777,6 +793,7 @@ export default function App() {
   const [chatInput, setChatInput] = useState('');
   const [isChatGenerating, setIsChatGenerating] = useState(false);
   const [runningTaskId, setRunningTaskId] = useState<string | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<{ id: string; role: 'user' | 'assistant'; text: string; citations?: { label: string; url: string }[] }[]>([
     {
       id: 'm-1',
@@ -1278,16 +1295,62 @@ export default function App() {
     setChatMessages((prev) => [...prev, { id: userMsgId, role: 'user', text: userText }]);
     setIsChatGenerating(true);
 
-    // High-craft contextual agent intelligence
+    // 1. Try real Backend AI Chat API if user is authenticated
+    let backendReply: string | null = null;
+    let backendCitations: { label: string; url: string }[] | undefined = undefined;
+
+    if (authSession) {
+      try {
+        let convId = activeConversationId;
+        if (!convId) {
+          const newConv = await aifpApi.createConversation('AIFP Workspace Chat');
+          if (newConv && newConv.id) {
+            convId = newConv.id;
+            setActiveConversationId(newConv.id);
+          }
+        }
+        if (convId) {
+          const res = await aifpApi.sendMessage(convId, userText);
+          if (res && res.assistantMessage && res.assistantMessage.content) {
+            backendReply = res.assistantMessage.content;
+            if (res.assistantMessage.citations) {
+              try {
+                backendCitations = JSON.parse(res.assistantMessage.citations);
+              } catch {}
+            }
+          }
+        }
+      } catch {}
+    }
+
+    if (backendReply) {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          id: `m-${Date.now() + 1}`,
+          role: 'assistant',
+          text: backendReply!,
+          citations: backendCitations,
+        },
+      ]);
+      setIsChatGenerating(false);
+      return;
+    }
+
+    // 2. High-craft contextual agent intelligence (Deterministic Smart Router)
     setTimeout(() => {
       const lower = userText.toLowerCase().trim();
       let reply = '';
       let citations: { label: string; url: string }[] | undefined = undefined;
 
-      // 1. Social & Casual Greetings (alo, chào bạn, hi, hello, bạn là ai, etc.)
+      // 1. Social & Casual Greetings (alo, chào bạn, hi, hello, bạn là ai, test, v.v.)
       const isGreeting =
-        lower.match(/\b(alo|alô|hi|hello|hey|chào|chào bạn|chào em|chào bot|chào trợ lý|xin chào|good morning|bạn là ai|bạn tên gì|khỏe không)\b/) ||
-        ['alo', 'alô', 'hi', 'hello', 'hey', 'chào', 'ê', 'bạn ơi'].includes(lower);
+        lower.match(/\b(alo|alô|hi|hello|helo|hey|chào|chào bạn|chào em|chào bot|chào trợ lý|xin chào|good morning|bạn là ai|bạn tên gì|khỏe không|bạn ơi|ơi|ê|ad|admin)\b/) ||
+        ['alo', 'alô', 'hi', 'helo', 'hello', 'hey', 'chào', 'ê', 'bạn ơi', 'ơi', 'test'].includes(lower);
+
+      const isHelpOrCapabilities =
+        lower.includes('làm được gì') || lower.includes('giúp gì') || lower.includes('chức năng') ||
+        lower.includes('hướng dẫn') || lower.includes('hệ thống có gì') || lower.includes('tính năng');
 
       const isThanks =
         lower.match(/\b(cảm ơn|thank|thanks|ok|oke|tuyệt vời|tốt lắm|hay quá|tạm biệt|bye)\b/) ||
@@ -1332,7 +1395,7 @@ export default function App() {
          lower.includes('deal') || lower.includes('báo cáo') || lower.includes('công nghệ') ||
          lower.includes('game') || lower.includes('mã nguồn'));
 
-      if (isGreeting) {
+      if (isGreeting || isHelpOrCapabilities) {
         reply = `Chào bạn! Tôi là Trợ lý AI của hệ thống AIFP — nền tảng tự động hóa cuộc sống và làm việc thông minh.\n\nTôi có thể hỗ trợ bạn trực tiếp các chức năng trong toàn hệ thống:\n• 🎬 **Tạo Video & Shorts:** Lên kịch bản AI, storyboard phân cảnh, tích hợp bộ công cụ mã nguồn mở (Stickman Video Director, Lemo-Opucas, MoviePy, Remotion).\n• 📰 **Bản tin & Tuyển dụng:** Cập nhật tin công nghệ, việc làm remote, cày cấp và test server game.\n• 🧾 **Quét hóa đơn (Vision OCR):** Bóc tách tự động tên đơn vị, ngày lập, chi tiết món hàng, thuế VAT và tổng tiền.\n• 🛍️ **Săn Deal Shopee:** Theo dõi biến động giá thiết bị và đồ công nghệ chọn lọc.\n• 🧠 **Mã nguồn mở (Open Source):** Tự động rà soát mô hình AI mới trên GitHub, lưu CSDL cá nhân và gửi email định kỳ.\n• ⚡ **Tự động hóa:** Thiết lập lịch gửi bản tin tổng hợp tự động vào email mỗi sáng (không cần mở ứng dụng hàng ngày).\n\nBạn muốn tôi hỗ trợ chức năng nào hôm nay?`;
         reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Tạo video","tab":"tools","subTab":"video"},{"title":"Mã nguồn mở","tab":"tools","subTab":"evolution"},{"title":"Xem việc làm","tab":"digests","filter":"jobs"},{"title":"Quét hóa đơn","tab":"tools","subTab":"vision"},{"title":"Săn deal Shopee","tab":"digests","filter":"shopping"}]} -->';
       } else if (isThanks) {
@@ -2118,7 +2181,7 @@ export default function App() {
       {/* ========================================================================= */}
       {/* 1. SIDEBAR NAVIGATION RAIL (Desktop — Crisp, High-Signal, Zero Text Bloat) */}
       {/* ========================================================================= */}
-      <aside className="sidebar-rail">
+      <aside className={`sidebar-rail ${isSidebarCollapsed ? 'collapsed' : ''}`}>
         {/* Brand Header */}
         <div style={{ padding: '6px 6px 14px 6px', borderBottom: '1px solid var(--border-subtle)', marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -2134,22 +2197,44 @@ export default function App() {
               </div>
             </div>
 
-            <button
-              onClick={handleOpenPreferencesModal}
-              className="btn btn-secondary"
-              style={{
-                minHeight: 28,
-                padding: '0 8px',
-                fontSize: 11.5,
-                fontWeight: 600,
-                borderRadius: 'var(--radius-sm)',
-                gap: 4,
-              }}
-              title="Tùy biến nhận tin"
-            >
-              <IconSliders />
-              <span>Cấu hình</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <button
+                type="button"
+                onClick={handleToggleSidebar}
+                className="btn btn-secondary"
+                style={{
+                  minHeight: 28,
+                  padding: '0 8px',
+                  fontSize: 11.5,
+                  fontWeight: 600,
+                  borderRadius: 'var(--radius-sm)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 3,
+                }}
+                title="Thu gọn menu (Sidebar)"
+              >
+                <span style={{ fontSize: 13, fontWeight: 800 }}>‹</span>
+                <span>Thu gọn</span>
+              </button>
+
+              <button
+                onClick={handleOpenPreferencesModal}
+                className="btn btn-secondary"
+                style={{
+                  minHeight: 28,
+                  padding: '0 8px',
+                  fontSize: 11.5,
+                  fontWeight: 600,
+                  borderRadius: 'var(--radius-sm)',
+                  gap: 4,
+                }}
+                title="Tùy biến nhận tin"
+              >
+                <IconSliders />
+                <span>Cấu hình</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -2232,13 +2317,51 @@ export default function App() {
               <span>{darkMode ? 'Giao diện sáng' : 'Giao diện tối'}</span>
             </span>
           </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleToggleSidebar}
+            style={{
+              width: '100%',
+              marginTop: 6,
+              justifyContent: 'center',
+              padding: '0 12px',
+              minHeight: 30,
+              fontSize: 12,
+              gap: 6,
+              color: 'var(--text-secondary)',
+            }}
+            title="Thu gọn menu (Sidebar)"
+          >
+            <span style={{ fontSize: 13, fontWeight: 800 }}>‹</span>
+            <span>Thu gọn menu</span>
+          </button>
         </div>
       </aside>
+
+      {/* Floating Reopen Button (›) when menu is collapsed */}
+      {isSidebarCollapsed && (
+        <button
+          type="button"
+          onClick={handleToggleSidebar}
+          className="btn-reopen-sidebar"
+          title="Mở lại menu (Sidebar)"
+        >
+          ›
+        </button>
+      )}
 
       {/* ========================================================================= */}
       {/* 2. MAIN WORKSPACE (Rộng rãi, Căn giữa, Không khí Trợ lý Cá nhân)          */}
       {/* ========================================================================= */}
-      <main className="main-workspace">
+      <main
+        className="main-workspace"
+        style={{
+          paddingLeft: isSidebarCollapsed ? 'clamp(28px, 4vw, 56px)' : undefined,
+          transition: 'padding-left 0.22s ease',
+        }}
+      >
         {/* KILL SWITCH ALERT BANNER */}
         {killSwitchTriggered && (
           <div
@@ -4051,9 +4174,23 @@ export default function App() {
 
             {/* TOOL 2: SHOPPING TRACKER */}
             {toolSubTab === 'shopping' && (
-              <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div
+                className="card-surface"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 16,
+                  minHeight: 'calc(100vh - 200px)',
+                  boxSizing: 'border-box',
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>So sánh giá sản phẩm</h3>
+                  <div>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>So sánh giá sản phẩm</h3>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
+                      Dữ liệu giá thực tế từ Shopee Mall, Tiki Official, Lazada Mall
+                    </span>
+                  </div>
                   <span className="source-badge-pill">Shopee · Tiki · Lazada</span>
                 </div>
 
@@ -4068,7 +4205,7 @@ export default function App() {
                     placeholder="Nhập tên sản phẩm để so sánh giá thực tế..."
                     style={{
                       flex: 1,
-                      padding: '8px 14px',
+                      padding: '10px 14px',
                       borderRadius: 'var(--radius-sm)',
                       border: '1px solid var(--border-subtle)',
                       background: 'var(--bg-surface)',
@@ -4081,7 +4218,7 @@ export default function App() {
                     className="btn btn-primary"
                     onClick={() => handleSearchShopping()}
                     disabled={isSearchingShop || !shopQuery.trim()}
-                    style={{ gap: 5 }}
+                    style={{ gap: 5, padding: '0 16px' }}
                   >
                     <IconSearch />
                     <span>{isSearchingShop ? 'Đang tìm...' : 'Tìm giá'}</span>
@@ -4090,7 +4227,7 @@ export default function App() {
 
                 {/* Quick Keyword Suggestions */}
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Gợi ý:</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Gợi ý nhanh:</span>
                   {[
                     'Bàn phím cơ Keychron K2 Pro',
                     'iPhone 15 Pro Max 256GB',
@@ -4108,7 +4245,7 @@ export default function App() {
                         background: 'var(--bg-surface)',
                         border: '1px solid var(--border-subtle)',
                         fontSize: 11,
-                        padding: '2px 8px',
+                        padding: '3px 10px',
                       }}
                     >
                       {kw}
@@ -4120,22 +4257,23 @@ export default function App() {
                 {shopBestSummary && (
                   <div
                     style={{
-                      padding: '10px 14px',
+                      padding: '12px 16px',
                       borderRadius: 'var(--radius-sm)',
                       background: 'var(--bg-subtle)',
                       border: '1px solid var(--border-subtle)',
-                      fontSize: 12.5,
+                      fontSize: 13,
                       color: 'var(--text-primary)',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 8,
+                      gap: 10,
                     }}
                   >
-                    <span style={{ color: 'var(--accent-primary)', fontWeight: 700 }}>●</span>
+                    <span style={{ color: 'var(--accent-primary)', fontWeight: 800, fontSize: 14 }}>●</span>
                     <span>{shopBestSummary}</span>
                   </div>
                 )}
 
+                {/* Main Store Comparison Rows */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {shopResults.map((item, idx) => (
                     <div
@@ -4144,7 +4282,7 @@ export default function App() {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        padding: '12px 16px',
+                        padding: '14px 18px',
                         borderRadius: 'var(--radius-sm)',
                         border: '1px solid var(--border-subtle)',
                         background: 'var(--bg-surface)',
@@ -4152,12 +4290,12 @@ export default function App() {
                     >
                       <div>
                         <div style={{ fontWeight: 700, fontSize: 14 }}>{item.store}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
                           {item.productTitle || item.status} {item.rating ? `· ${item.rating}` : ''}
                         </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontWeight: 800, fontSize: 15, color: 'var(--accent-primary)' }}>
+                        <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--accent-primary)' }}>
                           {item.price}
                         </span>
                         <a
@@ -4165,7 +4303,7 @@ export default function App() {
                           target="_blank"
                           rel="noreferrer"
                           className="btn btn-secondary"
-                          style={{ fontSize: 12, minHeight: 28, padding: '0 10px', gap: 4 }}
+                          style={{ fontSize: 12, minHeight: 30, padding: '0 12px', gap: 4 }}
                         >
                           <span>Xem giá</span>
                           <IconArrowRight />
@@ -4174,14 +4312,98 @@ export default function App() {
                     </div>
                   ))}
                 </div>
+
+                {/* Rich Shopping Intelligence: Matrix & Advice & Coupons */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                    gap: 14,
+                    marginTop: 8,
+                  }}
+                >
+                  {/* Column 1: Policy Matrix */}
+                  <div
+                    style={{
+                      background: 'var(--bg-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                      padding: '14px 16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 8,
+                    }}
+                  >
+                    <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>Chính sách & Bảo hành</strong>
+                    <div style={{ fontSize: 12, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div>• <strong>Shopee Mall:</strong> Hàng chính hãng 100%, đổi trả miễn phí 15 ngày, bảo hành 12T.</div>
+                      <div>• <strong>Tiki Official:</strong> Giao siêu tốc TikiNOW 2h, bồi thường 111% nếu hàng giả.</div>
+                      <div>• <strong>Lazada Mall:</strong> Hàng phân phối uỷ quyền, Freeship Max, bảo hành hãng 24T.</div>
+                    </div>
+                  </div>
+
+                  {/* Column 2: Available Promo Coupons */}
+                  <div
+                    style={{
+                      background: 'var(--bg-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                      padding: '14px 16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 8,
+                    }}
+                  >
+                    <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>Mã giảm giá khả dụng</strong>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {[
+                        { code: 'TECH50K', store: 'Shopee', desc: 'Giảm 50k cho đơn từ 1.5tr' },
+                        { code: 'TIKICONGNGHE', store: 'Tiki', desc: 'Giảm 5% tối đa 100k' },
+                        { code: 'LAZFREESHIP', store: 'Lazada', desc: 'Miễn phí vận chuyển toàn quốc' },
+                      ].map((cp, cIdx) => (
+                        <div key={cIdx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12 }}>
+                          <div>
+                            <span className="mono-pill" style={{ fontSize: 11, fontWeight: 700 }}>{cp.code}</span>
+                            <span style={{ color: 'var(--text-tertiary)', marginLeft: 6 }}>{cp.desc}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => {
+                              navigator.clipboard.writeText(cp.code);
+                              showToast(`Đã chép mã ${cp.code}!`);
+                            }}
+                            style={{ minHeight: 22, padding: '0 6px', fontSize: 10.5 }}
+                          >
+                            Chép mã
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
             {/* TOOL 3: WRITING STUDIO */}
             {toolSubTab === 'writing' && (
-              <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div
+                className="card-surface"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 14,
+                  minHeight: 'calc(100vh - 200px)',
+                  boxSizing: 'border-box',
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Soạn thảo văn bản AI</h3>
+                  <div>
+                    <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Soạn thảo văn bản AI</h3>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
+                      Tự động hoàn thiện văn bản theo chủ đề, lưu trữ CSDL cá nhân
+                    </span>
+                  </div>
                   <span className="source-badge-pill">Lưu trữ CSDL</span>
                 </div>
 
@@ -4192,7 +4414,7 @@ export default function App() {
                   placeholder="Nêu chủ đề hoặc mục tiêu bài viết..."
                   style={{
                     width: '100%',
-                    padding: '8px 14px',
+                    padding: '10px 14px',
                     borderRadius: 'var(--radius-sm)',
                     border: '1px solid var(--border-subtle)',
                     background: 'var(--bg-surface)',
@@ -4204,21 +4426,24 @@ export default function App() {
                 <textarea
                   value={writingDraft}
                   onChange={(e) => setWritingDraft(e.target.value)}
-                  rows={8}
+                  placeholder="Nội dung bài viết sẽ hiển thị tại đây..."
                   style={{
                     width: '100%',
-                    padding: '12px 14px',
+                    flex: 1,
+                    minHeight: 360,
+                    padding: '16px 18px',
                     borderRadius: 'var(--radius-sm)',
                     border: '1px solid var(--border-subtle)',
                     background: 'var(--bg-subtle)',
                     color: 'var(--text-primary)',
-                    fontSize: 13,
-                    lineHeight: 1.5,
+                    fontSize: 13.5,
+                    lineHeight: 1.6,
                     resize: 'vertical',
+                    boxSizing: 'border-box',
                   }}
                 />
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 'auto' }}>
                   <button
                     type="button"
                     className="btn btn-secondary"
@@ -4478,16 +4703,17 @@ export default function App() {
                           <textarea
                             value={videoScript}
                             onChange={(e) => setVideoScript(e.target.value)}
-                            rows={4}
+                            rows={5}
                             placeholder="Nhập nội dung kịch bản để AI chia cảnh và lồng tiếng..."
                             style={{
-                              padding: '10px 12px',
+                              padding: '12px 14px',
                               borderRadius: 'var(--radius-sm)',
                               border: '1px solid var(--border-subtle)',
                               background: 'var(--bg-surface)',
                               color: 'var(--text-primary)',
-                              fontSize: 12.5,
-                              lineHeight: 1.5,
+                              fontSize: 13,
+                              lineHeight: 1.6,
+                              minHeight: 120,
                               resize: 'vertical',
                             }}
                           />
@@ -4678,18 +4904,21 @@ export default function App() {
                               <strong style={{ fontSize: 13.5, color: 'var(--text-primary)' }}>{videoCreationResult.title}</strong>
                               <span className="source-badge-pill" style={{ background: '#10B981', color: '#FFF' }}>0 Watermark</span>
                             </div>
-                            {/* Video Player */}
+                            {/* Video Player with High-Craft Cinematic Poster */}
                             <video
                               src={videoCreationResult.videoUrl}
+                              poster="/aura_video_poster.svg"
                               controls
                               autoPlay
                               loop
+                              playsInline
                               style={{
                                 width: '100%',
-                                maxHeight: 220,
+                                maxHeight: 250,
                                 borderRadius: 'var(--radius-sm)',
-                                background: '#000',
-                                objectFit: 'cover',
+                                background: '#0F172A',
+                                objectFit: 'contain',
+                                boxShadow: '0 4px 14px rgba(0,0,0,0.2)',
                               }}
                             />
                             {/* Metadata Pills */}

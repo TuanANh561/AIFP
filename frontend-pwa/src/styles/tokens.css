@@ -131,6 +131,51 @@ input, textarea, select {
   gap: 6px;
   flex-shrink: 0;
   box-shadow: 1px 0 3px rgba(0, 0, 0, 0.02);
+  transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), min-width 0.22s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.22s cubic-bezier(0.16, 1, 0.3, 1), padding 0.22s ease, opacity 0.18s ease;
+}
+
+.sidebar-rail.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  border-right: none !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Floating Reopen Menu Button (›) */
+.btn-reopen-sidebar {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 10000;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-reopen-sidebar:hover {
+  background: var(--bg-subtle);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  transform: translateX(3px) scale(1.05);
+}
+
+.btn-reopen-sidebar:active {
+  transform: scale(0.95);
 }
 
 .main-workspace {

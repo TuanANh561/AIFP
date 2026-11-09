@@ -127,16 +127,20 @@ class AifpApiClient {
     startTime: string,
     endTime: string,
     location: string
-  ): Promise<boolean> {
+  ): Promise<any> {
     try {
       const resp = await fetch(this.resolveUrl('/api/v1/calendar/events'), {
         method: 'POST',
         headers: this.headers(),
         body: JSON.stringify({ title, startTime, endTime, location }),
       });
-      return resp.ok;
+      if (resp.ok) {
+        const json = await resp.json();
+        return json.data || json;
+      }
+      return null;
     } catch {
-      return false;
+      return null;
     }
   }
 
@@ -145,16 +149,20 @@ class AifpApiClient {
     docType: string,
     tone: string,
     promptBrief: string
-  ): Promise<boolean> {
+  ): Promise<any> {
     try {
       const resp = await fetch(this.resolveUrl('/api/v1/writing/draft'), {
         method: 'POST',
         headers: this.headers(),
         body: JSON.stringify({ title, docType, tone, promptBrief }),
       });
-      return resp.ok;
+      if (resp.ok) {
+        const json = await resp.json();
+        return json.data || json;
+      }
+      return null;
     } catch {
-      return false;
+      return null;
     }
   }
 

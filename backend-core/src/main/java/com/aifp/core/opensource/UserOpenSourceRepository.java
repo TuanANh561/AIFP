@@ -31,3 +31,4 @@ public interface UserOpenSourceRepository extends JpaRepository<UserOpenSourceEn
     @Query("DELETE FROM UserOpenSourceEntity u WHERE u.userId = :userId AND u.isPinned = false")
     int deleteByUserIdAndIsPinnedFalse(@Param("userId") UUID userId);
 }
+

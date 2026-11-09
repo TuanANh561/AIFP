@@ -8,6 +8,8 @@
 node_modules/
 frontend-pwa/dist/
 frontend-pwa/.vite/
+frontend-pwa/public/video_job/
+frontend-pwa/public/character_base.png
 
 # Java / Spring Boot
 backend-core/target/

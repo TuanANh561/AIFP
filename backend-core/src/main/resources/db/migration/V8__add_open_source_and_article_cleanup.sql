@@ -21,3 +21,4 @@ CREATE INDEX idx_user_open_source_user ON user_open_source_items(user_id, create
 CREATE INDEX idx_user_open_source_pinned ON user_open_source_items(user_id, is_pinned);
 
 ALTER TABLE live_articles ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN NOT NULL DEFAULT FALSE;
+

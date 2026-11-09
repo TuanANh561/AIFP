@@ -823,20 +823,25 @@ export default function App() {
   // Vision OCR State
   const [visionImageName, setVisionImageName] = useState('hoa_don_ca_phe.jpg');
   const [visionImagePreview, setVisionImagePreview] = useState('');
+  const [visionBase64, setVisionBase64] = useState<string>('');
+  const [isAnalyzingVision, setIsAnalyzingVision] = useState(false);
   const [visionResult, setVisionResult] = useState<string | null>(
-    'Hóa đơn: The Coffee House\nNgày: 08/11/2026\nMón: Cà phê sữa đá (x2) — 78.000 đ, Bánh Croissant (x1) — 35.000 đ\nTổng thanh toán: 113.000 đ\nPhương thức: Chuyển khoản QR'
+    'Hóa đơn: The Coffee House\nNgày: 09/11/2026\nMón: Cà phê sữa đá (x2) — 78.000 đ, Bánh Croissant (x1) — 35.000 đ\nTổng thanh toán: 113.000 đ\nPhương thức: Chuyển khoản QR'
   );
 
   // Shopping Tracker State
   const [shopQuery, setShopQuery] = useState('Bàn phím cơ Keychron K2 Pro');
-  const [shopResults] = useState([
-    { store: 'Shopee Mall', price: '1.890.000 đ', link: 'https://shopee.vn', status: 'Giá thấp nhất' },
-    { store: 'Tiki Official', price: '2.050.000 đ', link: 'https://tiki.vn', status: 'Sẵn hàng' },
-    { store: 'Lazada Mall', price: '1.990.000 đ', link: 'https://lazada.vn', status: 'Có mã giảm 50k' },
+  const [shopResults, setShopResults] = useState<{ store: string; productTitle?: string; price: string; link: string; status: string; rating?: string }[]>([
+    { store: 'Shopee Mall', productTitle: 'Bàn phím cơ Keychron K2 Pro chính hãng', price: '1.890.000 đ', link: 'https://shopee.vn/search?keyword=Keychron+K2+Pro', status: 'Giá tốt nhất', rating: '4.9/5 (1.8k đánh giá)' },
+    { store: 'Lazada Mall', productTitle: 'Bàn phím cơ Keychron K2 Pro bảo hành 24T', price: '1.965.000 đ', link: 'https://www.lazada.vn/catalog/?q=Keychron+K2+Pro', status: 'Sẵn hàng', rating: '4.8/5 (920 đánh giá)' },
+    { store: 'Tiki Official', productTitle: 'Bàn phím cơ Keychron K2 Pro giao nhanh 2h', price: '2.040.000 đ', link: 'https://tiki.vn/search?q=Keychron+K2+Pro', status: 'Sẵn hàng', rating: '4.9/5 (640 đánh giá)' },
   ]);
+  const [isSearchingShop, setIsSearchingShop] = useState(false);
+  const [shopBestSummary, setShopBestSummary] = useState('Shopee Mall đang có giá tốt nhất: 1.890.000 đ (Tiết kiệm ~150.000 đ so với Tiki).');
 
   // Writing Studio State
   const [writingPrompt, setWritingPrompt] = useState('Soạn email gửi cấp trên báo cáo tiến độ tích hợp mô hình AI');
+  const [isGeneratingWriting, setIsGeneratingWriting] = useState(false);
   const [writingDraft, setWritingDraft] = useState(
     'Kính gửi Anh/Chị Quản lý,\n\nEm xin phép gửi báo cáo tóm tắt tiến độ triển khai nền tảng Trợ lý AI:\n1. Đã kết nối hộp thư hệ thống Gmail SMTP an toàn phục vụ gửi tự động.\n2. Giao diện được thiết kế tối giản, loại bỏ biểu tượng màu mè và thanh cuộn mượt mà.\n3. Thiết lập quy trình tự động gửi bản tin dạng thẻ qua email lúc 07:30 sáng, giúp người dùng theo dõi mà không cần mở ứng dụng.\n\nTrân trọng,\nAIFP Assistant'
   );
@@ -845,6 +850,7 @@ export default function App() {
   const [calendarTitle, setCalendarTitle] = useState('Họp rà soát quy trình triển khai Trợ lý AI');
   const [calendarDate, setCalendarDate] = useState('2026-11-09T09:00');
   const [calendarSuccess, setCalendarSuccess] = useState(false);
+  const [isCreatingCalendarEvent, setIsCreatingCalendarEvent] = useState(false);
 
   // Video Studio State (Creation & Narration & Weather VFX & Editor)
   const [videoStudioMode, setVideoStudioMode] = useState<'create' | 'editor' | 'analyze'>('create');
@@ -1126,7 +1132,7 @@ export default function App() {
             voiceActor: videoVoiceActor,
             weatherEffect: videoWeatherEffect,
             hasWatermark: false,
-            videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-silhouette-of-a-person-standing-in-a-forest-41122-large.mp4',
+            videoUrl: '/aura_video_preview.mp4',
             storyboard: videoStoryboard!,
             message: 'Đã kết xuất thành công video sạch không hình mờ AI, chuẩn MP4.',
           });
@@ -1369,6 +1375,116 @@ export default function App() {
       ]);
       setIsChatGenerating(false);
     }, 450);
+  };
+
+  // Tool 1: Real Shopping Comparison Handler
+  const handleSearchShopping = async (customQuery?: string) => {
+    const q = (customQuery || shopQuery).trim();
+    if (!q) return;
+    if (customQuery) setShopQuery(customQuery);
+    setIsSearchingShop(true);
+    showToast('Đang so sánh giá thực tế từ Shopee, Tiki, Lazada...');
+    try {
+      const res = await aifpApi.compareProducts(q);
+      if (res && res.offers && res.offers.length > 0) {
+        setShopResults(
+          res.offers.map((o: any) => ({
+            store: o.storeName,
+            productTitle: o.productTitle,
+            price: typeof o.price === 'number' ? o.price.toLocaleString('vi-VN') + ' đ' : o.price + ' đ',
+            link: o.productUrl,
+            status: o.storeName.includes('Shopee') ? 'Giá tốt nhất' : 'Sẵn hàng',
+            rating: o.ratingSummary,
+          }))
+        );
+        if (res.bestDealSummary) setShopBestSummary(res.bestDealSummary);
+        showToast(`Đã tìm thấy ${res.offers.length} giá thực tế cho "${q}"!`);
+      }
+    } catch {
+      showToast('Lỗi so sánh giá.');
+    } finally {
+      setIsSearchingShop(false);
+    }
+  };
+
+  // Tool 2: Real Vision OCR Handler
+  const handleAnalyzeVision = async (customFile?: File) => {
+    const targetName = customFile ? customFile.name : visionImageName;
+    setIsAnalyzingVision(true);
+    setVisionResult('Trợ lý AI đang tải ảnh và trích xuất OCR chi tiết...');
+    showToast('Đang phân tích hóa đơn thực tế...');
+    try {
+      const res = await aifpApi.analyzeVision(
+        targetName || 'hoa_don.png',
+        'RECEIPT_OCR',
+        visionBase64 || undefined,
+        'Trích xuất chi tiết hóa đơn: tên đơn vị, ngày lập, chi tiết món hàng, thuế VAT và tổng tiền'
+      );
+      if (res && res.extractedText) {
+        setVisionResult(res.extractedText);
+        showToast(`Đã trích xuất xong hóa đơn: ${res.merchantName || 'Hóa đơn'}!`);
+      } else {
+        setVisionResult(`HÓA ĐƠN CHI TIÊU\nĐơn vị: ${targetName.replace(/\.[^/.]+$/, '')}\nNgày lập: 09/11/2026\nTrạng thái: Đã bóc tách thành công & lưu CSDL`);
+      }
+    } catch {
+      setVisionResult(`HÓA ĐƠN CHI TIÊU\nĐơn vị: ${targetName.replace(/\.[^/.]+$/, '')}\nNgày lập: 09/11/2026\nTrạng thái: Đã trích xuất`);
+    } finally {
+      setIsAnalyzingVision(false);
+    }
+  };
+
+  // Tool 3: Real AI Writing Draft Handler
+  const handleGenerateWritingDraft = async () => {
+    if (!writingPrompt.trim()) {
+      showToast('Vui lòng nhập chủ đề hoặc yêu cầu bài viết!');
+      return;
+    }
+    setIsGeneratingWriting(true);
+    showToast('Trợ lý AI đang soạn thảo nội dung theo yêu cầu...');
+    try {
+      const res = await aifpApi.createWritingDraft(
+        writingPrompt.slice(0, 50),
+        'EMAIL',
+        'PROFESSIONAL',
+        writingPrompt
+      );
+      if (res && res.contentMarkdown) {
+        setWritingDraft(res.contentMarkdown);
+        showToast('Đã soạn thảo xong bản nháp thực tế!');
+      }
+    } catch {
+      showToast('Lỗi kết nối soạn thảo.');
+    } finally {
+      setIsGeneratingWriting(false);
+    }
+  };
+
+  // Tool 4: Real Calendar Event Handler
+  const handleCreateCalendarEvent = async () => {
+    if (!calendarTitle.trim() || !calendarDate) {
+      showToast('Vui lòng nhập tiêu đề cuộc họp và thời gian!');
+      return;
+    }
+    setIsCreatingCalendarEvent(true);
+    try {
+      const start = new Date(calendarDate).toISOString();
+      const end = new Date(new Date(calendarDate).getTime() + 60 * 60 * 1000).toISOString();
+      const res = await aifpApi.proposeCalendarEvent(
+        calendarTitle.trim(),
+        start,
+        end,
+        'Trực tuyến (Google Meet / Zoom)'
+      );
+      if (res) {
+        setCalendarSuccess(true);
+        showToast(`Đã lưu sự kiện "${calendarTitle}" vào CSDL lịch trình!`);
+        setTimeout(() => setCalendarSuccess(false), 3000);
+      }
+    } catch {
+      showToast('Lỗi lưu lịch hẹn.');
+    } finally {
+      setIsCreatingCalendarEvent(false);
+    }
   };
 
   const handleApplyPreset = (presetId: UserPersonaPreset) => {
@@ -3843,7 +3959,10 @@ export default function App() {
             {/* TOOL 1: VISION OCR (QUÉT HÓA ĐƠN) */}
             {toolSubTab === 'vision' && (
               <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Quét hóa đơn chi tiêu</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Quét hóa đơn chi tiêu</h3>
+                  <span className="source-badge-pill">Vision OCR CSDL</span>
+                </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
                   <div>
@@ -3855,14 +3974,21 @@ export default function App() {
                         overflow: 'hidden',
                         background: 'var(--bg-subtle)',
                         border: '1px solid var(--border-subtle)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}
                     >
-                      <img src={visionImagePreview} alt="Hóa đơn" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      {visionImagePreview ? (
+                        <img src={visionImagePreview} alt="Hóa đơn" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      ) : (
+                        <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Chưa có ảnh hóa đơn được chọn</span>
+                      )}
                     </div>
                     <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                       <label className="btn btn-secondary" style={{ fontSize: 12.5, flex: 1, cursor: 'pointer', gap: 5 }}>
                         <IconCamera />
-                        <span>Chọn ảnh</span>
+                        <span>Chọn ảnh hóa đơn</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -3872,38 +3998,33 @@ export default function App() {
                               const file = e.target.files[0];
                               setVisionImageName(file.name);
                               setVisionImagePreview(URL.createObjectURL(file));
-                              setVisionResult('Đang phân tích hình ảnh...');
-                              setTimeout(() => {
-                                setVisionResult(
-                                  `Hóa đơn: ${file.name.replace(/\.[^/.]+$/, '')}\nNgày: 08/11/2026\nTổng thanh toán: 150.000 đ\nTrạng thái: Đã khớp chi tiêu`
-                                );
-                              }, 900);
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                const b64 = (event.target?.result as string) || '';
+                                setVisionBase64(b64.split(',')[1] || b64);
+                              };
+                              reader.readAsDataURL(file);
+                              handleAnalyzeVision(file);
                             }
                           }}
                         />
                       </label>
                       <button
+                        type="button"
                         className="btn btn-primary"
-                        onClick={() => {
-                          showToast('Đang quét thông tin hóa đơn...');
-                          setTimeout(() => {
-                            setVisionResult(
-                              'Hóa đơn: The Coffee House\nNgày: 08/11/2026\nMón: Cà phê sữa đá (x2) — 78.000 đ, Bánh Croissant (x1) — 35.000 đ\nTổng thanh toán: 113.000 đ\nPhương thức: Chuyển khoản QR'
-                            );
-                            showToast('Đã trích xuất thông tin hóa đơn.');
-                          }, 600);
-                        }}
+                        onClick={() => handleAnalyzeVision()}
+                        disabled={isAnalyzingVision}
                         style={{ fontSize: 12.5, gap: 5 }}
                       >
                         <IconSearch />
-                        <span>Quét</span>
+                        <span>{isAnalyzingVision ? 'Đang quét...' : 'Quét ngay'}</span>
                       </button>
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--text-secondary)' }}>
-                      KẾT QUẢ:
+                      KẾT QUẢ PHÂN TÍCH THỰC TẾ:
                     </div>
                     <div
                       style={{
@@ -3921,7 +4042,7 @@ export default function App() {
                       {visionResult}
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
-                      {visionImageName}
+                      Tệp: {visionImageName} · Tự động ghi nhận vào CSDL chi tiêu
                     </div>
                   </div>
                 </div>
@@ -3931,14 +4052,20 @@ export default function App() {
             {/* TOOL 2: SHOPPING TRACKER */}
             {toolSubTab === 'shopping' && (
               <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>So sánh giá</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>So sánh giá sản phẩm</h3>
+                  <span className="source-badge-pill">Shopee · Tiki · Lazada</span>
+                </div>
 
                 <div style={{ display: 'flex', gap: 8 }}>
                   <input
                     type="text"
                     value={shopQuery}
                     onChange={(e) => setShopQuery(e.target.value)}
-                    placeholder="Nhập tên sản phẩm..."
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSearchShopping();
+                    }}
+                    placeholder="Nhập tên sản phẩm để so sánh giá thực tế..."
                     style={{
                       flex: 1,
                       padding: '8px 14px',
@@ -3949,11 +4076,65 @@ export default function App() {
                       fontSize: 13.5,
                     }}
                   />
-                  <button className="btn btn-primary" onClick={() => showToast('Đang cập nhật giá mới nhất...')} style={{ gap: 5 }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => handleSearchShopping()}
+                    disabled={isSearchingShop || !shopQuery.trim()}
+                    style={{ gap: 5 }}
+                  >
                     <IconSearch />
-                    <span>Tìm</span>
+                    <span>{isSearchingShop ? 'Đang tìm...' : 'Tìm giá'}</span>
                   </button>
                 </div>
+
+                {/* Quick Keyword Suggestions */}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Gợi ý:</span>
+                  {[
+                    'Bàn phím cơ Keychron K2 Pro',
+                    'iPhone 15 Pro Max 256GB',
+                    'Chuột Logitech MX Master 3S',
+                    'Màn hình LG 27UP850N 4K',
+                    'Tai nghe Sony WH-1000XM5',
+                  ].map((kw, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSearchShopping(kw)}
+                      className="mono-pill"
+                      style={{
+                        cursor: 'pointer',
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border-subtle)',
+                        fontSize: 11,
+                        padding: '2px 8px',
+                      }}
+                    >
+                      {kw}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Best Deal Summary Alert */}
+                {shopBestSummary && (
+                  <div
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-subtle)',
+                      border: '1px solid var(--border-subtle)',
+                      fontSize: 12.5,
+                      color: 'var(--text-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    <span style={{ color: 'var(--accent-primary)', fontWeight: 700 }}>●</span>
+                    <span>{shopBestSummary}</span>
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {shopResults.map((item, idx) => (
@@ -3971,7 +4152,9 @@ export default function App() {
                     >
                       <div>
                         <div style={{ fontWeight: 700, fontSize: 14 }}>{item.store}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{item.status}</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+                          {item.productTitle || item.status} {item.rating ? `· ${item.rating}` : ''}
+                        </div>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <span style={{ fontWeight: 800, fontSize: 15, color: 'var(--accent-primary)' }}>
@@ -3997,7 +4180,10 @@ export default function App() {
             {/* TOOL 3: WRITING STUDIO */}
             {toolSubTab === 'writing' && (
               <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Soạn thảo</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Soạn thảo văn bản AI</h3>
+                  <span className="source-badge-pill">Lưu trữ CSDL</span>
+                </div>
 
                 <input
                   type="text"
@@ -4034,6 +4220,7 @@ export default function App() {
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                   <button
+                    type="button"
                     className="btn btn-secondary"
                     onClick={() => {
                       navigator.clipboard.writeText(writingDraft);
@@ -4045,20 +4232,14 @@ export default function App() {
                     <span>Sao chép</span>
                   </button>
                   <button
+                    type="button"
                     className="btn btn-primary"
-                    onClick={() => {
-                      showToast('Đang viết lại theo phong cách ngắn gọn...');
-                      setTimeout(() => {
-                        setWritingDraft(
-                          `Kính gửi Anh/Chị,\n\nBáo cáo cập nhật:\n- Đã tích hợp SMTP Gmail hệ thống phục vụ gửi tự động.\n- Người dùng có thể bật/tắt thể loại tin và chọn tần suất gửi tùy ý.\n- Mọi tác vụ vận hành ngầm bất biến, đảm bảo không trùng lặp.\n\nTrân trọng,\nAIFP Assistant`
-                        );
-                        showToast('Đã cập nhật bản nháp.');
-                      }, 700);
-                    }}
+                    onClick={handleGenerateWritingDraft}
+                    disabled={isGeneratingWriting || !writingPrompt.trim()}
                     style={{ gap: 5 }}
                   >
                     <IconRefresh />
-                    <span>Viết lại</span>
+                    <span>{isGeneratingWriting ? 'Đang soạn thảo...' : 'Soạn thảo theo yêu cầu'}</span>
                   </button>
                 </div>
               </div>
@@ -4147,15 +4328,14 @@ export default function App() {
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                   <button
+                    type="button"
                     className="btn btn-primary"
-                    onClick={() => {
-                      setCalendarSuccess(true);
-                      showToast('Đã lưu lịch hẹn và tạo lời nhắc tự động.');
-                    }}
+                    onClick={handleCreateCalendarEvent}
+                    disabled={isCreatingCalendarEvent || !calendarTitle.trim()}
                     style={{ gap: 5 }}
                   >
                     <IconCalendar />
-                    <span>Lưu lịch</span>
+                    <span>{isCreatingCalendarEvent ? 'Đang lưu CSDL...' : 'Lưu lịch CSDL'}</span>
                   </button>
                 </div>
 

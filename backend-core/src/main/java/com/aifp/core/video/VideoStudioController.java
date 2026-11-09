@@ -163,7 +163,7 @@ public class VideoStudioController {
                 ? request.title().trim()
                 : "Video Kể chuyện AI";
 
-        String videoUrl = "https://assets.mixkit.co/videos/preview/mixkit-silhouette-of-a-person-standing-in-a-forest-41122-large.mp4";
+        String videoUrl = "/aura_video_preview.mp4";
 
         VideoCreationResponse response = new VideoCreationResponse(
                 "COMPLETED",
@@ -242,7 +242,7 @@ public class VideoStudioController {
 
         String outUrl = (request.videoUrl() != null && !request.videoUrl().isBlank())
                 ? request.videoUrl()
-                : "https://assets.mixkit.co/videos/preview/mixkit-silhouette-of-a-person-standing-in-a-forest-41122-large.mp4";
+                : "/aura_video_preview.mp4";
 
         VideoEditResponse resp = new VideoEditResponse(
                 "COMPLETED",

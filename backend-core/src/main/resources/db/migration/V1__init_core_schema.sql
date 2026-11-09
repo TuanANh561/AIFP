@@ -220,7 +220,7 @@ CREATE TABLE integrations (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     provider VARCHAR(48) NOT NULL,
-    encrypted_credentials VARBINARY(4096) NOT NULL,
+    encrypted_credentials BYTEA NOT NULL,
     key_version SMALLINT NOT NULL DEFAULT 1,
     scopes_json TEXT NOT NULL DEFAULT '[]',
     status VARCHAR(24) NOT NULL DEFAULT 'ACTIVE',

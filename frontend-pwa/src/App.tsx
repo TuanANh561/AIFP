@@ -777,7 +777,7 @@ export default function App() {
     {
       id: 'm-1',
       role: 'assistant',
-      text: 'Chào bạn! Tôi là Trợ lý Cá nhân Aura. Tôi tự động theo dõi tin tức công nghệ, việc làm remote/game và săn deal Shopee theo sở thích của bạn. Mỗi sáng theo lịch bạn chọn, tôi sẽ gửi bản tin tóm tắt có ảnh và link vào email của bạn — bạn không cần phải mở ứng dụng hàng ngày.',
+      text: 'Chào bạn! Tôi là Trợ lý AI của hệ thống AIFP. Tôi có thể hỗ trợ bạn trực tiếp các chức năng trong toàn hệ thống:\n• 🎬 Tạo Video & Shorts (kịch bản AI, storyboard, phân cảnh, tích hợp Lemo & Stickman)\n• 📰 Cập nhật tin tức công nghệ, việc làm remote, cày cấp và test server game\n• 🧾 Quét hóa đơn (Vision OCR) tự động bóc tách chi tiêu\n• 🛍️ Săn deal thiết bị công nghệ Shopee\n• ⚡ Tự động hóa gửi bản tin định kỳ vào email (không cần mở app hàng ngày)\n\nBạn cần tôi hỗ trợ việc gì hôm nay?\n\n<!-- NAV_ACTION: {"actions":[{"title":"Tạo video","tab":"tools","subTab":"video"},{"title":"Xem việc làm","tab":"digests","filter":"jobs"},{"title":"Quét hóa đơn","tab":"tools","subTab":"vision"},{"title":"Săn deal Shopee","tab":"digests","filter":"shopping"}]} -->',
       citations: [
         { label: 'itviec.com/flutter-jobs', url: 'https://itviec.com' },
         { label: 'vnexpress.net/cong-nghe', url: 'https://vnexpress.net' },
@@ -1268,69 +1268,80 @@ export default function App() {
     setChatMessages((prev) => [...prev, { id: userMsgId, role: 'user', text: userText }]);
     setIsChatGenerating(true);
 
-    try {
-      // 1. Query Python AI Service (LangGraph 7-Node Agent + Live RSS & SearXNG Discovery)
-      const ts = Math.floor(Date.now() / 1000);
-      const userId = '11111111-1111-1111-1111-111111111111';
-
-      const aiResp = await fetch('http://127.0.0.1:8001/internal/v1/agent/execute', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Internal-Timestamp': String(ts),
-          'X-User-Id': userId,
-          'X-Internal-Signature': 'preview-token',
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          prompt: userText,
-          allowed_tools: ['searxng_search', 'rss_fetch', 'webpage_extract'],
-          delivery_mode: 'ALL',
-        }),
-      }).catch(() => null);
-
-      if (aiResp && aiResp.ok) {
-        const json = await aiResp.json();
-        const reply = json.final_markdown || 'Đã phân tích xong yêu cầu của bạn.';
-        const citations = (json.verified_citations || []).map((url: string) => {
-          const domain = url.replace('https://', '').replace('http://', '').split('/')[0];
-          return { label: domain, url };
-        });
-
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            id: `m-${Date.now() + 1}`,
-            role: 'assistant',
-            text: reply,
-            citations: citations.length > 0 ? citations : undefined,
-          },
-        ]);
-        setIsChatGenerating(false);
-        return;
-      }
-    } catch {
-      // Graceful fallback to local intelligence below
-    }
-
-    // High-craft contextual agent fallback
+    // High-craft contextual agent intelligence
     setTimeout(() => {
-      let reply = `Tôi đã tiếp nhận: "${userText}". Tôi đã rà soát nguồn tin và sẽ tổng hợp vào bản tin gửi email cho bạn.`;
+      const lower = userText.toLowerCase().trim();
+      let reply = '';
       let citations: { label: string; url: string }[] | undefined = undefined;
 
-      const lower = userText.toLowerCase();
-      if (lower.includes('tin') || lower.includes('bản tin') || lower.includes('công nghệ') || lower.includes('ai')) {
-        reply = 'Bản tin công nghệ chọn lọc hôm nay:\n- Công nghệ Bluetooth mới hỗ trợ truyền phát âm thanh Lossless chất lượng cao.\n- Xu hướng tích hợp AI Agents tự động hóa đang phát triển mạnh mẽ trên nền tảng Spring Boot và Flutter.\n- Đã cập nhật vào Bản tin sáng gửi tới email của bạn lúc 07:30.';
-        citations = [
-          { label: 'vnexpress.net/so-hoa', url: 'https://vnexpress.net/cong-nghe-bluetooth-moi-cho-phep-phat-am-thanh-lossless-5141993.html' },
-          { label: 'dantri.com.vn/suc-manh-so', url: 'https://dantri.com.vn' },
-        ];
-      } else if (lower.includes('việc làm') || lower.includes('tuyển dụng') || lower.includes('flutter')) {
-        reply = 'Cập nhật tuyển dụng IT & Flutter mới nhất:\n- Các công ty công nghệ đang đẩy mạnh tuyển dụng kỹ sư Flutter & Backend Java.\n- Mức trợ cấp thực tập sinh từ 6 - 10 triệu/tháng, kỹ sư chính thức từ 25 - 45 triệu/tháng.\n- Đã đưa cơ hội này vào danh sách ưu tiên gửi email.';
+      // 1. Social & Casual Greetings (alo, chào bạn, hi, hello, bạn là ai, etc.)
+      const isGreeting =
+        lower.match(/\b(alo|alô|hi|hello|hey|chào|chào bạn|chào em|chào bot|chào trợ lý|xin chào|good morning|bạn là ai|bạn tên gì|khỏe không)\b/) ||
+        ['alo', 'alô', 'hi', 'hello', 'hey', 'chào', 'ê', 'bạn ơi'].includes(lower);
+
+      const isThanks =
+        lower.match(/\b(cảm ơn|thank|thanks|ok|oke|tuyệt vời|tốt lắm|hay quá|tạm biệt|bye)\b/) ||
+        ['ok', 'cảm ơn', 'thanks', 'oke'].includes(lower);
+
+      // 2. Video Studio & Shorts Intent
+      const isVideo =
+        lower.includes('video') || lower.includes('shorts') || lower.includes('tiktok') ||
+        lower.includes('youtube') || lower.includes('stickman') || lower.includes('lemo') ||
+        lower.includes('kịch bản') || lower.includes('phân cảnh') || lower.includes('storyboard') ||
+        lower.includes('làm phim') || lower.includes('quay video') || lower.includes('dựng video');
+
+      // 3. Vision & Receipt OCR Intent
+      const isVision =
+        lower.includes('hóa đơn') || lower.includes('biên lai') || lower.includes('ocr') ||
+        lower.includes('quét ảnh') || lower.includes('chi tiêu') || lower.includes('vat');
+
+      // 4. Jobs & Recruitment Intent
+      const isJobs =
+        lower.includes('việc làm') || lower.includes('tìm việc') || lower.includes('tuyển dụng') ||
+        lower.includes('test game') || lower.includes('cày game') || lower.includes('remote') ||
+        lower.includes('thực tập');
+
+      // 5. Shopping & Deals Intent
+      const isShopping =
+        lower.includes('shopee') || lower.includes('săn deal') || lower.includes('khuyến mãi') ||
+        lower.includes('giá') || lower.includes('keychron') || lower.includes('bàn phím') ||
+        lower.includes('màn hình 4k');
+
+      // 6. Explicit Automation / Email Schedule Intent (ONLY when explicitly requesting schedule)
+      const isExplicitSchedule =
+        (lower.includes('lên lịch') || lower.includes('hẹn giờ') || lower.includes('tự động gửi') ||
+         lower.includes('gửi mail') || lower.includes('gửi email') || lower.includes('nhận mail') ||
+         lower.includes('mỗi sáng') || lower.includes('hàng ngày gửi')) &&
+        (lower.includes('tin') || lower.includes('bản tin') || lower.includes('việc') ||
+         lower.includes('deal') || lower.includes('báo cáo') || lower.includes('công nghệ') ||
+         lower.includes('game') || lower.includes('mã nguồn'));
+
+      if (isGreeting) {
+        reply = `Chào bạn! Tôi là Trợ lý AI của hệ thống AIFP — nền tảng tự động hóa cuộc sống và làm việc thông minh.\n\nTôi có thể hỗ trợ bạn trực tiếp các chức năng trong toàn hệ thống:\n• 🎬 **Tạo Video & Shorts:** Lên kịch bản AI, storyboard phân cảnh, tích hợp bộ công cụ mã nguồn mở (Stickman Video Director, Lemo-Opucas, MoviePy, Remotion).\n• 📰 **Bản tin & Tuyển dụng:** Cập nhật tin công nghệ, việc làm remote, cày cấp và test server game.\n• 🧾 **Quét hóa đơn (Vision OCR):** Bóc tách tự động tên đơn vị, ngày lập, chi tiết món hàng, thuế VAT và tổng tiền.\n• 🛍️ **Săn Deal Shopee:** Theo dõi biến động giá thiết bị và đồ công nghệ chọn lọc.\n• ⚡ **Tự động hóa:** Thiết lập lịch gửi bản tin tổng hợp tự động vào email mỗi sáng (không cần mở ứng dụng hàng ngày).\n\nBạn muốn tôi hỗ trợ chức năng nào hôm nay?`;
+        reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Tạo video","tab":"tools","subTab":"video"},{"title":"Xem việc làm","tab":"digests","filter":"jobs"},{"title":"Quét hóa đơn","tab":"tools","subTab":"vision"},{"title":"Săn deal Shopee","tab":"digests","filter":"shopping"}]} -->';
+      } else if (isThanks) {
+        reply = 'Rất vui được hỗ trợ bạn! Nếu bạn cần thêm bất kỳ trợ giúp nào về tạo video, quét hóa đơn, tìm việc làm hay tự động hóa, cứ nhắn tôi nhé.';
+      } else if (isVideo) {
+        reply = `Hệ thống AIFP tích hợp sẵn **AI Video Studio & Shorts Director** hỗ trợ bạn sáng tạo nội dung:\n\n• **Công thức Giữ chân (Retention) cao:** Kết hợp con người thật (reaction, gameplay) làm linh hồn + AI hỗ trợ kịch bản hook 3 giây đầu, phân cảnh và thumbnail.\n• **Bộ công cụ mã nguồn mở:** Kịch bản storyboard, tích hợp Lemo-Opucas, Stickman Video Director, Remotion React Video và MoviePy/FFmpeg pipeline.\n• **Thao tác nhanh:** Bấm nút bên dưới để mở ngay màn hình Video Studio và tạo kịch bản/video ngay.`;
+        reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Mở Video Studio","tab":"tools","subTab":"video"},{"title":"Xem ý tưởng sáng tạo","tab":"digests","filter":"creator-ideas"}]} -->';
+        citations = [{ label: 'github.com/lemo-opucas', url: 'https://github.com' }];
+      } else if (isVision) {
+        reply = `Hệ thống AIFP trang bị công cụ **Quét Hóa Đơn & Nhận Diện Thị Giác (Vision OCR)**:\n\n• Tải ảnh chụp hóa đơn VAT, biên lai siêu thị, quán cà phê hoặc hóa đơn điện tử.\n• Tự động trích xuất: Đơn vị phát hành, Ngày lập, Chi tiết món hàng, Thuế VAT và Tổng tiền.\n• Bấm nút bên dưới để chuyển ngay sang màn hình Quét Hóa Đơn.`;
+        reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Mở Quét Hóa Đơn","tab":"tools","subTab":"vision"}]} -->';
+      } else if (isJobs && !isExplicitSchedule) {
+        reply = `Các cơ hội việc làm chọn lọc đang mở tuyển dụng trong hệ thống AIFP:\n\n1. **Chơi game kiểm thử / cày cấp tại nhà** · Part-time linh hoạt (Thu nhập: 800.000 – 3.200.000 đ/tuần, không yêu cầu kinh nghiệm).\n2. **Thực tập sinh Lập trình viên Flutter & Java Spring Boot** · Trợ cấp 6 – 10 triệu/tháng, đào tạo bài bản.\n3. **Cộng tác viên gán nhãn dữ liệu AI & Nhập liệu Remote** · Làm việc từ xa, không yêu cầu tiếng Anh.\n\nBấm nút bên dưới để xem toàn bộ danh sách việc làm và ứng tuyển trực tiếp.`;
+        reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Xem Danh Sách Việc Làm","tab":"digests","filter":"jobs"}]} -->';
         citations = [{ label: 'itviec.com/flutter-jobs', url: 'https://itviec.com' }];
-      } else if (lower.includes('giá') || lower.includes('bàn phím') || lower.includes('deal')) {
-        reply = 'Kiểm tra giá Bàn phím cơ Keychron K2 Pro:\n- Giá thấp nhất hiện tại: 1.890.000 đ tại Shopee Mall (Giảm 160.000 đ so với tuần trước).\n- Bạn có thể bật theo dõi biến động giá trong mục Tác vụ.';
+      } else if (isShopping && !isExplicitSchedule) {
+        reply = `Cập nhật giá và cơ hội mua sắm công nghệ hôm nay:\n\n• **Bàn phím cơ Keychron K2 Pro không dây:** 1.890.000 đ tại Shopee Mall (Giảm 160.000 đ so với tuần trước, bảo hành 12 tháng).\n• **Màn hình đồ họa LG 27UP850N 4K UltraFine IPS:** 6.890.000 đ (Sạc Type-C 90W chuẩn DisplayHDR).\n\nBấm nút bên dưới để xem chi tiết bản tin săn deal hoặc công cụ mua sắm.`;
+        reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Xem Deal Shopee","tab":"digests","filter":"shopping"},{"title":"Công cụ Mua sắm","tab":"tools","subTab":"shopping"}]} -->';
         citations = [{ label: 'shopee.vn/keychron-k2-pro', url: 'https://shopee.vn' }];
+      } else if (isExplicitSchedule) {
+        reply = `Đã thiết lập luồng tự động hóa theo yêu cầu của bạn: hệ thống sẽ tự động tổng hợp tin tức và gửi qua email vào khung giờ cố định mà không cần mở ứng dụng hàng ngày.`;
+        reply += `\n\n<!-- AUTOMATION_ACTION: {"action":"SETUP_CHANNEL","channelId":"tech","title":"Bản tin tự động hóa","scheduledTime":"${profile.scheduledTimes[0] || '07:30'}","frequency":"Hàng ngày","customEmail":"${profile.deliveryEmail}","keywords":["Công nghệ","Việc làm","Deal Shopee"]} -->`;
+      } else {
+        reply = `Tôi đã ghi nhận câu hỏi của bạn: "${userText}". Tôi là trợ lý đa năng cho toàn bộ nền tảng AIFP — bạn có thể yêu cầu tôi tạo kịch bản video, quét hóa đơn chi tiêu, kiểm tra việc làm hoặc điều hướng đến bất kỳ công cụ nào trong hệ thống.`;
+        reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Tạo video","tab":"tools","subTab":"video"},{"title":"Xem việc làm","tab":"digests","filter":"jobs"},{"title":"Quét hóa đơn","tab":"tools","subTab":"vision"},{"title":"Săn deal Shopee","tab":"digests","filter":"shopping"}]} -->';
       }
 
       setChatMessages((prev) => [
@@ -1343,7 +1354,7 @@ export default function App() {
         },
       ]);
       setIsChatGenerating(false);
-    }, 600);
+    }, 450);
   };
 
   const handleApplyPreset = (presetId: UserPersonaPreset) => {
@@ -2098,11 +2109,11 @@ export default function App() {
               {/* Quick Action Suggestion Pills (Crisp, High-Signal, Editorial) */}
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
                 {[
-                  { label: 'Việc làm test game', query: 'Tôi muốn nhận mail việc làm test game và cày game remote không cần kinh nghiệm' },
-                  { label: 'Điểm tin sáng', query: 'Điểm tin công nghệ hôm nay' },
-                  { label: 'Việc làm IT', query: 'Tìm việc làm Flutter và Java mới nhất' },
-                  { label: 'Săn deal Keychron', query: 'Kiểm tra giá bàn phím Keychron K2 Pro' },
-                  { label: 'Quét hóa đơn', query: 'Quét hóa đơn chi tiêu cà phê' },
+                  { label: '🎬 Tạo video Shorts', query: 'Hướng dẫn tôi tạo kịch bản video Shorts ngắn để làm nội dung YouTube/TikTok' },
+                  { label: '🎮 Việc làm test game', query: 'Tìm kiếm cơ hội việc làm test game và cày cấp remote' },
+                  { label: '🧾 Quét hóa đơn', query: 'Làm thế nào để quét và trích xuất thông tin hóa đơn chi tiêu?' },
+                  { label: '🛍️ Săn deal Shopee', query: 'Kiểm tra giá bàn phím Keychron K2 Pro và deal sốc' },
+                  { label: '⚡ Tự động hóa', query: 'Lên lịch tự động gửi bản tin việc làm và công nghệ mỗi sáng' },
                 ].map((p, idx) => (
                   <div
                     key={idx}
@@ -2117,13 +2128,22 @@ export default function App() {
               {/* Chat Messages Feed */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, overflowY: 'auto', marginBottom: 16, paddingRight: 4 }}>
                 {chatMessages.map((msg) => {
-                  const actionMatch = msg.text.match(/<!-- AUTOMATION_ACTION: (.*?) -->/);
+                  const autoMatch = msg.text.match(/<!-- AUTOMATION_ACTION: (.*?) -->/);
+                  const navMatch = msg.text.match(/<!-- NAV_ACTION: (.*?) -->/);
                   let autoPayload: any = null;
-                  let displayText = msg.text;
-                  if (actionMatch) {
+                  let navPayload: { actions?: { title: string; tab?: NavTab; subTab?: ToolSubTab; filter?: string }[] } | null = null;
+                  let displayText = msg.text
+                    .replace(/<!-- AUTOMATION_ACTION: (.*?) -->/g, '')
+                    .replace(/<!-- NAV_ACTION: (.*?) -->/g, '')
+                    .trim();
+                  if (autoMatch) {
                     try {
-                      autoPayload = JSON.parse(actionMatch[1]);
-                      displayText = msg.text.replace(/<!-- AUTOMATION_ACTION: (.*?) -->/, '').trim();
+                      autoPayload = JSON.parse(autoMatch[1]);
+                    } catch {}
+                  }
+                  if (navMatch) {
+                    try {
+                      navPayload = JSON.parse(navMatch[1]);
                     } catch {}
                   }
 
@@ -2153,6 +2173,39 @@ export default function App() {
                       >
                         {displayText}
                       </div>
+
+                      {/* Interactive Navigation Action Buttons */}
+                      {navPayload && navPayload.actions && navPayload.actions.length > 0 && (
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+                          {navPayload.actions.map((act, actIdx) => (
+                            <button
+                              key={actIdx}
+                              type="button"
+                              className="btn btn-secondary"
+                              onClick={() => {
+                                if (act.tab) setActiveTab(act.tab);
+                                if (act.subTab) setToolSubTab(act.subTab);
+                                if (act.filter) setNewsFilter(act.filter as any);
+                              }}
+                              style={{
+                                fontSize: 12,
+                                padding: '4px 12px',
+                                minHeight: 30,
+                                gap: 6,
+                                background: 'var(--bg-surface)',
+                                borderColor: 'var(--border-subtle)',
+                                color: 'var(--text-primary)',
+                                fontWeight: 500,
+                                borderRadius: 'var(--radius-sm)',
+                                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                              }}
+                            >
+                              <span>{act.title}</span>
+                              <span style={{ fontSize: 11, color: 'var(--accent-primary)', fontWeight: 700 }}>→</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
 
                       {/* Interactive Automation Setup Card */}
                       {autoPayload && (

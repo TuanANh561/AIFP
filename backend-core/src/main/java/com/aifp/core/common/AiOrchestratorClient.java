@@ -265,15 +265,29 @@ public class AiOrchestratorClient {
         }
 
         // Deterministic intelligent agent fallback
+        String fallbackReply;
+        String lower = cleanPrompt.toLowerCase();
+        if (lower.matches(".*\\b(alo|alô|hi|hello|hey|chào|xin chào)\\b.*")) {
+            fallbackReply = "Chào bạn! Tôi là Trợ lý AI của hệ thống AIFP. Tôi có thể hỗ trợ bạn tạo kịch bản video Shorts, quét hóa đơn chi tiêu, tìm kiếm việc làm, săn deal Shopee hoặc lên lịch tự động hóa gửi email. Bạn muốn tôi hỗ trợ việc gì?";
+        } else if (lower.contains("video") || lower.contains("shorts") || lower.contains("kịch bản") || lower.contains("tiktok") || lowerQueryIsVideo(lower)) {
+            fallbackReply = "Để tạo video hiệu quả: (1) Sử dụng hook 3 giây đầu giữ chân người xem, (2) Tạo kịch bản phân cảnh chi tiết, (3) Tận dụng công cụ mã nguồn mở Lemo-Opucas & Stickman Video Director trong tab Công Cụ > Video & Shorts.";
+        } else {
+            fallbackReply = "Tôi đã phân tích câu hỏi của bạn về: \"" + cleanPrompt + "\". Tôi có thể hỗ trợ giải đáp chi tiết hoặc mở các công cụ chuyên dụng tương ứng trong hệ thống AIFP để bạn thao tác ngay.";
+        }
+
         return new AgentExecutionResult(
                 "COMPLETED",
                 "gemini-2.5-flash",
                 "GEMINI",
-                "Chào bạn! Tôi là Trợ lý Cá nhân AIFP. Tôi đã ghi nhận yêu cầu: \"" + cleanPrompt + "\". Tôi tự động tổng hợp tin tức và gửi qua email vào 07:30 sáng.",
+                fallbackReply,
                 List.of("https://vnexpress.net/so-hoa"),
                 List.of(),
                 null
         );
+    }
+
+    private boolean lowerQueryIsVideo(String query) {
+        return query.contains("youtube") || query.contains("phân cảnh") || query.contains("storyboard");
     }
 
     public ParsedTaskProposal parseNaturalLanguageTask(UUID userId, String prompt, String timezone) {

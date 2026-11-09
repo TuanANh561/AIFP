@@ -130,6 +130,14 @@ const IconCamera = () => (
   </svg>
 );
 
+const IconCollapseLeft = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" />
+    <path d="M9 3v18" />
+    <path d="m15 9-3 3 3 3" />
+  </svg>
+);
+
 const AppLogo = ({ size = 32 }: { size?: number }) => (
   <svg
     width={size}
@@ -2198,41 +2206,46 @@ export default function App() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {/* Nút đổi màu giao diện (icon-only, tinh tế ở Brand Header) */}
               <button
                 type="button"
-                onClick={handleToggleSidebar}
+                onClick={toggleDark}
                 className="btn btn-secondary"
                 style={{
+                  width: 28,
+                  height: 28,
                   minHeight: 28,
-                  padding: '0 8px',
-                  fontSize: 11.5,
-                  fontWeight: 600,
-                  borderRadius: 'var(--radius-sm)',
+                  padding: 0,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 3,
+                  justifyContent: 'center',
+                  borderRadius: 'var(--radius-sm)',
                 }}
-                title="Thu gọn menu (Sidebar)"
+                title={darkMode ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+                aria-label={darkMode ? 'Giao diện sáng' : 'Giao diện tối'}
               >
-                <span style={{ fontSize: 13, fontWeight: 800 }}>‹</span>
-                <span>Thu gọn</span>
+                {darkMode ? <IconSun /> : <IconMoon />}
               </button>
 
+              {/* Nút cấu hình nhận tin (icon-only) */}
               <button
+                type="button"
                 onClick={handleOpenPreferencesModal}
                 className="btn btn-secondary"
                 style={{
+                  width: 28,
+                  height: 28,
                   minHeight: 28,
-                  padding: '0 8px',
-                  fontSize: 11.5,
-                  fontWeight: 600,
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   borderRadius: 'var(--radius-sm)',
-                  gap: 4,
                 }}
-                title="Tùy biến nhận tin"
+                title="Cấu hình nhận tin"
+                aria-label="Cấu hình"
               >
                 <IconSliders />
-                <span>Cấu hình</span>
               </button>
             </div>
           </div>
@@ -2293,49 +2306,32 @@ export default function App() {
           </button>
         </div>
 
-        {/* Bottom Rail Actions */}
+        {/* Bottom Rail Actions: Nút Thu Gọn Menu ở dưới cùng thay cho nút đổi màu */}
         <div
           style={{
             marginTop: 'auto',
-            paddingTop: 12,
+            paddingTop: 10,
             borderTop: '1px solid var(--border-subtle)',
           }}
         >
-          <button
-            className="btn btn-secondary"
-            onClick={toggleDark}
-            style={{
-              width: '100%',
-              justifyContent: 'space-between',
-              padding: '0 12px',
-              minHeight: 34,
-              fontSize: 12.5,
-            }}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {darkMode ? <IconSun /> : <IconMoon />}
-              <span>{darkMode ? 'Giao diện sáng' : 'Giao diện tối'}</span>
-            </span>
-          </button>
-
           <button
             type="button"
             className="btn btn-secondary"
             onClick={handleToggleSidebar}
             style={{
               width: '100%',
-              marginTop: 6,
               justifyContent: 'center',
-              padding: '0 12px',
-              minHeight: 30,
-              fontSize: 12,
-              gap: 6,
+              padding: '0 8px',
+              minHeight: 32,
+              borderRadius: 'var(--radius-sm)',
               color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
             }}
             title="Thu gọn menu (Sidebar)"
+            aria-label="Thu gọn menu"
           >
-            <span style={{ fontSize: 13, fontWeight: 800 }}>‹</span>
-            <span>Thu gọn menu</span>
+            <IconCollapseLeft />
           </button>
         </div>
       </aside>
@@ -2443,10 +2439,30 @@ export default function App() {
                       <span>Đăng nhập</span>
                     </button>
                   )}
+                  {/* Nút đổi màu giao diện sáng / tối (icon-only) */}
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={toggleDark}
+                    style={{
+                      minHeight: 28,
+                      width: 28,
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 'var(--radius-sm)',
+                    }}
+                    title={darkMode ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
+                    aria-label="Đổi giao diện"
+                  >
+                    {darkMode ? <IconSun /> : <IconMoon />}
+                  </button>
+
                   <button
                     className="btn btn-secondary"
                     onClick={() => setShowCompanionDrawer(!showCompanionDrawer)}
-                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
+                    style={{ minHeight: 28, fontSize: 12, padding: '0 8px', gap: 4 }}
                     title={showCompanionDrawer ? 'Thu gọn bảng phụ' : 'Mở bảng phụ'}
                   >
                     <IconSliders />
@@ -2455,10 +2471,19 @@ export default function App() {
                   <button
                     className="btn btn-secondary"
                     onClick={handleOpenPreferencesModal}
-                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
+                    style={{
+                      minHeight: 28,
+                      width: 28,
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 'var(--radius-sm)',
+                    }}
+                    title="Cấu hình nhận tin & Tùy biến"
+                    aria-label="Tùy biến"
                   >
                     <IconSliders />
-                    <span>Tùy biến</span>
                   </button>
                   <span
                     className="mono-pill"
@@ -3237,11 +3262,19 @@ export default function App() {
                   className="btn btn-secondary"
                   onClick={handleSyncLiveNews}
                   disabled={isSyncingNews}
-                  style={{ minHeight: 26, fontSize: 11.5, padding: '0 10px', gap: 5 }}
-                  title="Cập nhật tin mới"
+                  style={{
+                    minHeight: 28,
+                    width: 28,
+                    padding: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 'var(--radius-sm)',
+                  }}
+                  title={isSyncingNews ? 'Đang cập nhật bài viết...' : 'Cập nhật tin mới'}
+                  aria-label="Cập nhật tin mới"
                 >
                   <IconRefresh spinning={isSyncingNews} />
-                  <span>{isSyncingNews ? 'Đang tải...' : 'Cập nhật'}</span>
                 </button>
 
                 {/* Sub Filter Pills */}
@@ -4218,10 +4251,19 @@ export default function App() {
                     className="btn btn-primary"
                     onClick={() => handleSearchShopping()}
                     disabled={isSearchingShop || !shopQuery.trim()}
-                    style={{ gap: 5, padding: '0 16px' }}
+                    style={{
+                      width: 42,
+                      minHeight: 38,
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 'var(--radius-sm)',
+                    }}
+                    title={isSearchingShop ? 'Đang so sánh giá...' : 'Tìm kiếm giá'}
+                    aria-label="Tìm kiếm giá"
                   >
-                    <IconSearch />
-                    <span>{isSearchingShop ? 'Đang tìm...' : 'Tìm giá'}</span>
+                    {isSearchingShop ? <IconRefresh spinning /> : <IconSearch />}
                   </button>
                 </div>
 

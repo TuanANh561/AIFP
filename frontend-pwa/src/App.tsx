@@ -814,6 +814,20 @@ export default function App() {
     },
   ]);
 
+  // Onboarding Wizard & Guided Roadmap State
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState<boolean>(false);
+  const [onboardingStep, setOnboardingStep] = useState<number>(1);
+  const [onboardingRole, setOnboardingRole] = useState<string>('developer');
+  const [onboardingTopics, setOnboardingTopics] = useState<string[]>([
+    'tech',
+    'jobs',
+    'shopping',
+    'opensource',
+  ]);
+  const [onboardingTime, setOnboardingTime] = useState<string>('07:30');
+  const [onboardingFrequency, setOnboardingFrequency] = useState<string>('1_DAILY');
+  const [onboardingEmail, setOnboardingEmail] = useState<string>('');
+
   // Tasks & Schedules
   const [tasks, setTasks] = useState([
     {
@@ -854,35 +868,27 @@ export default function App() {
     'Hóa đơn: The Coffee House\nNgày: 09/11/2026\nMón: Cà phê sữa đá (x2) — 78.000 đ, Bánh Croissant (x1) — 35.000 đ\nTổng thanh toán: 113.000 đ\nPhương thức: Chuyển khoản QR'
   );
 
-  // Shopping Tracker State
-  const [shopQuery, setShopQuery] = useState('Bàn phím cơ Keychron K2 Pro');
-  const [shopResults, setShopResults] = useState<{ store: string; productTitle?: string; price: string; link: string; status: string; rating?: string }[]>([
-    { store: 'Shopee Mall', productTitle: 'Bàn phím cơ Keychron K2 Pro chính hãng', price: '1.890.000 đ', link: 'https://shopee.vn/search?keyword=Keychron+K2+Pro', status: 'Giá tốt nhất', rating: '4.9/5 (1.8k đánh giá)' },
-    { store: 'Lazada Mall', productTitle: 'Bàn phím cơ Keychron K2 Pro bảo hành 24T', price: '1.965.000 đ', link: 'https://www.lazada.vn/catalog/?q=Keychron+K2+Pro', status: 'Sẵn hàng', rating: '4.8/5 (920 đánh giá)' },
-    { store: 'Tiki Official', productTitle: 'Bàn phím cơ Keychron K2 Pro giao nhanh 2h', price: '2.040.000 đ', link: 'https://tiki.vn/search?q=Keychron+K2+Pro', status: 'Sẵn hàng', rating: '4.9/5 (640 đánh giá)' },
-  ]);
+  // Shopping Tracker State (Clean state - zero hardcoded data)
+  const [shopQuery, setShopQuery] = useState('');
+  const [shopResults, setShopResults] = useState<{ store: string; productTitle?: string; price: string; link: string; status: string; rating?: string }[]>([]);
   const [isSearchingShop, setIsSearchingShop] = useState(false);
-  const [shopBestSummary, setShopBestSummary] = useState('Shopee Mall đang có giá tốt nhất: 1.890.000 đ (Tiết kiệm ~150.000 đ so với Tiki).');
+  const [shopBestSummary, setShopBestSummary] = useState('');
 
-  // Writing Studio State
-  const [writingPrompt, setWritingPrompt] = useState('Soạn email gửi cấp trên báo cáo tiến độ tích hợp mô hình AI');
+  // Writing Studio State (Clean state)
+  const [writingPrompt, setWritingPrompt] = useState('');
   const [isGeneratingWriting, setIsGeneratingWriting] = useState(false);
-  const [writingDraft, setWritingDraft] = useState(
-    'Kính gửi Anh/Chị Quản lý,\n\nEm xin phép gửi báo cáo tóm tắt tiến độ triển khai nền tảng Trợ lý AI:\n1. Đã kết nối hộp thư hệ thống Gmail SMTP an toàn phục vụ gửi tự động.\n2. Giao diện được thiết kế tối giản, loại bỏ biểu tượng màu mè và thanh cuộn mượt mà.\n3. Thiết lập quy trình tự động gửi bản tin dạng thẻ qua email lúc 07:30 sáng, giúp người dùng theo dõi mà không cần mở ứng dụng.\n\nTrân trọng,\nAIFP Assistant'
-  );
+  const [writingDraft, setWritingDraft] = useState('');
 
   // Calendar State
-  const [calendarTitle, setCalendarTitle] = useState('Họp rà soát quy trình triển khai Trợ lý AI');
+  const [calendarTitle, setCalendarTitle] = useState('');
   const [calendarDate, setCalendarDate] = useState('2026-11-09T09:00');
   const [calendarSuccess, setCalendarSuccess] = useState(false);
   const [isCreatingCalendarEvent, setIsCreatingCalendarEvent] = useState(false);
 
   // Video Studio State (Creation & Narration & Weather VFX & Editor)
   const [videoStudioMode, setVideoStudioMode] = useState<'create' | 'editor' | 'analyze'>('create');
-  const [videoTitle, setVideoTitle] = useState('Bóng người dưới mưa & Bài học về sự kiên cường');
-  const [videoScript, setVideoScript] = useState(
-    'Trong đêm mưa gió lạnh lẽo, bóng một người lữ khách đứng lặng im trên đỉnh đồi nhìn về phía thành phố xa xăm. Cơn bão quét qua những rặng cây, nhưng đôi chân anh vẫn vững vàng không lay chuyển. Anh hiểu rằng những thử thách khắc nghiệt nhất của cuộc đời không phải để quật ngã chúng ta, mà là để tôi luyện một ý chí thép. Khi bình minh ló rạng, bầu trời sẽ lại sáng trong và những hạt mưa đọng trên lá cỏ sẽ lấp lánh như những viên ngọc quý.'
-  );
+  const [videoTitle, setVideoTitle] = useState('');
+  const [videoScript, setVideoScript] = useState('');
   const [videoTargetSeconds, setVideoTargetSeconds] = useState<number>(30);
   const [videoStyle, setVideoStyle] = useState<'STICKMAN' | 'LEMO_OPUS' | 'SILHOUETTE' | 'ANIME_2D' | 'VOXEL_3D' | 'REALISTIC'>('STICKMAN');
   const [videoVoiceActor, setVideoVoiceActor] = useState<'DORAEMON' | 'NOBITA' | 'DOCUMENTARY' | 'GENTLE_FEMALE'>('DORAEMON');
@@ -910,77 +916,7 @@ export default function App() {
     message: string;
   } | null>(null);
 
-  const [videoStoryboard, setVideoStoryboard] = useState<VideoStoryboard | null>({
-    totalSeconds: 30.0,
-    sceneCount: 6,
-    style: 'STICKMAN',
-    voiceActor: 'DORAEMON',
-    voiceDescription: 'Lồng tiếng Doraemon HTV3 (Vui nhộn, biểu cảm cao)',
-    weatherEffect: 'NONE',
-    weatherDescription: 'Không hiệu ứng hạt',
-    scenes: [
-      {
-        index: 0,
-        sceneNumber: 1,
-        narration: 'Chào các bạn! Tôi là một anh chàng người que đơn giản sống trong thế giới đồ họa tối giản.',
-        prompt: 'Người que hoạt hình (Stickman Video Director) — Nhân vật người que đứng vẫy tay chào vui nhộn.',
-        duration: 5.0,
-        cameraMotion: 'Lia máy ngang từ trái sang phải (Slow Pan Right)',
-        weatherOverlay: 'Nét vẽ tối giản, đường viền đen sắc nét',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Auto-ducking nhạc nền (-12dB)',
-      },
-      {
-        index: 1,
-        sceneNumber: 2,
-        narration: 'Cuộc sống của tôi chỉ xoay quanh những đường nét đen trắng và những cú nhảy vượt chướng ngại vật.',
-        prompt: 'Người que hoạt hình (Stickman Video Director) — Người que nhảy qua các khối vuông đồ họa.',
-        duration: 5.0,
-        cameraMotion: 'Phóng to nhẹ vào trung tâm chủ thể (Slow Zoom-In 1.15x)',
-        weatherOverlay: 'Hiệu ứng chuyển động hạt mực vẽ tay',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Âm thanh cartoon vui nhộn',
-      },
-      {
-        index: 2,
-        sceneNumber: 3,
-        narration: 'Nhiều người hỏi tôi sao không cần khuôn mặt phức tạp mà vẫn vui vẻ?',
-        prompt: 'Người que hoạt hình (Stickman Video Director) — Người que gãi đầu biểu cảm tò mò, dấu hỏi chấm.',
-        duration: 5.0,
-        cameraMotion: 'Lia chéo từ dưới lên góc rộng (Low Angle Pan)',
-        weatherOverlay: 'Nét vẽ viền tương phản cao',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Tiếng nhạc dạo dí dỏm',
-      },
-      {
-        index: 3,
-        sceneNumber: 4,
-        narration: 'Đơn giản thôi, vì niềm vui nằm ở những điều mộc mạc và chân thành nhất!',
-        prompt: 'Người que hoạt hình (Stickman Video Director) — Người que cười tươi giơ ngón tay cái tán thành.',
-        duration: 5.0,
-        cameraMotion: 'Khóa chủ thể trung tâm, nền trôi nhẹ (Parallax 2.5D)',
-        weatherOverlay: 'Ánh sáng ấm áp lan tỏa',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Giai điệu tích cực',
-      },
-      {
-        index: 4,
-        sceneNumber: 5,
-        narration: 'Mỗi ngày thức dậy, chúng ta đều có quyền chọn mỉm cười và tiến về phía trước.',
-        prompt: 'Người que hoạt hình (Stickman Video Director) — Người que chạy về phía mặt trời mọc.',
-        duration: 5.0,
-        cameraMotion: 'Thu nhỏ mở rộng bối cảnh toàn cảnh (Slow Zoom-Out)',
-        weatherOverlay: 'Tia sáng mặt trời tối giản chiếu rọi',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Nhạc nền truyền cảm hứng',
-      },
-      {
-        index: 5,
-        sceneNumber: 6,
-        narration: 'Đừng quên đăng ký kênh và cùng tôi khám phá thêm nhiều câu chuyện thú vị nhé!',
-        prompt: 'Người que hoạt hình (Stickman Video Director) — Người que vẫy tay chào tạm biệt, nút Like & Subscribe.',
-        duration: 5.0,
-        cameraMotion: 'Lia máy nhẹ từ dưới lên (Slow Tilt Up)',
-        weatherOverlay: 'Biểu tượng chuông thông báo hoạt hình',
-        audioCue: 'Giọng đọc: Doraemon HTV3 + Âm thanh kết thúc ấn tượng',
-      },
-    ],
-  });
+  const [videoStoryboard, setVideoStoryboard] = useState<VideoStoryboard | null>(null);
 
   const VIDEO_PRESETS = [
     {
@@ -1737,6 +1673,12 @@ export default function App() {
         }));
         setShowLoginModal(false);
         showToast(`Đăng nhập Google thành công: ${res.displayName || res.email}!`);
+        const onboardingDone = localStorage.getItem('aifp_onboarding_completed') === 'true';
+        if (!onboardingDone) {
+          setOnboardingEmail(res.email);
+          setOnboardingStep(1);
+          setShowOnboardingWizard(true);
+        }
       } else {
         setAuthError('Xác thực tài khoản Google không thành công.');
         showToast('Đăng nhập Google không thành công.');
@@ -1771,6 +1713,12 @@ export default function App() {
         setShowLoginModal(false);
         setAuthPassword('');
         showToast(`Đăng nhập thành công: ${res.displayName || res.email}!`);
+        const onboardingDone = localStorage.getItem('aifp_onboarding_completed') === 'true';
+        if (!onboardingDone) {
+          setOnboardingEmail(res.email);
+          setOnboardingStep(1);
+          setShowOnboardingWizard(true);
+        }
       } else {
         setAuthError('Email hoặc mật khẩu không chính xác.');
       }
@@ -1807,6 +1755,12 @@ export default function App() {
         setShowLoginModal(false);
         setAuthPassword('');
         showToast(`Tạo tài khoản thành công! Xin chào ${res.displayName}.`);
+        const onboardingDone = localStorage.getItem('aifp_onboarding_completed') === 'true';
+        if (!onboardingDone) {
+          setOnboardingEmail(res.email);
+          setOnboardingStep(1);
+          setShowOnboardingWizard(true);
+        }
       } else {
         setAuthError('Email đã được đăng ký hoặc thông tin không hợp lệ.');
       }
@@ -1815,6 +1769,58 @@ export default function App() {
     } finally {
       setIsLoggingIn(false);
     }
+  };
+
+  const handleCompleteOnboarding = (isSkipped: boolean = false) => {
+    try {
+      localStorage.setItem('aifp_onboarding_completed', 'true');
+    } catch {}
+
+    if (!isSkipped) {
+      const roleMap: Record<string, string> = {
+        developer: 'Kỹ sư phần mềm & Lập trình viên',
+        creator: 'Sáng tạo nội dung & Video Creator',
+        gamer_remote: 'Việc làm Remote & Test Game',
+        shopper: 'Săn Deal Công nghệ & Thiết bị',
+        office: 'Văn phòng & Quản lý',
+      };
+      const personaTitle = roleMap[onboardingRole] || 'Kỹ sư & Lập trình viên';
+
+      setProfile((prev) => ({
+        ...prev,
+        personaTitle,
+        deliveryEmail: onboardingEmail.trim() || prev.deliveryEmail,
+        scheduledTimes: [onboardingTime],
+        deliveryFrequency: onboardingFrequency as any,
+        selectedTopics: onboardingTopics,
+      }));
+
+      // Synchronize Topic Channels based on user selections
+      setTopicChannels((prev) =>
+        prev.map((c) => ({
+          ...c,
+          isActive: onboardingTopics.includes(c.id),
+          scheduledTime: onboardingTime,
+          customEmail: onboardingEmail.trim() || c.customEmail,
+        }))
+      );
+
+      const email = onboardingEmail.trim() || profile.deliveryEmail;
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          id: `m-onboarding-${Date.now()}`,
+          role: 'assistant',
+          text: `🎉 **Khởi tạo thuật toán Trợ lý Cá nhân hóa thành công!**\n\nTôi đã cấu hình sẵn sàng các luồng tác vụ tự động theo vai trò **${personaTitle}** của bạn:\n• ⏱️ **Lịch gửi định kỳ:** ${onboardingTime} mỗi ngày (${onboardingFrequency === '1_DAILY' ? '1 lần/ngày' : '2 lần/ngày'})\n• 📬 **Hộp thư nhận bản tin:** ${email}\n• 🔍 **Chủ đề theo dõi:** ${onboardingTopics.join(', ')}\n\nTheo triết lý **Zero-App-Open**, mỗi sáng hệ thống sẽ tự động quét đa nguồn và gửi email dạng thẻ cho bạn — **bạn không cần phải mở ứng dụng hàng ngày**! Bất cứ khi nào cần tạo kịch bản video, quét hóa đơn hoặc tra cứu giá, bạn chỉ cần nhắn tôi tại đây.`,
+        },
+      ]);
+
+      showToast('Đã kích hoạt Trợ lý Cá nhân hóa thành công!');
+    } else {
+      showToast('Đã lưu cấu hình mặc định.');
+    }
+
+    setShowOnboardingWizard(false);
   };
 
   useEffect(() => {
@@ -4318,42 +4324,62 @@ export default function App() {
 
                 {/* Main Store Comparison Rows */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {shopResults.map((item, idx) => (
+                  {shopResults.length === 0 ? (
                     <div
-                      key={idx}
                       style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        padding: '14px 18px',
+                        padding: '32px 20px',
+                        textAlign: 'center',
+                        color: 'var(--text-tertiary)',
+                        border: '1px dashed var(--border-subtle)',
                         borderRadius: 'var(--radius-sm)',
-                        border: '1px solid var(--border-subtle)',
                         background: 'var(--bg-surface)',
                       }}
                     >
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: 14 }}>{item.store}</div>
-                        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-                          {item.productTitle || item.status} {item.rating ? `· ${item.rating}` : ''}
-                        </div>
+                      <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                        Chưa có dữ liệu so sánh giá
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--accent-primary)' }}>
-                          {item.price}
-                        </span>
-                        <a
-                          href={item.link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn btn-secondary"
-                          style={{ fontSize: 12, minHeight: 30, padding: '0 12px', gap: 4 }}
-                        >
-                          <span>Xem giá</span>
-                          <IconArrowRight />
-                        </a>
+                      <div style={{ fontSize: 12 }}>
+                        Nhập tên sản phẩm ở ô tìm kiếm hoặc bấm vào một từ khóa gợi ý bên trên để quét giá thực tế.
                       </div>
                     </div>
-                  ))}
+                  ) : (
+                    shopResults.map((item, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '14px 18px',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--bg-surface)',
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 14 }}>{item.store}</div>
+                          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
+                            {item.productTitle || item.status} {item.rating ? `· ${item.rating}` : ''}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--accent-primary)' }}>
+                            {item.price}
+                          </span>
+                          <a
+                            href={item.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn btn-secondary"
+                            style={{ fontSize: 12, minHeight: 30, padding: '0 12px', gap: 4 }}
+                          >
+                            <span>Xem giá</span>
+                            <IconArrowRight />
+                          </a>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
 
                 {/* Rich Shopping Intelligence: Matrix & Advice & Coupons */}
@@ -5059,6 +5085,44 @@ export default function App() {
                             </div>
                           </div>
                         )}
+
+                        {/* Empty Video Studio State */}
+                        {!isCreatingVideo && !videoCreationResult && !videoStoryboard && (
+                          <div
+                            style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              padding: '48px 20px',
+                              textAlign: 'center',
+                              color: 'var(--text-tertiary)',
+                              gap: 10,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 44,
+                                height: 44,
+                                borderRadius: '50%',
+                                background: 'var(--bg-surface)',
+                                border: '1px solid var(--border-subtle)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'var(--accent-primary)',
+                              }}
+                            >
+                              <IconPlay />
+                            </div>
+                            <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                              Chưa có phân cảnh video
+                            </div>
+                            <div style={{ fontSize: 12, maxWidth: 300, lineHeight: 1.5 }}>
+                              Chọn một kịch bản gợi ý ở trên hoặc nhập ý tưởng, sau đó bấm <strong>Lập phân cảnh</strong> hoặc <strong>Tạo video ngay</strong>.
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -5606,7 +5670,20 @@ export default function App() {
                     {profile.deliveryEmail} · {profile.scheduledTimes.join(', ')}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 6 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setOnboardingEmail(profile.deliveryEmail);
+                      setOnboardingStep(1);
+                      setShowOnboardingWizard(true);
+                    }}
+                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
+                    title="Xem lại lộ trình hướng dẫn & Thiết lập thuật toán AI"
+                  >
+                    <IconAssistant />
+                    <span>Lộ trình AI</span>
+                  </button>
                   <button
                     className="btn btn-secondary"
                     onClick={handleOpenPreferencesModal}
@@ -7063,6 +7140,478 @@ export default function App() {
                       Đăng nhập
                     </button>
                   </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 6: PERSONALIZED ONBOARDING WIZARD & GUIDED ROADMAP ENGINE            */}
+      {/* ========================================================================= */}
+      {showOnboardingWizard && (
+        <div className="email-modal-overlay" onClick={() => handleCompleteOnboarding(true)}>
+          <div
+            className="email-modal-container"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: 560 }}
+          >
+            {/* Header with Step Progress & Skip button */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px 20px',
+                borderBottom: '1px solid var(--border-subtle)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontWeight: 800, fontSize: 15.5, color: 'var(--text-primary)' }}>
+                  Khởi tạo Trợ lý Cá nhân hóa
+                </span>
+                <span className="mono-pill" style={{ fontSize: 11, color: 'var(--accent-primary)' }}>
+                  Bước {onboardingStep} / 4
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleCompleteOnboarding(true)}
+                className="btn btn-secondary"
+                style={{ minHeight: 26, fontSize: 11.5, padding: '0 8px' }}
+                title="Bỏ qua thiết lập ban đầu"
+              >
+                Bỏ qua
+              </button>
+            </div>
+
+            {/* Step Progress Line */}
+            <div style={{ height: 3, width: '100%', background: 'var(--border-subtle)' }}>
+              <div
+                style={{
+                  height: '100%',
+                  width: `${(onboardingStep / 4) * 100}%`,
+                  background: 'var(--accent-primary)',
+                  transition: 'width 0.25s ease',
+                }}
+              />
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* STEP 1: VALUE PROPOSITION & ROLE SELECTION */}
+              {onboardingStep === 1 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* System Purpose & Value Proposition Card */}
+                  <div
+                    style={{
+                      background: 'var(--bg-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border-subtle)',
+                      padding: '14px 16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 6,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981' }} />
+                      <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>
+                        Hệ thống Aura giúp ích gì cho bạn?
+                      </strong>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                      Aura vận hành theo triết lý <strong>Zero-App-Open</strong>: Tự động rà soát đa nguồn (tin công nghệ mới, việc làm remote, cày game, deal Shopee, mã nguồn mở GitHub) và gửi email dạng thẻ trực quan đúng giờ bạn muốn — <strong>bạn không cần phải mở ứng dụng hàng ngày</strong>!
+                    </p>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>
+                      Chọn vai trò bạn muốn AI tối ưu hóa tốt nhất:
+                    </label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {[
+                        {
+                          id: 'developer',
+                          icon: '💻',
+                          title: 'Kỹ sư phần mềm & Lập trình viên',
+                          desc: 'Tự động rà soát AI LLM, DeepSeek, MCP, việc làm Flutter/Java, mã nguồn mở GitHub.',
+                        },
+                        {
+                          id: 'creator',
+                          icon: '🎬',
+                          title: 'Sáng tạo nội dung & Video Creator',
+                          desc: 'Gợi ý kịch bản Shorts AI, phân cảnh storyboard, phong cách người que & WebGL.',
+                        },
+                        {
+                          id: 'gamer_remote',
+                          icon: '🎮',
+                          title: 'Việc làm Remote & Cày game',
+                          desc: 'Tìm việc test server game, cày cấp linh hoạt, gán nhãn dữ liệu làm việc tại nhà.',
+                        },
+                        {
+                          id: 'shopper',
+                          icon: '🛍️',
+                          title: 'Săn Deal Công nghệ & Mua sắm',
+                          desc: 'Theo dõi giá Shopee Mall, Tiki, Lazada; báo giảm giá bàn phím cơ, màn hình đồ họa.',
+                        },
+                        {
+                          id: 'office',
+                          icon: '💼',
+                          title: 'Dân văn phòng & Quản lý dự án',
+                          desc: 'Bản tin sáng 2 phút, quét hóa đơn OCR tự động bóc tách chi tiêu VAT, nhắc lịch hẹn.',
+                        },
+                      ].map((r) => {
+                        const isSelected = onboardingRole === r.id;
+                        return (
+                          <div
+                            key={r.id}
+                            onClick={() => setOnboardingRole(r.id)}
+                            className="card-surface"
+                            style={{
+                              padding: '12px 14px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 12,
+                              borderColor: isSelected ? 'var(--accent-primary)' : 'var(--border-subtle)',
+                              background: isSelected ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+                              boxShadow: isSelected ? '0 0 0 1px var(--accent-primary)' : 'none',
+                            }}
+                          >
+                            <span style={{ fontSize: 20 }}>{r.icon}</span>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 13.5, fontWeight: isSelected ? 700 : 600, color: 'var(--text-primary)' }}>
+                                {r.title}
+                              </div>
+                              <div style={{ fontSize: 11.5, color: 'var(--text-tertiary)', marginTop: 2 }}>
+                                {r.desc}
+                              </div>
+                            </div>
+                            <span style={{ fontSize: 14, color: isSelected ? 'var(--accent-primary)' : 'transparent', fontWeight: 800 }}>
+                              ✓
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 2: TOPIC & KEYWORD SELECTION */}
+              {onboardingStep === 2 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  <div>
+                    <h4 style={{ margin: '0 0 4px 0', fontSize: 14, fontWeight: 700 }}>
+                      Chủ đề tự động rà soát ngầm hàng ngày
+                    </h4>
+                    <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>
+                      Chọn các luồng tin AI sẽ tự động thu thập và sàng lọc cho bạn:
+                    </p>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {[
+                      { id: 'tech', label: 'Công nghệ & AI thế hệ mới', desc: 'Đột phá DeepSeek V3/R1, Claude 3.7, Gemini 2.5, MCP' },
+                      { id: 'jobs', label: 'Việc làm kiểm thử game & Remote', desc: 'Part-time linh hoạt, cày cấp, CTV gán nhãn AI' },
+                      { id: 'shopping', label: 'Săn Deal thiết bị công nghệ Shopee', desc: 'Bàn phím Keychron, màn hình LG, chuột Logitech' },
+                      { id: 'opensource', label: 'Radar mô hình mã nguồn mở GitHub', desc: 'Crawl4AI, Ollama, Lemo-Opuscar, Remotion' },
+                      { id: 'finance', label: 'Tin tức kinh tế & thị trường', desc: 'Cập nhật từ VnExpress, Dân Trí, TechCrunch' },
+                      { id: 'creator-ideas', label: 'Kịch bản Video Shorts & Kiếm tiền', desc: 'Công thức giữ chân người xem YouTube/TikTok' },
+                    ].map((t) => {
+                      const isChecked = onboardingTopics.includes(t.id);
+                      return (
+                        <div
+                          key={t.id}
+                          onClick={() => {
+                            setOnboardingTopics((prev) =>
+                              prev.includes(t.id) ? prev.filter((x) => x !== t.id) : [...prev, t.id]
+                            );
+                          }}
+                          className="card-surface"
+                          style={{
+                            padding: '10px 14px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            borderColor: isChecked ? 'var(--accent-primary)' : 'var(--border-subtle)',
+                            background: isChecked ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontSize: 13, fontWeight: isChecked ? 700 : 500 }}>{t.label}</div>
+                            <div style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>{t.desc}</div>
+                          </div>
+                          <span
+                            style={{
+                              width: 18,
+                              height: 18,
+                              borderRadius: 4,
+                              border: isChecked ? 'none' : '1.5px solid var(--border-subtle)',
+                              background: isChecked ? 'var(--accent-primary)' : 'transparent',
+                              color: '#FFF',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: 11,
+                              fontWeight: 800,
+                            }}
+                          >
+                            {isChecked ? '✓' : ''}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 3: SCHEDULE & EMAIL CONFIGURATION */}
+              {onboardingStep === 3 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div>
+                    <h4 style={{ margin: '0 0 4px 0', fontSize: 14, fontWeight: 700 }}>
+                      Lịch gửi bản tin & Hộp thư nhận
+                    </h4>
+                    <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>
+                      AI sẽ tự động tổng hợp và gửi trực tiếp vào email mà bạn không cần mở app:
+                    </p>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                      Khung giờ gửi email mỗi ngày:
+                    </label>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {[
+                        { time: '07:00', label: '07:00 · Sáng sớm' },
+                        { time: '07:30', label: '07:30 · Ăn sáng' },
+                        { time: '08:00', label: '08:00 · Bắt đầu làm' },
+                        { time: '11:30', label: '11:30 · Nghỉ trưa' },
+                        { time: '17:30', label: '17:30 · Tan làm' },
+                        { time: '20:00', label: '20:00 · Buổi tối' },
+                      ].map((slot) => {
+                        const isSelected = onboardingTime === slot.time;
+                        return (
+                          <button
+                            key={slot.time}
+                            type="button"
+                            onClick={() => setOnboardingTime(slot.time)}
+                            className="btn"
+                            style={{
+                              fontSize: 12,
+                              padding: '6px 12px',
+                              minHeight: 30,
+                              background: isSelected ? 'var(--accent-primary)' : 'var(--bg-surface)',
+                              color: isSelected ? 'var(--text-on-accent, #FFF)' : 'var(--text-primary)',
+                              border: '1px solid var(--border-subtle)',
+                              borderRadius: 'var(--radius-sm)',
+                            }}
+                          >
+                            {slot.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
+                      Tần suất nhận bản tin:
+                    </label>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      {[
+                        { id: '1_DAILY', label: '1 lần / ngày (Khuyên dùng)' },
+                        { id: '2_DAILY', label: '2 lần / ngày (Sáng & Chiều)' },
+                      ].map((freq) => {
+                        const isSelected = onboardingFrequency === freq.id;
+                        return (
+                          <button
+                            key={freq.id}
+                            type="button"
+                            onClick={() => setOnboardingFrequency(freq.id)}
+                            className="btn"
+                            style={{
+                              flex: 1,
+                              fontSize: 12,
+                              padding: '8px 10px',
+                              minHeight: 32,
+                              background: isSelected ? 'var(--bg-subtle)' : 'var(--bg-surface)',
+                              color: isSelected ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                              border: isSelected ? '1.5px solid var(--accent-primary)' : '1px solid var(--border-subtle)',
+                              fontWeight: isSelected ? 700 : 500,
+                            }}
+                          >
+                            {freq.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                      Địa chỉ email nhận bản tin:
+                    </label>
+                    <input
+                      type="email"
+                      value={onboardingEmail}
+                      onChange={(e) => setOnboardingEmail(e.target.value)}
+                      placeholder="email_cua_ban@domain.com"
+                      style={{
+                        width: '100%',
+                        height: 38,
+                        fontSize: 13,
+                        padding: '0 12px',
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1px solid var(--border-subtle)',
+                        background: 'var(--bg-surface)',
+                        color: 'var(--text-primary)',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 4: GUIDED ROADMAP FOR USER */}
+              {onboardingStep === 4 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  <div>
+                    <h4 style={{ margin: '0 0 4px 0', fontSize: 14, fontWeight: 700 }}>
+                      Lộ trình đồng hành cùng Trợ lý Aura
+                    </h4>
+                    <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>
+                      Quy trình 3 mốc vận hành tự động giúp bạn tiết kiệm thời gian mỗi ngày:
+                    </p>
+                  </div>
+
+                  {/* 3-Milestone Roadmap */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {[
+                      {
+                        step: '1',
+                        badge: 'Ngay bây giờ',
+                        title: 'AI tự động thiết lập thuật toán',
+                        desc: `Kích hoạt các luồng quét tin, việc làm và deal Shopee ngầm dựa theo vai trò của bạn.`,
+                        highlight: '#0F766E',
+                      },
+                      {
+                        step: '2',
+                        badge: `Mỗi ngày lúc ${onboardingTime}`,
+                        title: 'Tự động gửi email chọn lọc',
+                        desc: `Hệ thống lọc trùng SHA-256 và gửi bản tin dạng thẻ có ảnh tới ${onboardingEmail || 'email của bạn'}. Đọc 2 phút là nắm trọn thông tin, không cần mở app.`,
+                        highlight: '#2563EB',
+                      },
+                      {
+                        step: '3',
+                        badge: 'Bất kỳ lúc nào',
+                        title: 'Đa nhiệm & Sáng tạo nội dung',
+                        desc: 'Tận dụng Video Studio, Quét hóa đơn OCR tự động bóc tách chi tiêu, hoặc trò chuyện với Trợ lý để giải quyết mọi nhiệm vụ phát sinh.',
+                        highlight: '#7C3AED',
+                      },
+                    ].map((m) => (
+                      <div
+                        key={m.step}
+                        style={{
+                          display: 'flex',
+                          gap: 12,
+                          padding: '12px 14px',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--bg-subtle)',
+                          alignItems: 'flex-start',
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: '50%',
+                            background: m.highlight,
+                            color: '#FFF',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: 12,
+                            fontWeight: 800,
+                            flexShrink: 0,
+                            marginTop: 2,
+                          }}
+                        >
+                          {m.step}
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                            <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>{m.title}</strong>
+                            <span className="mono-pill" style={{ fontSize: 10.5 }}>{m.badge}</span>
+                          </div>
+                          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                            {m.desc}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer Controls */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '12px 20px',
+                borderTop: '1px solid var(--border-subtle)',
+                background: 'var(--bg-subtle)',
+              }}
+            >
+              <div>
+                {onboardingStep > 1 ? (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setOnboardingStep((s) => s - 1)}
+                    style={{ minHeight: 32, fontSize: 12, padding: '0 12px' }}
+                  >
+                    ← Quay lại
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => handleCompleteOnboarding(true)}
+                    style={{ minHeight: 32, fontSize: 12, padding: '0 12px', color: 'var(--text-tertiary)' }}
+                  >
+                    Bỏ qua
+                  </button>
+                )}
+              </div>
+
+              <div>
+                {onboardingStep < 4 ? (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => setOnboardingStep((s) => s + 1)}
+                    style={{ minHeight: 32, fontSize: 12, padding: '0 16px', fontWeight: 600 }}
+                  >
+                    Tiếp tục →
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={() => handleCompleteOnboarding(false)}
+                    style={{ minHeight: 34, fontSize: 12.5, padding: '0 20px', fontWeight: 700 }}
+                  >
+                    Kích hoạt Trợ lý Ngay 🚀
+                  </button>
                 )}
               </div>
             </div>

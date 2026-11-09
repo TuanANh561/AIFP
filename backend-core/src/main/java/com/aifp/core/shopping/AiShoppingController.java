@@ -114,14 +114,16 @@ public class AiShoppingController {
             @AuthenticationPrincipal CustomUserPrincipal principal,
             @Valid @RequestBody CompareProductsRequest request
     ) {
-        // Enforce Level 1 tool permission gate (product_price_compare)
-        toolPermissionGateService.evaluateToolCall(
-                principal.userId(),
-                null,
-                "product_price_compare",
-                "{\"query\":\"" + request.query().replace("\"", "\\\"") + "\"}",
-                "{}"
-        );
+        // Enforce Level 1 tool permission gate (product_price_compare) if authenticated
+        if (principal != null) {
+            toolPermissionGateService.evaluateToolCall(
+                    principal.userId(),
+                    null,
+                    "product_price_compare",
+                    "{\"query\":\"" + request.query().replace("\"", "\\\"") + "\"}",
+                    "{}"
+            );
+        }
 
         String cleanQuery = request.query().trim();
         String lower = cleanQuery.toLowerCase();

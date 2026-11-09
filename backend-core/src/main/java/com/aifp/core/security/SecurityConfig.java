@@ -54,7 +54,9 @@ public class SecurityConfig {
                                 "/api/v1/notifications/send-channel-digest",
                                 "/api/v1/news/**",
                                 "/api/v1/open-source/**",
-                                "/api/v1/video/**"
+                                "/api/v1/video/**",
+                                "/api/v1/shopping/compare",
+                                "/api/v1/writing/draft"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

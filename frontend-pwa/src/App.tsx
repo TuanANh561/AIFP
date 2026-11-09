@@ -797,6 +797,7 @@ export default function App() {
 
   // Onboarding Wizard & Guided Roadmap State
   const [showOnboardingWizard, setShowOnboardingWizard] = useState<boolean>(false);
+  const [showGuidanceModal, setShowGuidanceModal] = useState<boolean>(false);
   const [onboardingStep, setOnboardingStep] = useState<number>(1);
   const [onboardingRole, setOnboardingRole] = useState<string>('developer');
   const [onboardingTopics, setOnboardingTopics] = useState<string[]>([
@@ -2339,6 +2340,32 @@ export default function App() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {/* Nút hướng dẫn lại (? có viền tròn) */}
+              <button
+                type="button"
+                onClick={() => setShowGuidanceModal(true)}
+                className="btn btn-secondary"
+                style={{
+                  width: 28,
+                  height: 28,
+                  minHeight: 28,
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '50%',
+                  border: '1px solid var(--border-subtle)',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  color: 'var(--text-secondary)',
+                  background: 'var(--bg-surface)',
+                }}
+                title="Hướng dẫn sử dụng & Lộ trình AI"
+                aria-label="Hướng dẫn sử dụng"
+              >
+                ?
+              </button>
+
               {/* Nút đổi màu giao diện (icon-only, tinh tế ở Brand Header) */}
               <button
                 type="button"
@@ -2469,16 +2496,33 @@ export default function App() {
         </div>
       </aside>
 
-      {/* Floating Reopen Button (›) when menu is collapsed */}
+      {/* Floating Reopen Button (›) and Help Button (?) when menu is collapsed */}
       {isSidebarCollapsed && (
-        <button
-          type="button"
-          onClick={handleToggleSidebar}
-          className="btn-reopen-sidebar"
-          title="Mở lại menu (Sidebar)"
-        >
-          ›
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={handleToggleSidebar}
+            className="btn-reopen-sidebar"
+            title="Mở lại menu (Sidebar)"
+          >
+            ›
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowGuidanceModal(true)}
+            className="btn-reopen-sidebar"
+            style={{
+              left: 52,
+              borderRadius: '50%',
+              fontSize: 14,
+              fontWeight: 700,
+            }}
+            title="Hướng dẫn sử dụng & Lộ trình AI"
+            aria-label="Hướng dẫn sử dụng"
+          >
+            ?
+          </button>
+        </>
       )}
 
       {/* ========================================================================= */}
@@ -2572,6 +2616,32 @@ export default function App() {
                       <span>Đăng nhập</span>
                     </button>
                   )}
+                  {/* Nút hướng dẫn lại (? có viền tròn) */}
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowGuidanceModal(true)}
+                    style={{
+                      minHeight: 28,
+                      width: 28,
+                      height: 28,
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '50%',
+                      border: '1px solid var(--border-subtle)',
+                      fontWeight: 700,
+                      fontSize: 13,
+                      color: 'var(--text-secondary)',
+                      background: 'var(--bg-surface)',
+                    }}
+                    title="Hướng dẫn sử dụng & Lộ trình AI"
+                    aria-label="Hướng dẫn sử dụng"
+                  >
+                    ?
+                  </button>
+
                   {/* Nút đổi màu giao diện sáng / tối (icon-only) */}
                   <button
                     type="button"
@@ -7836,10 +7906,207 @@ export default function App() {
                     onClick={() => handleCompleteOnboarding(false)}
                     style={{ minHeight: 34, fontSize: 12.5, padding: '0 20px', fontWeight: 700 }}
                   >
-                    Kích hoạt Trợ lý Ngay 🚀
+                    Kích hoạt Trợ lý
                   </button>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 7: GUIDANCE & INTRODUCTORY MODAL (NÚT ? HƯỚNG DẪN LẠI)             */}
+      {/* ========================================================================= */}
+      {showGuidanceModal && (
+        <div className="email-modal-overlay" onClick={() => setShowGuidanceModal(false)}>
+          <div
+            className="email-modal-container"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: 540 }}
+          >
+            {/* Modal Header */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '16px 20px',
+                borderBottom: '1px solid var(--border-subtle)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    border: '1px solid var(--border-subtle)',
+                    background: 'var(--bg-subtle)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 800,
+                    fontSize: 14,
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  ?
+                </span>
+                <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--text-primary)' }}>
+                  Hướng dẫn & Lộ trình Trợ lý Aura
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowGuidanceModal(false)}
+                className="btn btn-secondary"
+                style={{
+                  width: 28,
+                  height: 28,
+                  minHeight: 28,
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: 'var(--radius-sm)',
+                }}
+                title="Đóng"
+                aria-label="Đóng"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Highlight Philosophy Card */}
+              <div
+                style={{
+                  background: 'var(--bg-subtle)',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border-subtle)',
+                  padding: '14px 16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981' }} />
+                  <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>
+                    Triết lý Zero-App-Open
+                  </strong>
+                </div>
+                <p style={{ margin: 0, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                  Hệ thống tự động theo dõi tin tức công nghệ, việc làm, deal giá Shopee và mô hình mã nguồn mở theo đúng mục tiêu của bạn. Bản tin dạng thẻ trực quan sẽ được gửi tự động vào email bạn đã cài đặt — <strong>bạn không cần phải mở ứng dụng hằng ngày</strong>.
+                </p>
+              </div>
+
+              {/* Core Features Quick Tour */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: 0.4 }}>
+                  Tính năng nổi bật trong hệ thống:
+                </span>
+                {[
+                  {
+                    title: 'Trợ lý AI Đa năng & Tự động hóa',
+                    desc: 'Trò chuyện tự nhiên, giải đáp nghiệp vụ, tự động thiết lập lịch chạy ngầm không cần cú pháp phức tạp.',
+                  },
+                  {
+                    title: 'Bản tin & Radar Dữ liệu Thật',
+                    desc: 'Cập nhật tin tức và việc làm từ nguồn báo uy tín, lưu trữ riêng vào CSDL của bạn, có nút giữ lại hoặc xóa.',
+                  },
+                  {
+                    title: 'Bộ công cụ Studio Sáng tạo',
+                    desc: 'Tạo video kể chuyện phân cảnh 0-watermark, theo dõi giá sản phẩm đa sàn, soạn thảo văn bản tự động.',
+                  },
+                  {
+                    title: 'Tùy biến lịch trình & Email',
+                    desc: 'Tự do chọn khung giờ nhận thư (1–3 lần/ngày) và điều chỉnh kênh nhận tin bất kỳ lúc nào.',
+                  },
+                ].map((item, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      gap: 10,
+                      alignItems: 'flex-start',
+                      padding: '8px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: '50%',
+                        background: 'var(--bg-subtle)',
+                        border: '1px solid var(--border-subtle)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: 'var(--text-secondary)',
+                        flexShrink: 0,
+                        marginTop: 1,
+                      }}
+                    >
+                      {idx + 1}
+                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <strong style={{ fontSize: 12.5, color: 'var(--text-primary)' }}>{item.title}</strong>
+                      <span style={{ fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{item.desc}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal Footer with Actions */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '14px 20px',
+                borderTop: '1px solid var(--border-subtle)',
+                background: 'var(--bg-subtle)',
+                gap: 12,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setShowGuidanceModal(false)}
+                className="btn btn-secondary"
+                style={{ fontSize: 12, minHeight: 34, padding: '0 14px' }}
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGuidanceModal(false);
+                  setOnboardingEmail(profile.deliveryEmail || (authSession ? authSession.email : ''));
+                  setOnboardingStep(1);
+                  setShowOnboardingWizard(true);
+                }}
+                className="btn btn-primary"
+                style={{
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  minHeight: 34,
+                  padding: '0 18px',
+                  gap: 6,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <span>Nhận hướng dẫn</span>
+                <span>→</span>
+              </button>
             </div>
           </div>
         </div>

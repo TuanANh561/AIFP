@@ -1311,7 +1311,13 @@ export default function App() {
         lower.includes('giá') || lower.includes('keychron') || lower.includes('bàn phím') ||
         lower.includes('màn hình 4k');
 
-      // 6. Explicit Automation / Email Schedule Intent (ONLY when explicitly requesting schedule)
+      // 6. Open Source Models & Tools Intent
+      const isOpenSource =
+        lower.includes('mã nguồn') || lower.includes('open source') || lower.includes('mô hình') ||
+        lower.includes('github') || lower.includes('deepseek') || lower.includes('hugging') ||
+        lower.includes('model') || lower.includes('công cụ ai');
+
+      // 7. Explicit Automation / Email Schedule Intent (ONLY when explicitly requesting schedule)
       const isExplicitSchedule =
         (lower.includes('lên lịch') || lower.includes('hẹn giờ') || lower.includes('tự động gửi') ||
          lower.includes('gửi mail') || lower.includes('gửi email') || lower.includes('nhận mail') ||
@@ -1321,10 +1327,14 @@ export default function App() {
          lower.includes('game') || lower.includes('mã nguồn'));
 
       if (isGreeting) {
-        reply = `Chào bạn! Tôi là Trợ lý AI của hệ thống AIFP — nền tảng tự động hóa cuộc sống và làm việc thông minh.\n\nTôi có thể hỗ trợ bạn trực tiếp các chức năng trong toàn hệ thống:\n• 🎬 **Tạo Video & Shorts:** Lên kịch bản AI, storyboard phân cảnh, tích hợp bộ công cụ mã nguồn mở (Stickman Video Director, Lemo-Opucas, MoviePy, Remotion).\n• 📰 **Bản tin & Tuyển dụng:** Cập nhật tin công nghệ, việc làm remote, cày cấp và test server game.\n• 🧾 **Quét hóa đơn (Vision OCR):** Bóc tách tự động tên đơn vị, ngày lập, chi tiết món hàng, thuế VAT và tổng tiền.\n• 🛍️ **Săn Deal Shopee:** Theo dõi biến động giá thiết bị và đồ công nghệ chọn lọc.\n• ⚡ **Tự động hóa:** Thiết lập lịch gửi bản tin tổng hợp tự động vào email mỗi sáng (không cần mở ứng dụng hàng ngày).\n\nBạn muốn tôi hỗ trợ chức năng nào hôm nay?`;
-        reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Tạo video","tab":"tools","subTab":"video"},{"title":"Xem việc làm","tab":"digests","filter":"jobs"},{"title":"Quét hóa đơn","tab":"tools","subTab":"vision"},{"title":"Săn deal Shopee","tab":"digests","filter":"shopping"}]} -->';
+        reply = `Chào bạn! Tôi là Trợ lý AI của hệ thống AIFP — nền tảng tự động hóa cuộc sống và làm việc thông minh.\n\nTôi có thể hỗ trợ bạn trực tiếp các chức năng trong toàn hệ thống:\n• 🎬 **Tạo Video & Shorts:** Lên kịch bản AI, storyboard phân cảnh, tích hợp bộ công cụ mã nguồn mở (Stickman Video Director, Lemo-Opucas, MoviePy, Remotion).\n• 📰 **Bản tin & Tuyển dụng:** Cập nhật tin công nghệ, việc làm remote, cày cấp và test server game.\n• 🧾 **Quét hóa đơn (Vision OCR):** Bóc tách tự động tên đơn vị, ngày lập, chi tiết món hàng, thuế VAT và tổng tiền.\n• 🛍️ **Săn Deal Shopee:** Theo dõi biến động giá thiết bị và đồ công nghệ chọn lọc.\n• 🧠 **Mã nguồn mở (Open Source):** Tự động rà soát mô hình AI mới trên GitHub, lưu CSDL cá nhân và gửi email định kỳ.\n• ⚡ **Tự động hóa:** Thiết lập lịch gửi bản tin tổng hợp tự động vào email mỗi sáng (không cần mở ứng dụng hàng ngày).\n\nBạn muốn tôi hỗ trợ chức năng nào hôm nay?`;
+        reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Tạo video","tab":"tools","subTab":"video"},{"title":"Mã nguồn mở","tab":"tools","subTab":"evolution"},{"title":"Xem việc làm","tab":"digests","filter":"jobs"},{"title":"Quét hóa đơn","tab":"tools","subTab":"vision"},{"title":"Săn deal Shopee","tab":"digests","filter":"shopping"}]} -->';
       } else if (isThanks) {
-        reply = 'Rất vui được hỗ trợ bạn! Nếu bạn cần thêm bất kỳ trợ giúp nào về tạo video, quét hóa đơn, tìm việc làm hay tự động hóa, cứ nhắn tôi nhé.';
+        reply = 'Rất vui được hỗ trợ bạn! Nếu bạn cần thêm bất kỳ trợ giúp nào về tạo video, quét hóa đơn, tìm việc làm, theo dõi mã nguồn mở hay tự động hóa, cứ nhắn tôi nhé.';
+      } else if (isOpenSource && !isExplicitSchedule) {
+        reply = `Hệ thống AIFP trang bị công cụ **Radar Mô hình & Công cụ AI Mã nguồn mở (Open Source)**:\n\n• Tự động rà soát các repo GitHub, mô hình AI mới nổi bật theo từ khóa và lưu vào CSDL riêng của bạn.\n• Quản lý lưu trữ: Bạn có thể ghim [Lưu], [Xóa] hoặc bấm [Dọn dẹp] các mục không cần thiết để tránh đầy bộ nhớ.\n• Tự động hóa: Hệ thống tự động tìm kiếm vào khung giờ hàng ngày bạn chọn và gửi email tổng hợp.\n\nBấm nút bên dưới để mở ngay radar Mã nguồn mở.`;
+        reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Mở Mã nguồn mở","tab":"tools","subTab":"evolution"},{"title":"Xem tin công nghệ","tab":"digests","filter":"tech"}]} -->';
+        citations = [{ label: 'github.com/trending', url: 'https://github.com/trending' }];
       } else if (isVideo) {
         reply = `Hệ thống AIFP tích hợp sẵn **AI Video Studio & Shorts Director** hỗ trợ bạn sáng tạo nội dung:\n\n• **Công thức Giữ chân (Retention) cao:** Kết hợp con người thật (reaction, gameplay) làm linh hồn + AI hỗ trợ kịch bản hook 3 giây đầu, phân cảnh và thumbnail.\n• **Bộ công cụ mã nguồn mở:** Kịch bản storyboard, tích hợp Lemo-Opucas, Stickman Video Director, Remotion React Video và MoviePy/FFmpeg pipeline.\n• **Thao tác nhanh:** Bấm nút bên dưới để mở ngay màn hình Video Studio và tạo kịch bản/video ngay.`;
         reply += '\n\n<!-- NAV_ACTION: {"actions":[{"title":"Mở Video Studio","tab":"tools","subTab":"video"},{"title":"Xem ý tưởng sáng tạo","tab":"digests","filter":"creator-ideas"}]} -->';

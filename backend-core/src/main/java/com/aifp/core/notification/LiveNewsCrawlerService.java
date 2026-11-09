@@ -293,6 +293,31 @@ public class LiveNewsCrawlerService {
         return liveArticleRepository.count();
     }
 
+    @org.springframework.transaction.annotation.Transactional
+    public boolean deleteArticle(UUID id) {
+        if (liveArticleRepository.existsById(id)) {
+            liveArticleRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public LiveArticleEntity togglePinArticle(UUID id) {
+        LiveArticleEntity article = liveArticleRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài viết với ID: " + id));
+        article.setPinned(!article.isPinned());
+        return liveArticleRepository.save(article);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public int clearUnpinnedArticles() {
+        long countBefore = liveArticleRepository.count();
+        liveArticleRepository.deleteByIsPinnedFalse();
+        long countAfter = liveArticleRepository.count();
+        return (int) (countBefore - countAfter);
+    }
+
     private String getTagValue(Element element, String tagName) {
         NodeList nl = element.getElementsByTagName(tagName);
         if (nl != null && nl.getLength() > 0 && nl.item(0).getFirstChild() != null) {

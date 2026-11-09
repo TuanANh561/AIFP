@@ -7,6 +7,19 @@ export interface AuthSession {
   dailyTokensUsed: number;
 }
 
+export interface UserOpenSourceItem {
+  id: string;
+  userId: string;
+  name: string;
+  stars: string;
+  url: string;
+  tag: string;
+  summary: string;
+  queryKeyword?: string;
+  isPinned: boolean;
+  createdAt: string;
+}
+
 const ENV_BASE_URL: string =
   typeof import.meta !== 'undefined' && (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_API_BASE_URL
     ? String((import.meta as unknown as { env: Record<string, string> }).env.VITE_API_BASE_URL).replace(/\/+$/, '')
@@ -450,6 +463,119 @@ class AifpApiClient {
     }
   }
 
+  public async deleteNewsArticle(id: string): Promise<boolean> {
+    try {
+      const resp = await fetch(this.resolveUrl(`/api/v1/news/${id}`), {
+        method: 'DELETE',
+        headers: this.headers(),
+      });
+      return resp.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  public async togglePinNewsArticle(id: string): Promise<boolean> {
+    try {
+      const resp = await fetch(this.resolveUrl(`/api/v1/news/${id}/pin`), {
+        method: 'PUT',
+        headers: this.headers(),
+      });
+      return resp.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  public async clearUnpinnedNews(): Promise<number> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/news/clear-unpinned'), {
+        method: 'DELETE',
+        headers: this.headers(),
+      });
+      if (!resp.ok) return 0;
+      const json = await resp.json();
+      return json.data?.clearedCount || 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  public async getOpenSourceItems(pinnedOnly?: boolean): Promise<UserOpenSourceItem[]> {
+    try {
+      const q = pinnedOnly ? '?pinned=true' : '';
+      const resp = await fetch(this.resolveUrl(`/api/v1/open-source${q}`), {
+        method: 'GET',
+        headers: this.headers(),
+      });
+      if (!resp.ok) return [];
+      const json = await resp.json();
+      return json.success && json.data ? (json.data as UserOpenSourceItem[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  public async discoverOpenSource(
+    keywords: string,
+    goal?: string,
+    email?: string,
+    sendEmail?: boolean
+  ): Promise<UserOpenSourceItem[]> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/open-source/discover'), {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify({ keywords, goal, email, sendEmail: Boolean(sendEmail) }),
+      });
+      if (!resp.ok) return [];
+      const json = await resp.json();
+      return json.success && json.data ? (json.data as UserOpenSourceItem[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  public async togglePinOpenSource(id: string): Promise<UserOpenSourceItem | null> {
+    try {
+      const resp = await fetch(this.resolveUrl(`/api/v1/open-source/${id}/pin`), {
+        method: 'PUT',
+        headers: this.headers(),
+      });
+      if (!resp.ok) return null;
+      const json = await resp.json();
+      return json.success && json.data ? (json.data as UserOpenSourceItem) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  public async deleteOpenSourceItem(id: string): Promise<boolean> {
+    try {
+      const resp = await fetch(this.resolveUrl(`/api/v1/open-source/${id}`), {
+        method: 'DELETE',
+        headers: this.headers(),
+      });
+      return resp.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  public async clearUnpinnedOpenSource(): Promise<number> {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/open-source/clear-unpinned'), {
+        method: 'DELETE',
+        headers: this.headers(),
+      });
+      if (!resp.ok) return 0;
+      const json = await resp.json();
+      return json.data?.clearedCount || 0;
+    } catch {
+      return 0;
+    }
+  }
+
   public async planVideo(params: {
     script: string;
     targetSeconds?: number;
@@ -593,6 +719,7 @@ export interface LiveArticle {
   url: string;
   publishedAt: string;
   fetchedAt: string;
+  isPinned?: boolean;
 }
 
 export const aifpApi = new AifpApiClient();

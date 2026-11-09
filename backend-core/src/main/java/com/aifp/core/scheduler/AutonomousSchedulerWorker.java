@@ -35,6 +35,7 @@ public class AutonomousSchedulerWorker {
     private final AiOrchestratorClient aiOrchestratorClient;
     private final com.aifp.core.notification.LiveNewsCrawlerService liveNewsCrawlerService;
     private final com.aifp.core.notification.LinkValidationService linkValidationService;
+    private final com.aifp.core.opensource.OpenSourceDiscoveryService openSourceDiscoveryService;
     private final boolean schedulerEnabled;
     private final boolean runHourly;
 
@@ -45,6 +46,7 @@ public class AutonomousSchedulerWorker {
             AiOrchestratorClient aiOrchestratorClient,
             com.aifp.core.notification.LiveNewsCrawlerService liveNewsCrawlerService,
             com.aifp.core.notification.LinkValidationService linkValidationService,
+            com.aifp.core.opensource.OpenSourceDiscoveryService openSourceDiscoveryService,
             @Value("${aifp.scheduler.enabled:true}") boolean schedulerEnabled,
             @Value("${aifp.scheduler.run-hourly:false}") boolean runHourly
     ) {
@@ -54,6 +56,7 @@ public class AutonomousSchedulerWorker {
         this.aiOrchestratorClient = aiOrchestratorClient;
         this.liveNewsCrawlerService = liveNewsCrawlerService;
         this.linkValidationService = linkValidationService;
+        this.openSourceDiscoveryService = openSourceDiscoveryService;
         this.schedulerEnabled = schedulerEnabled;
         this.runHourly = runHourly;
     }
@@ -133,6 +136,26 @@ public class AutonomousSchedulerWorker {
                         now,
                         discoveredItems
                 );
+
+                // Auto-sync discovered open-source models & repos into user's database library
+                String lowerTitle = task.getTitle().toLowerCase();
+                String lowerPrompt = task.getNaturalLanguagePrompt().toLowerCase();
+                if (lowerTitle.contains("mã nguồn") || lowerTitle.contains("open source") ||
+                    lowerPrompt.contains("mã nguồn") || lowerPrompt.contains("open source") ||
+                    lowerPrompt.contains("github") || lowerPrompt.contains("mô hình")) {
+                    try {
+                        openSourceDiscoveryService.discoverAndPersist(
+                                task.getUserId(),
+                                task.getTitle(),
+                                task.getNaturalLanguagePrompt(),
+                                false,
+                                null
+                        );
+                        log.info("[AutonomousWorker] Open source items auto-synced into user DB: {}", task.getUserId());
+                    } catch (Exception ose) {
+                        log.warn("[AutonomousWorker] Open source auto-sync note: {}", ose.getMessage());
+                    }
+                }
 
                 log.info("[AutonomousWorker] Task execution completed: {} -> Status: {}", task.getTitle(), execution.getStatus());
             } catch (Exception ex) {

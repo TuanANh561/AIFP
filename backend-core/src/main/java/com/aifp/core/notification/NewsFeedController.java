@@ -38,7 +38,8 @@ public class NewsFeedController {
             String imageUrl,
             String url,
             Instant publishedAt,
-            Instant fetchedAt
+            Instant fetchedAt,
+            boolean isPinned
     ) {
         public static LiveArticleDto fromEntity(LiveArticleEntity entity) {
             return new LiveArticleDto(
@@ -52,7 +53,8 @@ public class NewsFeedController {
                     entity.getImageUrl(),
                     entity.getUrl(),
                     entity.getPublishedAt(),
-                    entity.getFetchedAt()
+                    entity.getFetchedAt(),
+                    entity.isPinned()
             );
         }
     }
@@ -84,6 +86,34 @@ public class NewsFeedController {
                 "totalInDatabase", total,
                 "syncedAt", Instant.now().toString(),
                 "status", "DATABASE_UPDATED"
+        )));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> deleteArticle(
+            @PathVariable("id") UUID id
+    ) {
+        boolean deleted = liveNewsCrawlerService.deleteArticle(id);
+        return ResponseEntity.ok(ApiResponse.ok(Map.of(
+                "deleted", deleted,
+                "id", id.toString()
+        )));
+    }
+
+    @PutMapping("/{id}/pin")
+    public ResponseEntity<ApiResponse<LiveArticleDto>> togglePinArticle(
+            @PathVariable("id") UUID id
+    ) {
+        LiveArticleEntity updated = liveNewsCrawlerService.togglePinArticle(id);
+        return ResponseEntity.ok(ApiResponse.ok(LiveArticleDto.fromEntity(updated)));
+    }
+
+    @DeleteMapping("/clear-unpinned")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> clearUnpinnedArticles() {
+        int deletedCount = liveNewsCrawlerService.clearUnpinnedArticles();
+        return ResponseEntity.ok(ApiResponse.ok(Map.of(
+                "clearedCount", deletedCount,
+                "status", "UNPINNED_ARTICLES_CLEARED"
         )));
     }
 }

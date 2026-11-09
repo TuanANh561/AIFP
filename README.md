@@ -1,7 +1,7 @@
 # 🌟 AI Life Assistant Platform (AIFP)
 
-> **Hệ điều hành Trợ lý Cá nhân Tự động hóa Toàn diện · Bảo mật Đa tầng · Giao diện Tối giản (Anti-AI-Slop)**  
-> *Zero-App-Open Autonomous Life Assistant & High-Security Multi-Agent Operating System*
+> **Hệ điều hành Trợ lý Cá nhân Đa Năng Thông Minh · Tự động hóa Toàn diện · Studio Sáng tạo Video & Shorts · Bảo mật Đa tầng · Giao diện Tinh gọn (Anti-AI-Slop)**  
+> *Autonomous Multi-Purpose Personal AI Assistant, Video Creative Studio & High-Security Multi-Agent Operating System*
 
 ---
 
@@ -13,26 +13,33 @@
   <img src="https://img.shields.io/badge/React_18-TypeScript_PWA-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 18" />
   <img src="https://img.shields.io/badge/Flutter-3.24_Mobile-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
   <img src="https://img.shields.io/badge/PostgreSQL-16_%2B_pgvector-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/Gmail_SMTP-Automated_Digest-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Gmail SMTP" />
-  <img src="https://img.shields.io/badge/JUnit_Tests-15%2F15_PASS-success?style=for-the-badge&logo=junit5&logoColor=white" alt="JUnit" />
-  <img src="https://img.shields.io/badge/Pytest-9%2F9_PASS-success?style=for-the-badge&logo=pytest&logoColor=white" alt="Pytest" />
+  <img src="https://img.shields.io/badge/JUnit_Tests-22%2F22_PASS-success?style=for-the-badge&logo=junit5&logoColor=white" alt="JUnit" />
+  <img src="https://img.shields.io/badge/Pytest-12%2F12_PASS-success?style=for-the-badge&logo=pytest&logoColor=white" alt="Pytest" />
+  <img src="https://img.shields.io/badge/Vite_Build-PASS_1.2s-success?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/Flutter_Analyze-0_Issues-success?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter Analyze" />
 </p>
 
 ---
 
-## 📖 1. Giới Thiệu Tổng Quan (Introduction)
+## 📖 1. Giới Thiệu Tổng Quan & Tầm Nhìn Nâng Cấp (Introduction & Evolved Vision)
 
-**AIFP (AI Life Assistant Platform)** không đơn thuần là một chatbot hỏi-đáp trên giao diện web, mà là một **Trợ lý Cá nhân Đời thực hoạt động tự động ngầm 24/7**. 
+**AIFP (AI Life Assistant Platform)** là **Hệ điều hành Trợ lý Cá nhân Đa Năng Thông Minh**, kết hợp giữa sức mạnh tự động hóa ngầm 24/7 (**Zero-App-Open Background Engine**) và bộ công cụ sáng tạo nội dung, điều hành công việc hàng ngày (**Interactive Multi-Purpose Studio**).
 
-Triết lý cốt lõi của AIFP là **"Zero-App-Open"**: Người dùng **không cần phải mở ứng dụng hàng ngày**. Hệ thống định thời ngầm sẽ tự động quét thông tin từ các nguồn tin tức uy tín, việc làm IT, deal mua sắm Shopee giảm giá sâu, bóc tách dữ liệu sạch, kiểm tra trùng lặp thông minh và gửi bản tin tóm tắt dạng thẻ trực quan thẳng vào email của bạn đúng theo khung giờ bạn đã chọn.
+Không đơn thuần chỉ là một chatbot thụ động hay một công cụ gửi email định kỳ, AIFP giải quyết bài toán toàn diện của cuộc sống hiện đại:
+1. **Trợ Lý Hội Thoại Đa Năng (Multi-Purpose Conversational Agent)**: Nhận biết 7 nhóm ý định (Intent Engine), đối đáp tự nhiên, xã giao lịch thiệp và điều hướng/thực thi các chức năng trên toàn hệ thống bằng các nút điều hướng 1 chạm (`[Tạo video →]`, `[Xem việc làm →]`, `[Quét hóa đơn →]`, `[Săn deal Shopee →]`).
+2. **AI Video Studio & Shorts Director**: Tích hợp các bộ công cụ mã nguồn mở hàng đầu (`kaomei/stickman-video-director`, `lemomo-ai/lemo-opuscar`, `remotion`, `moviepy/ffmpeg`, `lossless-cut`). Soạn kịch bản giữ chân người xem cao (Retention Hook 3s), phân cảnh storyboard, xem trước thời gian thực đa tỉ lệ (`16:9`, `9:16`, `1:1`), cắt ghép lossless, phụ đề tự động và xuất MP4 0-watermark.
+3. **Bản Tin & Tuyển Dụng Chọn Lọc (Job Intelligence & Editorial Pagination)**: Cào quét và xác minh cơ hội việc làm thực tế (cày game, test server part-time, dev thực tập, remote không cần tiếng Anh), phân trang 20 bài/trang chuẩn Linear/Raycast với bộ đếm thực tế.
+4. **Quét Hóa Đơn (Vision OCR) & Săn Deal Shopee**: Bóc tách tự động dữ liệu hóa đơn chi tiêu từ ảnh chụp và theo dõi biến động giá thiết bị công nghệ chọn lọc.
+5. **Tự Động Hóa Không Cần Mở App (Zero-App-Open Architecture)**: Các luồng tác vụ ngầm tự động cào quét, kiểm tra trùng lặp thông minh (`DELTA_ONLY`) và gửi báo cáo qua Gmail SMTP vào các khung giờ cố định (`07:00`, `08:00`, `11:30`, `20:00`), hoàn toàn không phụ thuộc vào thao tác bấm gửi thủ công.
+6. **Bảo Mật Đa Người Dùng & Phân Quyền Master Owner Động**: Hỗ trợ đăng nhập Google OAuth2 cho người dùng công cộng; phân quyền Master Owner qua biến môi trường cục bộ `.env` (`AIFP_OWNER_EMAIL`), khử 100% dữ liệu cá nhân khỏi mã nguồn Git, bảo vệ tuyệt đối các kênh nghiên cứu và ý tưởng phát triển nội bộ.
 
 ### 💡 Điểm Khác Biệt Độc Bản
-1. **Hoạt Động Tự Động Ngầm (Autonomous Background Engine)**: Worker định thời kiểm tra CSDL mỗi 60 giây, tự động phát hiện tin tức sốt dẻo và phân phát email qua máy chủ Gmail SMTP bảo mật.
-2. **Dữ Liệu Thực Tế 100% (Zero Mock / Zero Fallback Policy)**: Hoàn toàn không dùng dữ liệu ảo. Toàn bộ bài viết được crawl trực tiếp từ VnExpress, ITViec, Shopee và lưu trữ trong bảng CSDL `live_articles` với tem thời gian thực tế.
-3. **Bảo Mật Zero-Trust & Cổng Phân Quyền 4 Cấp (4-Level Tool Gate)**: Cô lập dữ liệu triệt để theo `user_id` từ JWT, cách ly nội dung bên ngoài bằng thẻ `<untrusted_external_content>`, xác minh trích dẫn thật (Citation Grounding) và nút Dừng Khẩn Cấp (Emergency Kill Switch).
-4. **Giao Diện Tối Giản Cao Cấp (Anti-AI-Slop Editorial Design)**: Không dùng gradient neon sặc sỡ hay biểu tượng màu mè. Thiết kế tinh tế lấy cảm hứng từ Linear, Raycast, Things 3 với hệ biến Design Tokens đồng nhất và chuẩn công thái học iOS Safari PWA.
-5. **Ràng Buộc Nghiệp Vụ Chặt Chẽ (Strict Business Constraints)**: Ràng buộc toán học giữa Tần suất gửi và Khung giờ nhận tin (`1 lần/ngày` -> đúng 1 giờ; `2 lần/ngày` -> tối đa 2 giờ; `3 lần/ngày` -> tối đa 3 giờ; `Tức thì` -> kích hoạt ngay khi có tin mới).
-6. **Lưu Trữ Bền Vững Hai Tầng (Two-Tier Persistence)**: Tự động lưu trữ đồng bộ giữa `localStorage` và Cơ sở dữ liệu, giữ nguyên vẹn cấu hình người dùng khi F5 hoặc mở lại ứng dụng.
+1. **Phân Loại Ý Định Thông Minh (7-Tier Intent Engine)**: Hiểu đúng bản chất câu chat của người dùng (xã giao, chào hỏi, nhờ làm chức năng hay lên lịch gửi mail), không bao giờ nhầm lẫn biến câu nói thường thành yêu cầu đăng ký nhận tin tức.
+2. **Hệ Thống Video Studio Mã Nguồn Mở Tích Hợp Sẵn**: Tích hợp các thư viện video tiên tiến, hỗ trợ sáng tạo video ngắn TikTok/Shorts 0đ GPU với kịch bản được tối ưu retention.
+3. **Hoạt Động Tự Động Ngầm (Autonomous Background Engine)**: Worker định thời kiểm tra CSDL và gửi email định kỳ tự động, giảm thiểu tối đa các nút bấm thủ công.
+4. **Dữ Liệu Thực Tế 100% (Zero Mock / Zero Fallback Policy)**: Toàn bộ bài viết, tin tuyển dụng được crawl trực tiếp từ VnExpress, ITViec, Shopee và lưu trữ trong bảng CSDL `live_articles` với tem thời gian thực tế.
+5. **Bảo Mật Zero-Trust & Cổng Phân Quyền 4 Cấp (4-Level Tool Gate)**: Cô lập dữ liệu triệt để theo `user_id` từ JWT, cách ly nội dung bên ngoài bằng thẻ `<untrusted_external_content>`, xác minh trích dẫn thật (Citation Grounding) và nút Dừng Khẩn Cấp (Emergency Kill Switch).
+6. **Giao Diện Tinh Gọn Cao Cấp (Anti-AI-Slop Editorial Design)**: Không dùng gradient neon sặc sỡ hay biểu tượng màu mè. Thiết kế tinh tế lấy cảm hứng từ Linear, Raycast, Things 3 với hệ biến Design Tokens đồng nhất, phân trang 20 item/trang mượt mà và chuẩn công thái học iOS Safari PWA.
 
 ---
 
@@ -128,15 +135,29 @@ flowchart TD
 * **Lưu trữ mã hóa cục bộ**: Lưu trữ JWT và Refresh Token qua `flutter_secure_storage`.
 * **Trợ lý Nổi Trên Màn Hình (Assistive Floating Bubble)**: Mô hình tiện ích nổi (Accessibility / Overlay Tool) sẵn sàng trên thiết bị di động, hỗ trợ quét nhanh nội dung màn hình và tóm tắt ngay tức thì.
 
-### 🎬 D. Xử Lý Video & Shorts Đa Nền Tảng (Video Intelligence Studio)
-* **Bóc tách tri thức video YouTube / TikTok**: Nhận diện URL, trích xuất phụ đề, bóc tách cấu trúc video đa tầng.
-* **Tóm tắt 30s cốt lõi**: Nắm bắt nhanh toàn bộ nội dung chính yếu trong vòng 30 giây đọc.
-* **Phân đoạn mốc thời gian (Key Chapters)**: Đánh dấu các mốc phát và chủ đề chi tiết.
-* **Hành động áp dụng đời thực (Life Action Items)**: Rút ra bài học thực tiễn để ứng dụng ngay vào cuộc sống và công việc, lưu vào bộ nhớ cá nhân hóa chỉ với 1 cú click.
+### 🎬 D. Xử Lý Video & Shorts Đa Nền Tảng (Video Intelligence & Studio)
+* **AI Video Studio & Shorts Director**: Tích hợp các bộ công cụ mã nguồn mở hàng đầu (`kaomei/stickman-video-director`, `lemomo-ai/lemo-opuscar`, `remotion`, `moviepy/ffmpeg`, `lossless-cut`).
+* **Công thức Giữ Chân (Retention) cao**: Kết hợp footage gameplay/con người thật (cảm xúc thật) làm linh hồn + AI hỗ trợ kịch bản hook 3 giây đầu, phân cảnh và thumbnail.
+* **Biên tập thời gian thực**: Xem trước video với tỉ lệ linh hoạt (`16:9`, `9:16`, `1:1`), thanh trượt cắt ghép thời gian bắt đầu/kết thúc, phụ đề tự động và xuất file MP4 không đóng watermark.
+* **Tự động gửi email kịch bản**: Hệ thống tự động chuyển giao kịch bản và phân cảnh vào email người dùng ngay khi hoàn tất.
+
+### 🤖 E. Trợ Lý Hội Thoại Đa Năng & Điều Hướng Hệ Thống (Conversational Navigation)
+* **Bộ nhận diện 7 nhóm ý định (7-Tier Intent Engine)**: Xã giao lịch thiệp, tạo video, quét hóa đơn, tìm việc làm, săn deal Shopee, lên lịch tự động và giải đáp kiến thức tổng quát.
+* **Nút bấm hành động 1 chạm (Interactive Action Buttons)**: Tự động đính kèm các nút chuyển hướng (`[Tạo video →]`, `[Xem việc làm →]`, `[Quét hóa đơn →]`, `[Săn deal Shopee →]`) ngay dưới câu trả lời, bấm phát chuyển tab ngay lập tức.
+* **Gợi ý tác vụ thực tiễn**: Các thẻ câu hỏi nhanh phía trên ô chat bao quát đầy đủ năng lực hệ thống thay vì chỉ xoay quanh việc gửi email.
+
+### 💼 F. Cơ Hội Việc Làm Xác Thực & Phân Trang Chuẩn Mực (20 Items/Trang)
+* **Việc làm thực tế có liên kết sống**: Test server game, cày cấp linh hoạt, thực tập sinh lập trình, cộng tác viên remote không yêu cầu kinh nghiệm hay tiếng Anh.
+* **Kiểm tra liên kết định kỳ (Link Validation Service)**: Tự động rà soát HTTP status code và hoán đổi link sống ngay lập tức nếu link bài viết cũ bị 404.
+* **Phân trang Editorial 20 bài/trang**: Hiển thị bộ đếm thực tế (*Hiển thị 1–20 trên tổng số 46 bài viết*), nút chuyển trang mượt mà và tự động cuộn lên đầu danh mục.
+
+### 🔐 G. Phân Quyền Master Owner & Đăng Nhập Đa Người Dùng An Toàn
+* **Google OAuth2 cho cộng đồng**: Người dùng đăng nhập nhận UUID cô lập độc lập, dữ liệu tách biệt 100%.
+* **Master Owner Gate qua `.env`**: Khóa an toàn các kênh nghiên cứu nội bộ (`ai-evolution`, `creator-ideas`, `Radar Mã nguồn mở`); mã nguồn Git không chứa bất kỳ email, tên tuổi hay thông tin định danh cá nhân nào.
 
 ---
 
-## 📁 4. Cấu Trúc Thư Mục Dự Án (Monorepo Layout)
+## 📁 5. Cấu Trúc Thư Mục Dự Án (Monorepo Layout)
 
 ```text
 AIFP/
@@ -182,7 +203,7 @@ AIFP/
 
 ---
 
-## 🚀 5. Hướng Dẫn Cài Đặt & Chạy Nhanh (Quick Start)
+## 🚀 6. Hướng Dẫn Cài Đặt & Chạy Nhanh (Quick Start)
 
 ### Yêu Cầu Môi Trường
 * **Java**: OpenJDK 21 LTS hoặc mới hơn (tương thích chạy tốt trên Java 17+).
@@ -230,20 +251,20 @@ flutter run
 
 ---
 
-## 🧪 6. Kết Quả Kiểm Thử Toàn Diện (Verification)
+## 🧪 7. Kết Quả Kiểm Thử Toàn Diện (Verification)
 
-Mọi chức năng trong hệ thống đều phải vượt qua chuỗi kiểm thử tự động nghiêm ngặt trước khi nghiệm thu:
+Mọi chức năng trong hệ thống đều phải vượt qua chuỗi kiểm thử tự động nghiêm ngặt trên toàn bộ 4 tầng công nghệ:
 
 | Tầng Hệ Thống | Công Cụ Kiểm Thử | Số Lượng Test | Kết Quả | Chi Tiết Xác Thực |
 | :--- | :--- | :---: | :---: | :--- |
-| **Backend Core** | JUnit 5 + MockMvc | `15 / 15` | **100% PASS** | Cô lập đa người dùng, JWT Rotation, Lập lịch ngầm Idempotent, Delta SHA-256 |
-| **Python AI Service** | Python Unittest | `9 / 9` | **100% PASS** | HMAC Token, SSRF Guard, LangGraph 7-Node, Model Router Failover, OCR |
-| **Frontend Web PWA** | TypeScript + Vite | `0 Errors` | **PASS (950ms)** | Biên dịch sạch, kiểm soát kiểu chặt chẽ, tối ưu nén Gzip |
-| **Mobile Flutter** | Flutter Test Runner | `1 / 1` | **100% PASS** | Điều hướng 5 tab, token đồng bộ, kiểm tra phản hồi nút Kill Switch |
+| **Backend Core** | JUnit 5 + Spring Boot Test | `22 / 22` | **100% PASS** | Cô lập đa người dùng, Phân quyền Master Owner, Video Studio Engine, Lập lịch ngầm Idempotent, Xác thực liên kết LinkValidator |
+| **Python AI Service** | Pytest + AnyIO | `12 / 12` | **100% PASS** | HMAC-SHA256 Token, SSRF Guard, LangGraph 7-Node, Model Router, Video Studio Engine |
+| **Frontend Web PWA** | TypeScript + Vite | `0 Errors` | **PASS (1.20s)** | Biên dịch sạch sẽ, kiểm soát kiểu chặt chẽ, tối ưu nén Gzip |
+| **Mobile Flutter** | Flutter Analyze & Test | `0 Issues` | **100% PASS** | Phân tích 0 cảnh báo lint, điều hướng 5 tab, đồng bộ token bảo mật |
 
 ---
 
-## 📄 7. Giấy Phép & Tác Giả (License)
+## 📄 8. Giấy Phép & Tác Giả (License)
 
 Dự án được xây dựng và phát triển bởi **AIFP Core Architecture Team**.  
 Phát hành theo giấy phép mã nguồn mở **MIT License**. Mọi quyền được bảo lưu.

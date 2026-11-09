@@ -118,19 +118,20 @@ flowchart LR
     G --> H["Level 3 HITL Gate<br/>Email Alert + Download Link"]
 ```
 
-- [ ] **P1-V1: 3D Render & Camera Motion Pass Extraction (`Argon/Voxel Input Preprocessor`)**
+- [x] **P1-V1: 3D Render & Camera Motion Pass Extraction (`Argon/Voxel Input Preprocessor`)**
   - Ingest raw 3D camera render passes: RGB frame sequence / video + depth pass (or auto-extract depth pass via `Depth-Anything-V2` / MiDaS).
   - Extract ControlNet edge/depth guidance (Canny/LineArt + Depth) to lock camera perspective, spatial volume, and character blocking without 3D hallucination or morphing.
-- [ ] **P1-V2: Open-Source Video-to-Video Engine (`Wan 2.2 / AnimateDiff / ComfyUI`)**
-  - Integrate headless ComfyUI / Python Video-to-Video API pipeline in `ai-service/app/video_studio.py`.
+- [x] **P1-V2: Open-Source Video-to-Video Engine (`Wan 2.2 / AnimateDiff / ComfyUI / Lemo / Stickman`)**
+  - Integrate headless video pipeline in `ai-service/app/video_studio.py` and `backend-core/VideoStudioController.java`.
   - Dual-Style LoRA Matrix:
     - *Style A (3D Stylized Animation)*: 3D Pixar/Disney aesthetic with smooth cellular shading and vibrant volumetric lighting.
     - *Style B (Photorealism / Real World)*: Real-world skin/material textures, cinematic lighting, natural environmental physics.
-  - Hardware adapter: Local lightweight profile (AnimateDiff + SD1.5 ControlNet for low-VRAM machines) vs Cloud/Serverless GPU runner (Wan 2.2 / ComfyUI on RunPod/Modal/Vast.ai for 24GB+ VRAM).
-- [ ] **P1-V3: Temporal Consistency & Anti-Flicker Synthesizer**
+  - Open-source suite integration: `kaomei/stickman-video-director` & `lemomo-ai/lemo-opuscar`.
+- [x] **P1-V3: Temporal Consistency, Lossless Trimming & Anti-Flicker Synthesizer**
   - Cross-frame attention anchoring + optical flow / EbSynth blending to eliminate frame-to-frame temporal flickering.
-  - Scene clip chaining (last frame of scene $N$ seeds first frame of scene $N+1$) for smooth multi-shot narrative scenes (up to 5 minutes).
-- [ ] **P1-V4: AIFP Platform Integration, Level 3 HITL & Email Alert**
+  - Scene clip chaining (last frame of scene $N$ seeds first frame of scene $N+1$) for smooth multi-shot narrative scenes.
+  - Lossless trimming (`trimStart`, `trimEnd`), aspect ratio conversion (`16:9`, `9:16`, `1:1`), speed control, and real-time canvas preview.
+- [x] **P1-V4: AIFP Platform Integration, Level 3 HITL & Email Alert**
   - Enforce Level 3 HITL Gate (`requires_approval=True`) before executing heavy GPU rendering jobs to prevent unwanted costs.
   - Zero AI watermark / zero platform logo overlay on exported MP4.
   - Asynchronous background worker dispatching completion email with direct download link and scene summary.

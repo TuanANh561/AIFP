@@ -207,6 +207,31 @@ class AifpApiClient {
     }
   }
 
+  public async getTrackedProducts() {
+    try {
+      const resp = await fetch(this.resolveUrl('/api/v1/shopping/items'), {
+        headers: this.headers(),
+      });
+      if (!resp.ok) return [];
+      const json = await resp.json();
+      return json.data || [];
+    } catch {
+      return [];
+    }
+  }
+
+  public async deleteTrackedProduct(id: string): Promise<boolean> {
+    try {
+      const resp = await fetch(this.resolveUrl(`/api/v1/shopping/items/${id}`), {
+        method: 'DELETE',
+        headers: this.headers(),
+      });
+      return resp.ok;
+    } catch {
+      return false;
+    }
+  }
+
   public async triggerEmergencyKillSwitch(): Promise<boolean> {
     try {
       const resp = await fetch(this.resolveUrl('/api/v1/security/emergency-stop'), {

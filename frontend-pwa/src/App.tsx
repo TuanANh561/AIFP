@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { aifpApi, LiveArticle, VideoStoryboard, VideoCreationResult } from './api/aifpApi';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { aifpApi, LiveArticle, VideoStoryboard, VideoCreationResult, UserOpenSourceItem } from './api/aifpApi';
 
 // ============================================================================
 // MONOCHROME MINIMALIST SVG ICONS (Clean 1.7px Stroke, Editorial Polish)
@@ -238,11 +238,6 @@ const IconClock = () => (
   </svg>
 );
 
-const IconShield = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-  </svg>
-);
 
 export const MASTER_OWNER_ID = '00000000-0000-0000-0000-000000000001';
 
@@ -593,8 +588,6 @@ const INITIAL_TOPIC_CHANNELS: TopicChannelConfig[] = [
 export default function App() {
   const [activeTab, setActiveTab] = useState<NavTab>('assistant');
   const [toolSubTab, setToolSubTab] = useState<ToolSubTab>('evolution');
-  const [isAuditingEvolution, setIsAuditingEvolution] = useState(false);
-  const [lastEvolutionAuditTime, setLastEvolutionAuditTime] = useState('07:00 · Hôm nay');
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     try {
       return localStorage.getItem('aifp_dark_mode') === 'true';
@@ -707,28 +700,18 @@ export default function App() {
       : topicChannels.filter((ch: TopicChannelConfig) => ch.id !== 'ai-evolution' && ch.id !== 'creator-ideas');
   }, [isOwner, topicChannels]);
 
-  // Available Tool subtabs based on ownership: proprietary open-source research is exclusively for master owner
+  // Available Tool subtabs for all users (Open-Source, Video Studio, OCR, Shopping, Writing, Docs, Calendar)
   const availableToolSubTabs = useMemo(() => {
-    const tabs: { id: ToolSubTab; label: string }[] = [];
-    if (isOwner) {
-      tabs.push({ id: 'evolution', label: 'Mã nguồn mở' });
-    }
-    tabs.push(
-      { id: 'video', label: 'Video & Shorts' },
-      { id: 'vision', label: 'Hóa đơn' },
-      { id: 'shopping', label: 'Mua sắm' },
-      { id: 'writing', label: 'Soạn thảo' },
-      { id: 'docs', label: 'Tài liệu' },
-      { id: 'calendar', label: 'Lịch hẹn' }
-    );
-    return tabs;
-  }, [isOwner]);
-
-  useEffect(() => {
-    if (!isOwner && toolSubTab === 'evolution') {
-      setToolSubTab('video');
-    }
-  }, [isOwner, toolSubTab]);
+    return [
+      { id: 'evolution' as const, label: 'Mã nguồn mở' },
+      { id: 'video' as const, label: 'Video & Shorts' },
+      { id: 'vision' as const, label: 'Hóa đơn' },
+      { id: 'shopping' as const, label: 'Mua sắm' },
+      { id: 'writing' as const, label: 'Soạn thảo' },
+      { id: 'docs' as const, label: 'Tài liệu' },
+      { id: 'calendar' as const, label: 'Lịch hẹn' },
+    ];
+  }, []);
 
   // Sub-filter pills for news feed
   const newsFilterOptions = useMemo(() => {
@@ -871,6 +854,17 @@ export default function App() {
   const [shopResults, setShopResults] = useState<{ store: string; productTitle?: string; price: string; link: string; status: string; rating?: string }[]>([]);
   const [isSearchingShop, setIsSearchingShop] = useState(false);
   const [shopBestSummary, setShopBestSummary] = useState('');
+
+  // Tracked Shopping Items (Saved in User CSDL)
+  const [trackedProducts, setTrackedProducts] = useState<any[]>([]);
+  const [isLoadingTracked, setIsLoadingTracked] = useState(false);
+
+  // Open Source Radar State (Persisted in Supabase CSDL for each user)
+  const [openSourceItems, setOpenSourceItems] = useState<UserOpenSourceItem[]>([]);
+  const [isLoadingOpenSource, setIsLoadingOpenSource] = useState(false);
+  const [openSourceKeywords, setOpenSourceKeywords] = useState('LLM reasoning, stickman video, crawl4ai');
+  const [openSourceGoal, setOpenSourceGoal] = useState('Tìm mô hình AI mã nguồn mở chất lượng cao');
+  const [openSourceSendEmail, setOpenSourceSendEmail] = useState(true);
 
   // Writing Studio State (Clean state)
   const [writingPrompt, setWritingPrompt] = useState('');
@@ -1188,25 +1182,6 @@ export default function App() {
       });
       showToast('Đã tóm tắt và trích xuất bài học đời sống từ video thành công!');
     }, 700);
-  };
-
-  const handleRunEvolutionAudit = () => {
-    setIsAuditingEvolution(true);
-    showToast('Đang quét mã nguồn mở GitHub & đối chiếu kiến trúc hệ thống...');
-    setTimeout(() => {
-      setIsAuditingEvolution(false);
-      setLastEvolutionAuditTime('Vừa xong');
-      showToast('Đã đối chiếu xong! Cập nhật 5 mã nguồn mở tinh hoa và 4 RFC mới.');
-    }, 900);
-  };
-
-  const handleTriggerEvolutionProposalEmail = () => {
-    const evoChannel = topicChannels.find((c) => c.id === 'ai-evolution');
-    if (evoChannel) {
-      handleSendChannelDigest(evoChannel);
-    } else {
-      showToast('Không tìm thấy kênh Tiến hóa AI.');
-    }
   };
 
   // Toast Helper
@@ -1913,6 +1888,159 @@ export default function App() {
       setIsSyncingNews(false);
     }
   };
+
+  const handleTogglePinNews = async (id: string) => {
+    try {
+      const ok = await aifpApi.togglePinNewsArticle(id);
+      if (ok) {
+        setLiveNews((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, isPinned: !item.isPinned } : item))
+        );
+        showToast('Đã cập nhật trạng thái bài viết!');
+      }
+    } catch {
+      showToast('Lỗi khi ghim bài viết');
+    }
+  };
+
+  const handleDeleteNews = async (id: string) => {
+    try {
+      const ok = await aifpApi.deleteNewsArticle(id);
+      if (ok) {
+        setLiveNews((prev) => prev.filter((item) => item.id !== id));
+        showToast('Đã xóa bài viết');
+      }
+    } catch {
+      showToast('Lỗi khi xóa bài viết');
+    }
+  };
+
+  const handleClearUnpinnedNews = async () => {
+    try {
+      const cleared = await aifpApi.clearUnpinnedNews();
+      setLiveNews((prev) => prev.filter((item) => item.isPinned));
+      showToast(`Đã dọn dẹp ${cleared} bài viết không ghim`);
+    } catch {
+      showToast('Lỗi khi dọn dẹp bài viết');
+    }
+  };
+
+  // Open-Source CRUD Handlers (Supabase CSDL per User)
+  const loadOpenSourceItems = useCallback(async () => {
+    setIsLoadingOpenSource(true);
+    try {
+      const items = await aifpApi.getOpenSourceItems();
+      setOpenSourceItems(items);
+    } catch {
+      // ignore
+    } finally {
+      setIsLoadingOpenSource(false);
+    }
+  }, []);
+
+  const handleDiscoverOpenSource = async () => {
+    if (!openSourceKeywords.trim()) {
+      showToast('Vui lòng nhập từ khóa tìm kiếm');
+      return;
+    }
+    setIsLoadingOpenSource(true);
+    showToast('Đang quét mô hình mã nguồn mở trên GitHub...');
+    try {
+      const updated = await aifpApi.discoverOpenSource(
+        openSourceKeywords.trim(),
+        openSourceGoal.trim() || undefined,
+        profile.deliveryEmail || undefined,
+        openSourceSendEmail
+      );
+      if (updated && updated.length > 0) {
+        setOpenSourceItems(updated);
+        showToast(`Đã tìm thấy & lưu ${updated.length} mô hình vào CSDL cá nhân!`);
+      } else {
+        await loadOpenSourceItems();
+        showToast('Đã quét xong mô hình mã nguồn mở.');
+      }
+    } catch {
+      showToast('Không thể kết nối máy chủ để tìm kiếm.');
+    } finally {
+      setIsLoadingOpenSource(false);
+    }
+  };
+
+  const handleTogglePinOpenSource = async (id: string) => {
+    try {
+      const updated = await aifpApi.togglePinOpenSource(id);
+      if (updated) {
+        setOpenSourceItems((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, isPinned: updated.isPinned } : item))
+        );
+        showToast(updated.isPinned ? 'Đã ghim giữ lại mô hình!' : 'Đã bỏ ghim');
+      }
+    } catch {
+      showToast('Lỗi khi thay đổi trạng thái ghim');
+    }
+  };
+
+  const handleDeleteOpenSource = async (id: string) => {
+    try {
+      const ok = await aifpApi.deleteOpenSourceItem(id);
+      if (ok) {
+        setOpenSourceItems((prev) => prev.filter((item) => item.id !== id));
+        showToast('Đã xóa mô hình khỏi CSDL');
+      }
+    } catch {
+      showToast('Lỗi khi xóa mô hình');
+    }
+  };
+
+  const handleClearUnpinnedOpenSource = async () => {
+    try {
+      const cleared = await aifpApi.clearUnpinnedOpenSource();
+      setOpenSourceItems((prev) => prev.filter((item) => item.isPinned));
+      showToast(`Đã dọn dẹp ${cleared} mô hình không ghim`);
+    } catch {
+      showToast('Lỗi khi dọn dẹp');
+    }
+  };
+
+  // Shopping Tracked Products Handlers
+  const loadTrackedProducts = useCallback(async () => {
+    setIsLoadingTracked(true);
+    try {
+      const items = await aifpApi.getTrackedProducts();
+      setTrackedProducts(items);
+    } catch {
+      // ignore
+    } finally {
+      setIsLoadingTracked(false);
+    }
+  }, []);
+
+  const handleTrackOffer = async (item: { store: string; productTitle?: string; price: string; link: string }) => {
+    const rawPrice = parseInt(item.price.replace(/[^\d]/g, ''), 10) || 0;
+    const ok = await aifpApi.trackProduct(item.productTitle || shopQuery, rawPrice * 0.9, rawPrice, item.link, item.store);
+    if (ok) {
+      showToast('Đã lưu vào CSDL để theo dõi giá!');
+      loadTrackedProducts();
+    } else {
+      showToast('Chưa thể lưu, vui lòng kiểm tra đăng nhập');
+    }
+  };
+
+  const handleDeleteTrackedProduct = async (id: string) => {
+    const ok = await aifpApi.deleteTrackedProduct(id);
+    if (ok) {
+      setTrackedProducts((prev) => prev.filter((p) => p.id !== id));
+      showToast('Đã xóa sản phẩm khỏi theo dõi');
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'tools' && toolSubTab === 'evolution') {
+      loadOpenSourceItems();
+    } else if (activeTab === 'tools' && toolSubTab === 'shopping') {
+      loadTrackedProducts();
+    }
+  }, [activeTab, toolSubTab, loadOpenSourceItems, loadTrackedProducts]);
 
   const handleSendTestEmail = async () => {
     const targetEmail = tempProfile.deliveryEmail.trim();
@@ -3145,6 +3273,16 @@ export default function App() {
                               <IconTrash />
                             </button>
                           )}
+
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => handleSendChannelDigest(channel)}
+                            style={{ minHeight: 28, height: 28, fontSize: 12, padding: '0 8px', gap: 4 }}
+                            title="Gửi thử bản tin này vào email"
+                          >
+                            <IconSend />
+                          </button>
                         </div>
 
                         <span
@@ -3261,7 +3399,17 @@ export default function App() {
                 )}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleClearUnpinnedNews}
+                  style={{ minHeight: 28, fontSize: 11.5, padding: '0 10px', gap: 4 }}
+                  title="Dọn dẹp bài viết không ghim để tránh lưu quá nhiều"
+                >
+                  <IconTrash />
+                  <span>Dọn dẹp</span>
+                </button>
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -3281,32 +3429,44 @@ export default function App() {
                 >
                   <IconRefresh spinning={isSyncingNews} />
                 </button>
-
-                {/* Sub Filter Pills */}
-                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                  {newsFilterOptions.map((f) => (
-                    <button
-                      key={f.id}
-                      onClick={() => {
-                        setNewsFilter(f.id as any);
-                        setNewsPage(1);
-                      }}
-                      className="btn btn-secondary"
-                      style={{
-                        minHeight: 26,
-                        padding: '0 9px',
-                        fontSize: 11.5,
-                        fontWeight: newsFilter === f.id ? 700 : 500,
-                        background: newsFilter === f.id ? 'var(--accent-primary)' : 'var(--bg-surface)',
-                        borderColor: newsFilter === f.id ? 'var(--accent-primary)' : 'var(--border-subtle)',
-                        color: newsFilter === f.id ? '#FFFFFF' : 'var(--text-secondary)',
-                      }}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
               </div>
+            </div>
+
+            {/* Sub Filter Pills Bar (Dedicated Single-Line Horizontal Scroll Row) */}
+            <div
+              style={{
+                display: 'flex',
+                gap: 6,
+                overflowX: 'auto',
+                whiteSpace: 'nowrap',
+                paddingBottom: 6,
+                marginBottom: 12,
+              }}
+            >
+              {newsFilterOptions.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => {
+                    setNewsFilter(f.id as any);
+                    setNewsPage(1);
+                  }}
+                  className="btn btn-secondary"
+                  style={{
+                    minHeight: 28,
+                    padding: '0 12px',
+                    fontSize: 12,
+                    fontWeight: newsFilter === f.id ? 700 : 500,
+                    background: newsFilter === f.id ? 'var(--accent-primary)' : 'var(--bg-surface)',
+                    borderColor: newsFilter === f.id ? 'var(--accent-primary)' : 'var(--border-subtle)',
+                    color: newsFilter === f.id ? '#FFFFFF' : 'var(--text-secondary)',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                >
+                  {f.label}
+                </button>
+              ))}
             </div>
 
             {/* Card-Based News Feed */}
@@ -3666,7 +3826,7 @@ export default function App() {
                       {item.summary}
                     </p>
 
-                    {/* Link đến (Source Link & Domain) */}
+                    {/* Link đến (Source Link & Domain) & Actions */}
                     <div
                       style={{
                         paddingTop: 10,
@@ -3674,23 +3834,58 @@ export default function App() {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
+                        gap: 8,
                       }}
                     >
-                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                        {item.url.replace(/^https?:\/\//, '').split('/')[0]}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                          {item.url.replace(/^https?:\/\//, '').split('/')[0]}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePinNews(item.id)}
+                          style={{
+                            background: item.isPinned ? 'var(--bg-subtle)' : 'transparent',
+                            border: '1px solid var(--border-subtle)',
+                            borderRadius: 'var(--radius-sm)',
+                            padding: '2px 6px',
+                            fontSize: 10.5,
+                            color: item.isPinned ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+                            cursor: 'pointer',
+                          }}
+                          title={item.isPinned ? 'Bỏ ghim' : 'Ghim giữ lại'}
+                        >
+                          {item.isPinned ? '★ Đã giữ' : '☆ Giữ'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteNews(item.id)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            padding: '2px 4px',
+                            fontSize: 10.5,
+                            color: 'var(--text-tertiary)',
+                            cursor: 'pointer',
+                          }}
+                          title="Xóa bài viết này"
+                        >
+                          Xóa
+                        </button>
+                      </div>
                       <a
                         href={item.url}
                         target="_blank"
                         rel="noreferrer"
                         style={{
-                          fontSize: 12.5,
+                          fontSize: 12,
                           fontWeight: 600,
                           color: 'var(--accent-primary)',
                           textDecoration: 'none',
                           display: 'inline-flex',
                           alignItems: 'center',
-                          gap: 4,
+                          gap: 3,
+                          whiteSpace: 'nowrap',
                         }}
                       >
                         <span>Đọc tiếp</span>
@@ -3875,160 +4070,161 @@ export default function App() {
               ))}
             </div>
 
-            {/* TOOL 0: SELF-EVOLUTION & OPEN-SOURCE RADAR */}
+            {/* TOOL 0: OPEN-SOURCE RADAR & PERSONAL CSDL */}
             {toolSubTab === 'evolution' && (
-              !isOwner ? (
+              <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {/* Header Row */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                      Mã nguồn mở
+                    </h3>
+                    <span className="mono-pill" style={{ color: 'var(--accent-primary)' }}>
+                      {openSourceItems.length} mô hình CSDL
+                    </span>
+                    <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                      Tự động hóa 07:00 &middot; Supabase CSDL
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={handleClearUnpinnedOpenSource}
+                      style={{ fontSize: 12, minHeight: 28, height: 28, padding: '0 10px', gap: 4 }}
+                      title="Dọn dẹp các mô hình không ghim để tránh lưu quá nhiều"
+                    >
+                      <IconTrash />
+                      <span>Dọn dẹp</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={handleDiscoverOpenSource}
+                      disabled={isLoadingOpenSource}
+                      style={{ gap: 5, fontSize: 12, minHeight: 28, height: 28, padding: '0 10px' }}
+                    >
+                      <IconRefresh spinning={isLoadingOpenSource} />
+                      <span>{isLoadingOpenSource ? 'Đang quét...' : 'Quét lại'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Configuration & Search Bar */}
                 <div
-                  className="card-surface"
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '44px 24px',
-                    textAlign: 'center',
-                    gap: 12,
+                    gap: 10,
+                    padding: '12px 14px',
+                    borderRadius: 'var(--radius-sm)',
+                    background: 'var(--bg-subtle)',
                     border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-md)',
-                    background: 'var(--bg-surface)',
                   }}
                 >
-                  <div
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: '50%',
-                      background: 'var(--bg-subtle)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '1px solid var(--border-subtle)',
-                      color: 'var(--accent-primary)',
-                    }}
-                  >
-                    <IconShield />
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 10 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                        Từ khóa tìm kiếm (GitHub)
+                      </label>
+                      <input
+                        type="text"
+                        value={openSourceKeywords}
+                        onChange={(e) => setOpenSourceKeywords(e.target.value)}
+                        placeholder="e.g. LLM reasoning, stickman video, crawl4ai"
+                        style={{
+                          width: '100%',
+                          height: 34,
+                          padding: '0 10px',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--bg-surface)',
+                          color: 'var(--text-primary)',
+                          fontSize: 12.5,
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                        Mục tiêu tìm kiếm
+                      </label>
+                      <input
+                        type="text"
+                        value={openSourceGoal}
+                        onChange={(e) => setOpenSourceGoal(e.target.value)}
+                        placeholder="e.g. Tìm mô hình AI mã nguồn mở chất lượng cao"
+                        style={{
+                          width: '100%',
+                          height: 34,
+                          padding: '0 10px',
+                          borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border-subtle)',
+                          background: 'var(--bg-surface)',
+                          color: 'var(--text-primary)',
+                          fontSize: 12.5,
+                          boxSizing: 'border-box',
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--text-primary)' }}>
-                    Kho Nghiên Cứu Mã Nguồn Mở Riêng Tư (Owner Only)
-                  </div>
-                  <p style={{ maxWidth: 480, fontSize: 13, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                    Toàn bộ 8 công cụ mã nguồn mở chọn lọc (Stickman Director, Lemo-Opuscar, Lossless-Cut, Remotion...) và báo cáo phân tích tiến hóa AI từ trước đến nay thuộc quyền sở hữu riêng biệt của Quản trị viên (Chủ sở hữu).
-                  </p>
-                  <span className="mono-pill" style={{ fontSize: 11, color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                    Chỉ dành cho Quản trị viên hệ thống
-                  </span>
-                  {!authSession && (
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, paddingTop: 4 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-secondary)', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={openSourceSendEmail}
+                        onChange={(e) => setOpenSourceSendEmail(e.target.checked)}
+                      />
+                      <span>Gửi email báo cáo danh sách tìm được vào hòm thư</span>
+                    </label>
+
                     <button
                       type="button"
                       className="btn btn-primary"
-                      onClick={() => setShowLoginModal(true)}
-                      style={{ marginTop: 6, fontSize: 12.5, minHeight: 32, padding: '0 16px' }}
+                      onClick={handleDiscoverOpenSource}
+                      disabled={isLoadingOpenSource}
+                      style={{ fontSize: 12, minHeight: 30, padding: '0 14px', whiteSpace: 'nowrap' }}
                     >
-                      Đăng nhập Quản trị viên
+                      {isLoadingOpenSource ? 'Đang tìm & Lưu...' : 'Tìm & Lưu CSDL'}
                     </button>
-                  )}
-                </div>
-              ) : (
-                <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {/* Header Row */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                        Mã nguồn mở
-                      </h3>
-                      <span className="mono-pill" style={{ color: 'var(--status-running)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                        8 đề xuất
-                      </span>
-                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                        Cập nhật {lastEvolutionAuditTime}
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={handleRunEvolutionAudit}
-                        disabled={isAuditingEvolution}
-                        style={{ gap: 5, fontSize: 12, minHeight: 28, height: 28, padding: '0 10px' }}
-                      >
-                        <IconRefresh spinning={isAuditingEvolution} />
-                        <span>{isAuditingEvolution ? 'Đang quét...' : 'Quét lại'}</span>
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={handleTriggerEvolutionProposalEmail}
-                        style={{ gap: 5, fontSize: 12, minHeight: 28, height: 28, padding: '0 12px' }}
-                      >
-                        <IconSend />
-                        <span>Gửi mail</span>
-                      </button>
-                    </div>
                   </div>
+                </div>
 
-                  {/* Grid of 8 Curated Open-Source Cards */}
+                {/* Grid of Dynamic Open-Source Cards from CSDL */}
+                {openSourceItems.length === 0 ? (
+                  <div
+                    style={{
+                      padding: '36px 20px',
+                      textAlign: 'center',
+                      color: 'var(--text-tertiary)',
+                      border: '1px dashed var(--border-subtle)',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-surface)',
+                    }}
+                  >
+                    <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                      Chưa có mô hình trong CSDL cá nhân
+                    </div>
+                    <div style={{ fontSize: 12, marginBottom: 12 }}>
+                      Bấm "Tìm & Lưu CSDL" ở trên để hệ thống tự động rà soát và lưu các mô hình mã nguồn mở phù hợp.
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={handleDiscoverOpenSource}
+                      disabled={isLoadingOpenSource}
+                      style={{ fontSize: 12, minHeight: 30, padding: '0 14px' }}
+                    >
+                      Quét mô hình mặc định
+                    </button>
+                  </div>
+                ) : (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-                    {[
-                      {
-                        name: 'stickman-video-director',
-                        stars: '★ 4.2k',
-                        url: 'https://github.com/kaomei/stickman-video-director',
-                        tag: 'Video người que kịch bản',
-                        summary: 'Tự động đạo diễn video người que không lộ mặt cho YouTube & TikTok từ kịch bản phân cảnh.',
-                      },
-                      {
-                        name: 'lemo-opuscar',
-                        stars: '★ 3.8k',
-                        url: 'https://github.com/lemomo-ai/lemo-opuscar',
-                        tag: 'Canvas & WebGL Motion',
-                        summary: 'Làm phim hoạt hình và đồ họa chuyển động bằng code Canvas/WebGL không cần GPU nặng.',
-                      },
-                      {
-                        name: 'lossless-cut & remotion',
-                        stars: '★ 28.1k',
-                        url: 'https://github.com/mifi/lossless-cut',
-                        tag: 'Biên tập video mở',
-                        summary: 'Cắt ghép, tinh chỉnh tỉ lệ 16:9/9:16 và xuất video siêu tốc tức thì không suy hao chất lượng.',
-                      },
-                      {
-                        name: 'crawl4ai',
-                        stars: '★ 34.5k',
-                        url: 'https://github.com/unclecode/crawl4ai',
-                        tag: 'Thu thập tin & Việc làm',
-                        summary: 'Cào quét dữ liệu tự động tốc độ cao, trích xuất Markdown sạch không quảng cáo.',
-                      },
-                      {
-                        name: 'modelcontextprotocol',
-                        stars: '★ 18.2k',
-                        url: 'https://github.com/modelcontextprotocol',
-                        tag: 'Chuẩn công cụ MCP',
-                        summary: 'Chuẩn kết nối công cụ mở của Anthropic, tích hợp hơn 1,000 API doanh nghiệp.',
-                      },
-                      {
-                        name: 'mem0',
-                        stars: '★ 26.8k',
-                        url: 'https://github.com/mem0ai/mem0',
-                        tag: 'Bộ nhớ dài hạn',
-                        summary: 'Tự động học thói quen người dùng, giải quyết xung đột thông tin và nén bộ nhớ.',
-                      },
-                      {
-                        name: 'ollama',
-                        stars: '★ 118k',
-                        url: 'https://github.com/ollama/ollama',
-                        tag: 'AI Offline 0đ',
-                        summary: 'Chạy mô hình SLM cục bộ (Gemma 2 / Qwen 2.5), phân loại tin tức miễn phí và bảo mật.',
-                      },
-                      {
-                        name: 'livekit',
-                        stars: '★ 8.5k',
-                        url: 'https://github.com/livekit/agents',
-                        tag: 'Đàm thoại 2 chiều',
-                        summary: 'Đàm thoại giọng nói thời gian thực độ trễ thấp (< 300ms) trên Web & Mobile.',
-                      },
-                    ].map((oss) => (
+                    {openSourceItems.map((oss) => (
                       <div
-                        key={oss.name}
+                        key={oss.id}
                         className="card-surface card-interactive"
                         style={{
                           padding: '14px 16px',
@@ -4045,13 +4241,17 @@ export default function App() {
                             <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>
                               {oss.name}
                             </span>
-                            <span className="mono-pill" style={{ fontSize: 10.5 }}>
-                              {oss.stars}
-                            </span>
+                            {oss.stars && (
+                              <span className="mono-pill" style={{ fontSize: 10.5 }}>
+                                {oss.stars}
+                              </span>
+                            )}
                           </div>
-                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>
-                            {oss.tag}
-                          </span>
+                          {oss.tag && (
+                            <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>
+                              {oss.tag}
+                            </span>
+                          )}
                         </div>
 
                         <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.45, flex: 1 }}>
@@ -4063,58 +4263,49 @@ export default function App() {
                             href={oss.url}
                             target="_blank"
                             rel="noreferrer"
-                            style={{ fontSize: 12, color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}
+                            style={{ fontSize: 12, color: 'var(--accent-primary)', textDecoration: 'none', fontWeight: 600 }}
                           >
                             GitHub ↗
                           </a>
-                          <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={() => {
-                              showToast(`Đã ghi nhận duyệt đề xuất: ${oss.name}`);
-                            }}
-                            style={{ fontSize: 11.5, minHeight: 26, height: 26, padding: '0 10px' }}
-                          >
-                            Duyệt
-                          </button>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <button
+                              type="button"
+                              onClick={() => handleTogglePinOpenSource(oss.id)}
+                              style={{
+                                background: oss.isPinned ? 'var(--bg-subtle)' : 'transparent',
+                                border: '1px solid var(--border-subtle)',
+                                borderRadius: 'var(--radius-sm)',
+                                padding: '3px 8px',
+                                fontSize: 11,
+                                color: oss.isPinned ? 'var(--accent-primary)' : 'var(--text-tertiary)',
+                                cursor: 'pointer',
+                              }}
+                              title={oss.isPinned ? 'Bỏ ghim' : 'Ghim giữ lại trong CSDL'}
+                            >
+                              {oss.isPinned ? '★ Đã giữ' : '☆ Giữ'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteOpenSource(oss.id)}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                padding: '3px 6px',
+                                fontSize: 11,
+                                color: 'var(--text-tertiary)',
+                                cursor: 'pointer',
+                              }}
+                              title="Xóa mô hình này khỏi CSDL"
+                            >
+                              Xóa
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
-
-                  {/* Minimalist 1-line Footer */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: '8px 12px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: 'var(--bg-subtle)',
-                      border: '1px solid var(--border-subtle)',
-                      fontSize: 12,
-                      color: 'var(--text-tertiary)',
-                      flexWrap: 'wrap',
-                      gap: 6,
-                    }}
-                  >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
-                      <span>Tự động quét lúc 07:00 hàng ngày &middot; Gửi email để phê duyệt</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActiveTab('assistant');
-                        showToast('Đang mở Trợ lý...');
-                      }}
-                      style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', padding: 0 }}
-                    >
-                      Hỏi Trợ lý →
-                    </button>
-                  </div>
-                </div>
-              )
+                )}
+              </div>
             )}
 
             {/* TOOL 1: VISION OCR (QUÉT HÓA ĐƠN) */}
@@ -4218,18 +4409,12 @@ export default function App() {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 16,
-                  minHeight: 'calc(100vh - 200px)',
                   boxSizing: 'border-box',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>So sánh giá sản phẩm</h3>
-                    <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
-                      Dữ liệu giá thực tế từ Shopee Mall, Tiki Official, Lazada Mall
-                    </span>
-                  </div>
-                  <span className="source-badge-pill">Shopee · Tiki · Lazada</span>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>So sánh giá sản phẩm</h3>
+                  <span className="mono-pill">Shopee · Tiki · Lazada</span>
                 </div>
 
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -4272,9 +4457,9 @@ export default function App() {
                   </button>
                 </div>
 
-                {/* Quick Keyword Suggestions */}
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>Gợi ý nhanh:</span>
+                {/* Quick Keyword Suggestions (Horizontal Scroll) */}
+                <div style={{ display: 'flex', gap: 6, overflowX: 'auto', whiteSpace: 'nowrap', alignItems: 'center', paddingBottom: 2 }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)', flexShrink: 0 }}>Gợi ý:</span>
                   {[
                     'Bàn phím cơ Keychron K2 Pro',
                     'iPhone 15 Pro Max 256GB',
@@ -4293,6 +4478,8 @@ export default function App() {
                         border: '1px solid var(--border-subtle)',
                         fontSize: 11,
                         padding: '3px 10px',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0,
                       }}
                     >
                       {kw}
@@ -4352,6 +4539,7 @@ export default function App() {
                           borderRadius: 'var(--radius-sm)',
                           border: '1px solid var(--border-subtle)',
                           background: 'var(--bg-surface)',
+                          gap: 12,
                         }}
                       >
                         <div>
@@ -4360,16 +4548,25 @@ export default function App() {
                             {item.productTitle || item.status} {item.rating ? `· ${item.rating}` : ''}
                           </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                          <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--accent-primary)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--accent-primary)', whiteSpace: 'nowrap' }}>
                             {item.price}
                           </span>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => handleTrackOffer(item)}
+                            style={{ fontSize: 11.5, minHeight: 30, padding: '0 10px', whiteSpace: 'nowrap' }}
+                            title="Lưu sản phẩm vào CSDL để theo dõi giá"
+                          >
+                            Theo dõi giá
+                          </button>
                           <a
                             href={item.link}
                             target="_blank"
                             rel="noreferrer"
-                            className="btn btn-secondary"
-                            style={{ fontSize: 12, minHeight: 30, padding: '0 12px', gap: 4 }}
+                            className="btn btn-primary"
+                            style={{ fontSize: 12, minHeight: 30, padding: '0 12px', gap: 4, whiteSpace: 'nowrap', textDecoration: 'none' }}
                           >
                             <span>Xem giá</span>
                             <IconArrowRight />
@@ -4379,6 +4576,52 @@ export default function App() {
                     ))
                   )}
                 </div>
+
+                {/* Tracked Products Section (Saved in CSDL) */}
+                {trackedProducts.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 8, paddingTop: 14, borderTop: '1px solid var(--border-subtle)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <strong style={{ fontSize: 13.5, color: 'var(--text-primary)' }}>Sản phẩm đang theo dõi giá ({trackedProducts.length})</strong>
+                      <span className="mono-pill" style={{ fontSize: 10.5 }}>
+                        {isLoadingTracked ? 'Đang cập nhật...' : 'CSDL Cá nhân'}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {trackedProducts.map((p) => (
+                        <div
+                          key={p.id}
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            padding: '10px 14px',
+                            borderRadius: 'var(--radius-sm)',
+                            background: 'var(--bg-subtle)',
+                            border: '1px solid var(--border-subtle)',
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: 13 }}>{p.title}</div>
+                            <div style={{ fontSize: 11.5, color: 'var(--text-secondary)' }}>{p.storeName}</div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--accent-primary)' }}>
+                              {typeof p.currentPrice === 'number' ? p.currentPrice.toLocaleString('vi-VN') + ' đ' : p.currentPrice}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTrackedProduct(p.id)}
+                              style={{ background: 'transparent', border: 'none', color: 'var(--text-tertiary)', fontSize: 11, cursor: 'pointer' }}
+                              title="Bỏ theo dõi sản phẩm"
+                            >
+                              Xóa
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Rich Shopping Intelligence: Matrix & Advice & Coupons */}
                 <div

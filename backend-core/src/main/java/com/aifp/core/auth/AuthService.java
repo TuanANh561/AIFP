@@ -41,6 +41,7 @@ public class AuthService {
     private final ObjectMapper objectMapper;
     private final long refreshTokenTtlSeconds;
     private final String googleClientId;
+    private final String ownerEmail;
 
     public AuthService(
             UserRepository userRepository,
@@ -52,7 +53,8 @@ public class AuthService {
             TaskInitializerService taskInitializerService,
             ObjectMapper objectMapper,
             @Value("${aifp.security.refresh-token-ttl-seconds:604800}") long refreshTokenTtlSeconds,
-            @Value("${aifp.security.google-client-id:}") String googleClientId
+            @Value("${aifp.security.google-client-id:}") String googleClientId,
+            @Value("${aifp.owner-email:nguyentuananh11a1.lhpt@gmail.com}") String ownerEmail
     ) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
@@ -64,6 +66,7 @@ public class AuthService {
         this.objectMapper = objectMapper;
         this.refreshTokenTtlSeconds = refreshTokenTtlSeconds;
         this.googleClientId = googleClientId != null ? googleClientId.trim() : "";
+        this.ownerEmail = (ownerEmail != null && !ownerEmail.isBlank()) ? ownerEmail.trim() : "nguyentuananh11a1.lhpt@gmail.com";
     }
 
     @Transactional
@@ -112,35 +115,61 @@ public class AuthService {
         }
 
         String normalizedEmail = googleUser.email().trim().toLowerCase(Locale.ROOT);
-        UserEntity user = userRepository.findByEmailIgnoreCase(normalizedEmail).orElseGet(() -> {
-            UUID newUserId = UUID.randomUUID();
-            UserEntity newUser = new UserEntity(
-                    newUserId,
-                    normalizedEmail,
-                    passwordEncoder.encode(UUID.randomUUID().toString())
-            );
-            newUser.setEmailVerified(true);
-            userRepository.save(newUser);
+        boolean isOwner = normalizedEmail.equalsIgnoreCase(ownerEmail.trim().toLowerCase(Locale.ROOT));
 
-            String displayName = (googleUser.name() != null && !googleUser.name().isBlank())
-                    ? googleUser.name().trim()
-                    : normalizedEmail.split("@")[0];
+        UserEntity user;
+        if (isOwner) {
+            // Master Owner: maps to DEFAULT_SYSTEM_USER_ID, preserving all historic data and tasks
+            user = userRepository.findById(TaskInitializerService.DEFAULT_SYSTEM_USER_ID).orElseGet(() -> {
+                UserEntity masterUser = new UserEntity(
+                        TaskInitializerService.DEFAULT_SYSTEM_USER_ID,
+                        normalizedEmail,
+                        passwordEncoder.encode(UUID.randomUUID().toString())
+                );
+                masterUser.setEmailVerified(true);
+                return userRepository.save(masterUser);
+            });
+            user.setEmail(normalizedEmail);
+            userRepository.save(user);
 
-            UserProfileEntity profile = new UserProfileEntity(newUserId, displayName, normalizedEmail);
+            UserProfileEntity profile = profileRepository.findById(user.getId()).orElseGet(() ->
+                    new UserProfileEntity(user.getId(), "Tuấn Anh (Chủ sở hữu)", normalizedEmail));
+            profile.setDisplayName(googleUser.name() != null ? googleUser.name() : "Tuấn Anh (Chủ sở hữu)");
+            profile.setNotificationEmail(normalizedEmail);
             profileRepository.save(profile);
+            auditService.logEvent(user.getId(), "LOGIN_OWNER_GOOGLE_SUCCESS", "INFO", "USER", user.getId().toString(), "{}");
+        } else {
+            // Standard User: strictly isolated tenant with an independent random UUID
+            user = userRepository.findByEmailIgnoreCase(normalizedEmail).orElseGet(() -> {
+                UUID newUserId = UUID.randomUUID();
+                UserEntity newUser = new UserEntity(
+                        newUserId,
+                        normalizedEmail,
+                        passwordEncoder.encode(UUID.randomUUID().toString())
+                );
+                newUser.setEmailVerified(true);
+                userRepository.save(newUser);
 
-            auditService.logEvent(newUserId, "USER_REGISTERED_GOOGLE", "INFO", "USER", newUserId.toString(), "{}");
-            return newUser;
-        });
+                String displayName = (googleUser.name() != null && !googleUser.name().isBlank())
+                        ? googleUser.name().trim()
+                        : normalizedEmail.split("@")[0];
 
-        // Ensure default topic tasks exist for this user
-        taskInitializerService.seedDefaultTasksForUser(user.getId());
+                UserProfileEntity profile = new UserProfileEntity(newUserId, displayName, normalizedEmail);
+                profileRepository.save(profile);
+
+                auditService.logEvent(newUserId, "USER_REGISTERED_GOOGLE", "INFO", "USER", newUserId.toString(), "{}");
+                return newUser;
+            });
+
+            // Ensure starter topic tasks exist for this user
+            taskInitializerService.seedDefaultTasksForUser(user.getId());
+            auditService.logEvent(user.getId(), "LOGIN_GOOGLE_SUCCESS", "INFO", "USER", user.getId().toString(), "{}");
+        }
 
         String displayName = profileRepository.findById(user.getId())
                 .map(UserProfileEntity::getDisplayName)
                 .orElse(user.getEmail());
 
-        auditService.logEvent(user.getId(), "LOGIN_GOOGLE_SUCCESS", "INFO", "USER", user.getId().toString(), "{}");
         return issueTokenPair(user, displayName, UUID.randomUUID());
     }
 

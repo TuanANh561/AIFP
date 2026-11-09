@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { aifpApi, LiveArticle, VideoStoryboard, VideoCreationResult } from './api/aifpApi';
 
 // ============================================================================
@@ -229,6 +229,14 @@ const IconClock = () => (
     <polyline points="12 6 12 12 16 14" />
   </svg>
 );
+
+const IconShield = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
+export const MASTER_OWNER_EMAIL = 'nguyentuananh11a1.lhpt@gmail.com';
 
 // ============================================================================
 // DATA TYPES & PRESETS FOR MULTI-AUDIENCE GROUPS
@@ -660,6 +668,17 @@ export default function App() {
     } catch {}
     return INITIAL_TOPIC_CHANNELS;
   });
+
+  // Master Owner Gate: Certain proprietary discoveries belong exclusively to nguyentuananh11a1.lhpt@gmail.com
+  const isOwner = (authSession?.email?.toLowerCase() === MASTER_OWNER_EMAIL.toLowerCase()) ||
+    (!authSession && profile.deliveryEmail.toLowerCase() === MASTER_OWNER_EMAIL.toLowerCase());
+
+  // Filter channels based on ownership: proprietary channels are exclusively for the master owner
+  const visibleChannels: TopicChannelConfig[] = useMemo(() => {
+    return isOwner
+      ? topicChannels
+      : topicChannels.filter((ch: TopicChannelConfig) => ch.id !== 'ai-evolution' && ch.id !== 'creator-ideas');
+  }, [isOwner, topicChannels]);
   const [editingChannel, setEditingChannel] = useState<TopicChannelConfig | null>(null);
   const [sendingChannelId, setSendingChannelId] = useState<string | null>(null);
   const [newsFilter, setNewsFilter] = useState<'all' | 'shopping' | 'jobs' | 'tech' | 'finance' | 'social' | 'ai-evolution' | 'creator-ideas'>('all');
@@ -2277,11 +2296,11 @@ export default function App() {
                       <span>Kênh tự động</span>
                     </div>
                     <span className="mono-pill" style={{ fontSize: 10.5 }}>
-                      {topicChannels.filter((c) => c.isActive).length}/{topicChannels.length} bật
+                      {visibleChannels.filter((c) => c.isActive).length}/{visibleChannels.length} bật
                     </span>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {topicChannels.map((ch) => (
+                    {visibleChannels.map((ch) => (
                       <div
                         key={ch.id}
                         className="channel-quick-row"
@@ -2435,13 +2454,13 @@ export default function App() {
                   Kênh tự động
                 </h2>
                 <span className="mono-pill" style={{ background: 'var(--bg-surface)' }}>
-                  {topicChannels.filter((c) => c.isActive).length}/{topicChannels.length} đang bật
+                  {visibleChannels.filter((c) => c.isActive).length}/{visibleChannels.length} đang bật
                 </span>
               </div>
 
               {/* Grid of Topic Channels */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-                {topicChannels.map((channel) => {
+                {visibleChannels.map((channel) => {
                   const targetEmail = channel.customEmail.trim() || profile.deliveryEmail;
                   const isSendingThis = sendingChannelId === channel.id;
 
@@ -3276,191 +3295,244 @@ export default function App() {
 
             {/* TOOL 0: SELF-EVOLUTION & OPEN-SOURCE RADAR */}
             {toolSubTab === 'evolution' && (
-              <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {/* Header Row */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
-                      Mã nguồn mở
-                    </h3>
-                    <span className="mono-pill" style={{ color: 'var(--status-running)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                      8 đề xuất
-                    </span>
-                    <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
-                      Cập nhật {lastEvolutionAuditTime}
-                    </span>
+              !isOwner ? (
+                <div
+                  className="card-surface"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '44px 24px',
+                    textAlign: 'center',
+                    gap: 12,
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--bg-surface)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: '50%',
+                      background: 'var(--bg-subtle)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--accent-primary)',
+                    }}
+                  >
+                    <IconShield />
                   </div>
-
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={handleRunEvolutionAudit}
-                      disabled={isAuditingEvolution}
-                      style={{ gap: 5, fontSize: 12, minHeight: 28, height: 28, padding: '0 10px' }}
-                    >
-                      <IconRefresh spinning={isAuditingEvolution} />
-                      <span>{isAuditingEvolution ? 'Đang quét...' : 'Quét lại'}</span>
-                    </button>
+                  <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--text-primary)' }}>
+                    Kho Nghiên Cứu Mã Nguồn Mở Riêng Tư (Owner Only)
+                  </div>
+                  <p style={{ maxWidth: 480, fontSize: 13, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                    Toàn bộ 8 công cụ mã nguồn mở chọn lọc (Stickman Director, Lemo-Opuscar, Lossless-Cut, Remotion...) và báo cáo phân tích tiến hóa AI từ trước đến nay thuộc quyền sở hữu riêng biệt của Quản trị viên (Chủ sở hữu).
+                  </p>
+                  <span className="mono-pill" style={{ fontSize: 11, color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                    Chỉ hiển thị khi đăng nhập tài khoản: {MASTER_OWNER_EMAIL}
+                  </span>
+                  {!authSession && (
                     <button
                       type="button"
                       className="btn btn-primary"
-                      onClick={handleTriggerEvolutionProposalEmail}
-                      style={{ gap: 5, fontSize: 12, minHeight: 28, height: 28, padding: '0 12px' }}
+                      onClick={() => setShowLoginModal(true)}
+                      style={{ marginTop: 6, fontSize: 12.5, minHeight: 32, padding: '0 16px' }}
                     >
-                      <IconSend />
-                      <span>Gửi mail</span>
+                      Đăng nhập Chủ sở hữu
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="card-surface" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* Header Row */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                        Mã nguồn mở
+                      </h3>
+                      <span className="mono-pill" style={{ color: 'var(--status-running)', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
+                        8 đề xuất
+                      </span>
+                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)' }}>
+                        Cập nhật {lastEvolutionAuditTime}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={handleRunEvolutionAudit}
+                        disabled={isAuditingEvolution}
+                        style={{ gap: 5, fontSize: 12, minHeight: 28, height: 28, padding: '0 10px' }}
+                      >
+                        <IconRefresh spinning={isAuditingEvolution} />
+                        <span>{isAuditingEvolution ? 'Đang quét...' : 'Quét lại'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={handleTriggerEvolutionProposalEmail}
+                        style={{ gap: 5, fontSize: 12, minHeight: 28, height: 28, padding: '0 12px' }}
+                      >
+                        <IconSend />
+                        <span>Gửi mail</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Grid of 8 Curated Open-Source Cards */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+                    {[
+                      {
+                        name: 'stickman-video-director',
+                        stars: '★ 4.2k',
+                        url: 'https://github.com/kaomei/stickman-video-director',
+                        tag: 'Video người que kịch bản',
+                        summary: 'Tự động đạo diễn video người que không lộ mặt cho YouTube & TikTok từ kịch bản phân cảnh.',
+                      },
+                      {
+                        name: 'lemo-opuscar',
+                        stars: '★ 3.8k',
+                        url: 'https://github.com/lemomo-ai/lemo-opuscar',
+                        tag: 'Canvas & WebGL Motion',
+                        summary: 'Làm phim hoạt hình và đồ họa chuyển động bằng code Canvas/WebGL không cần GPU nặng.',
+                      },
+                      {
+                        name: 'lossless-cut & remotion',
+                        stars: '★ 28.1k',
+                        url: 'https://github.com/mifi/lossless-cut',
+                        tag: 'Biên tập video mở',
+                        summary: 'Cắt ghép, tinh chỉnh tỉ lệ 16:9/9:16 và xuất video siêu tốc tức thì không suy hao chất lượng.',
+                      },
+                      {
+                        name: 'crawl4ai',
+                        stars: '★ 34.5k',
+                        url: 'https://github.com/unclecode/crawl4ai',
+                        tag: 'Thu thập tin & Việc làm',
+                        summary: 'Cào quét dữ liệu tự động tốc độ cao, trích xuất Markdown sạch không quảng cáo.',
+                      },
+                      {
+                        name: 'modelcontextprotocol',
+                        stars: '★ 18.2k',
+                        url: 'https://github.com/modelcontextprotocol',
+                        tag: 'Chuẩn công cụ MCP',
+                        summary: 'Chuẩn kết nối công cụ mở của Anthropic, tích hợp hơn 1,000 API doanh nghiệp.',
+                      },
+                      {
+                        name: 'mem0',
+                        stars: '★ 26.8k',
+                        url: 'https://github.com/mem0ai/mem0',
+                        tag: 'Bộ nhớ dài hạn',
+                        summary: 'Tự động học thói quen người dùng, giải quyết xung đột thông tin và nén bộ nhớ.',
+                      },
+                      {
+                        name: 'ollama',
+                        stars: '★ 118k',
+                        url: 'https://github.com/ollama/ollama',
+                        tag: 'AI Offline 0đ',
+                        summary: 'Chạy mô hình SLM cục bộ (Gemma 2 / Qwen 2.5), phân loại tin tức miễn phí và bảo mật.',
+                      },
+                      {
+                        name: 'livekit',
+                        stars: '★ 8.5k',
+                        url: 'https://github.com/livekit/agents',
+                        tag: 'Đàm thoại 2 chiều',
+                        summary: 'Đàm thoại giọng nói thời gian thực độ trễ thấp (< 300ms) trên Web & Mobile.',
+                      },
+                    ].map((oss) => (
+                      <div
+                        key={oss.name}
+                        className="card-surface card-interactive"
+                        style={{
+                          padding: '14px 16px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 10,
+                          border: '1px solid var(--border-subtle)',
+                          borderRadius: 'var(--radius-md)',
+                          background: 'var(--bg-surface)',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>
+                              {oss.name}
+                            </span>
+                            <span className="mono-pill" style={{ fontSize: 10.5 }}>
+                              {oss.stars}
+                            </span>
+                          </div>
+                          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>
+                            {oss.tag}
+                          </span>
+                        </div>
+
+                        <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.45, flex: 1 }}>
+                          {oss.summary}
+                        </p>
+
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid var(--border-subtle)', marginTop: 'auto' }}>
+                          <a
+                            href={oss.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ fontSize: 12, color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}
+                          >
+                            GitHub ↗
+                          </a>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => {
+                              showToast(`Đã ghi nhận duyệt đề xuất: ${oss.name}`);
+                            }}
+                            style={{ fontSize: 11.5, minHeight: 26, height: 26, padding: '0 10px' }}
+                          >
+                            Duyệt
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Minimalist 1-line Footer */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '8px 12px',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-subtle)',
+                      border: '1px solid var(--border-subtle)',
+                      fontSize: 12,
+                      color: 'var(--text-tertiary)',
+                      flexWrap: 'wrap',
+                      gap: 6,
+                    }}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
+                      <span>Tự động quét lúc 07:00 hàng ngày &middot; Gửi email để phê duyệt</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveTab('assistant');
+                        showToast('Đang mở Trợ lý...');
+                      }}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                    >
+                      Hỏi Trợ lý →
                     </button>
                   </div>
                 </div>
-
-                {/* Grid of 8 Curated Open-Source Cards */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
-                  {[
-                    {
-                      name: 'stickman-video-director',
-                      stars: '★ 4.2k',
-                      url: 'https://github.com/kaomei/stickman-video-director',
-                      tag: 'Video người que kịch bản',
-                      summary: 'Tự động đạo diễn video người que không lộ mặt cho YouTube & TikTok từ kịch bản phân cảnh.',
-                    },
-                    {
-                      name: 'lemo-opuscar',
-                      stars: '★ 3.8k',
-                      url: 'https://github.com/lemomo-ai/lemo-opuscar',
-                      tag: 'Canvas & WebGL Motion',
-                      summary: 'Làm phim hoạt hình và đồ họa chuyển động bằng code Canvas/WebGL không cần GPU nặng.',
-                    },
-                    {
-                      name: 'lossless-cut & remotion',
-                      stars: '★ 28.1k',
-                      url: 'https://github.com/mifi/lossless-cut',
-                      tag: 'Biên tập video mở',
-                      summary: 'Cắt ghép, tinh chỉnh tỉ lệ 16:9/9:16 và xuất video siêu tốc tức thì không suy hao chất lượng.',
-                    },
-                    {
-                      name: 'crawl4ai',
-                      stars: '★ 34.5k',
-                      url: 'https://github.com/unclecode/crawl4ai',
-                      tag: 'Thu thập tin & Việc làm',
-                      summary: 'Cào quét dữ liệu tự động tốc độ cao, trích xuất Markdown sạch không quảng cáo.',
-                    },
-                    {
-                      name: 'modelcontextprotocol',
-                      stars: '★ 18.2k',
-                      url: 'https://github.com/modelcontextprotocol',
-                      tag: 'Chuẩn công cụ MCP',
-                      summary: 'Chuẩn kết nối công cụ mở của Anthropic, tích hợp hơn 1,000 API doanh nghiệp.',
-                    },
-                    {
-                      name: 'mem0',
-                      stars: '★ 26.8k',
-                      url: 'https://github.com/mem0ai/mem0',
-                      tag: 'Bộ nhớ dài hạn',
-                      summary: 'Tự động học thói quen người dùng, giải quyết xung đột thông tin và nén bộ nhớ.',
-                    },
-                    {
-                      name: 'ollama',
-                      stars: '★ 118k',
-                      url: 'https://github.com/ollama/ollama',
-                      tag: 'AI Offline 0đ',
-                      summary: 'Chạy mô hình SLM cục bộ (Gemma 2 / Qwen 2.5), phân loại tin tức miễn phí và bảo mật.',
-                    },
-                    {
-                      name: 'livekit',
-                      stars: '★ 8.5k',
-                      url: 'https://github.com/livekit/agents',
-                      tag: 'Đàm thoại 2 chiều',
-                      summary: 'Đàm thoại giọng nói thời gian thực độ trễ thấp (< 300ms) trên Web & Mobile.',
-                    },
-                  ].map((oss) => (
-                    <div
-                      key={oss.name}
-                      className="card-surface card-interactive"
-                      style={{
-                        padding: '14px 16px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 10,
-                        border: '1px solid var(--border-subtle)',
-                        borderRadius: 'var(--radius-md)',
-                        background: 'var(--bg-surface)',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>
-                            {oss.name}
-                          </span>
-                          <span className="mono-pill" style={{ fontSize: 10.5 }}>
-                            {oss.stars}
-                          </span>
-                        </div>
-                        <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 500 }}>
-                          {oss.tag}
-                        </span>
-                      </div>
-
-                      <p style={{ fontSize: 12.5, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.45, flex: 1 }}>
-                        {oss.summary}
-                      </p>
-
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid var(--border-subtle)', marginTop: 'auto' }}>
-                        <a
-                          href={oss.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          style={{ fontSize: 12, color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600 }}
-                        >
-                          GitHub ↗
-                        </a>
-                        <button
-                          type="button"
-                          className="btn btn-secondary"
-                          onClick={() => {
-                            showToast(`Đã ghi nhận duyệt đề xuất: ${oss.name}`);
-                          }}
-                          style={{ fontSize: 11.5, minHeight: 26, height: 26, padding: '0 10px' }}
-                        >
-                          Duyệt
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Minimalist 1-line Footer */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '8px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    background: 'var(--bg-subtle)',
-                    border: '1px solid var(--border-subtle)',
-                    fontSize: 12,
-                    color: 'var(--text-tertiary)',
-                    flexWrap: 'wrap',
-                    gap: 6,
-                  }}
-                >
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
-                    <span>Tự động quét lúc 07:00 hàng ngày &middot; Gửi email để phê duyệt</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab('assistant');
-                      showToast('Đang mở Trợ lý...');
-                    }}
-                    style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: 11.5, fontWeight: 600, cursor: 'pointer', padding: 0 }}
-                  >
-                    Hỏi Trợ lý →
-                  </button>
-                </div>
-              </div>
+              )
             )}
 
             {/* TOOL 1: VISION OCR (QUÉT HÓA ĐƠN) */}

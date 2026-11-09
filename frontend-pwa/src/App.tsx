@@ -723,6 +723,8 @@ export default function App() {
   const [editingChannel, setEditingChannel] = useState<TopicChannelConfig | null>(null);
   
   const [newsFilter, setNewsFilter] = useState<'all' | 'shopping' | 'jobs' | 'tech' | 'finance' | 'social' | 'ai-evolution' | 'creator-ideas'>('all');
+  const [newsPage, setNewsPage] = useState<number>(1);
+  const NEWS_PAGE_SIZE = 20;
   const [bookmarkedJobIds, setBookmarkedJobIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('aifp_bookmarked_jobs');
@@ -1815,6 +1817,13 @@ export default function App() {
     return true;
   });
 
+  const totalNewsPages = Math.max(1, Math.ceil(filteredNews.length / NEWS_PAGE_SIZE));
+  const safeNewsPage = Math.min(newsPage, totalNewsPages);
+  const paginatedNews = useMemo(() => {
+    const start = (safeNewsPage - 1) * NEWS_PAGE_SIZE;
+    return filteredNews.slice(start, start + NEWS_PAGE_SIZE);
+  }, [filteredNews, safeNewsPage]);
+
 
   return (
     <div className={`app-shell ${darkMode ? 'dark' : ''}`}>
@@ -2760,7 +2769,7 @@ export default function App() {
             </div>
 
             {/* SECTION 2: NEWS FEED WITH LIVE CSDL STATUS & REFRESH */}
-            <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+            <div id="news-feed-heading" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <h2 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
                   Tin tức thực tế
@@ -2782,9 +2791,9 @@ export default function App() {
                 >
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981' }} />
                   <span>
-                    {newsFilter === 'all'
-                      ? `${liveNews.length} bài viết`
-                      : `${filteredNews.length}/${liveNews.length} bài viết`}
+                    {filteredNews.length > NEWS_PAGE_SIZE
+                      ? `${filteredNews.length} bài · Trang ${safeNewsPage}/${totalNewsPages}`
+                      : `${filteredNews.length} bài viết`}
                   </span>
                 </span>
                 {lastSyncTime && (
@@ -2812,7 +2821,10 @@ export default function App() {
                   {newsFilterOptions.map((f) => (
                     <button
                       key={f.id}
-                      onClick={() => setNewsFilter(f.id as any)}
+                      onClick={() => {
+                        setNewsFilter(f.id as any);
+                        setNewsPage(1);
+                      }}
                       className="btn btn-secondary"
                       style={{
                         minHeight: 26,
@@ -2833,7 +2845,7 @@ export default function App() {
 
             {/* Card-Based News Feed */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: 14 }}>
-              {filteredNews.map((item) => {
+              {paginatedNews.map((item) => {
                 const isJobItem = item.channelId === 'jobs' || item.category.toLowerCase().includes('việc') || item.title.includes('TESTER') || item.title.includes('CÀY GAME') || item.title.includes('NHẬP LIỆU') || item.title.includes('THỰC TẬP');
                 const hasRealImage = Boolean(item.imageUrl && !item.imageUrl.includes('unsplash.com') && item.imageUrl.trim().length > 0);
 
@@ -3224,6 +3236,81 @@ export default function App() {
               );
             })}
             </div>
+
+            {/* Pagination Controls (20 items per page) */}
+            {filteredNews.length > NEWS_PAGE_SIZE && (
+              <div
+                style={{
+                  marginTop: 20,
+                  padding: '12px 18px',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: 12,
+                }}
+              >
+                <div style={{ fontSize: 12.5, color: 'var(--text-secondary)' }}>
+                  Hiển thị <strong style={{ color: 'var(--text-primary)' }}>{(safeNewsPage - 1) * NEWS_PAGE_SIZE + 1}–{Math.min(safeNewsPage * NEWS_PAGE_SIZE, filteredNews.length)}</strong> trên tổng số <strong style={{ color: 'var(--text-primary)' }}>{filteredNews.length}</strong> bài viết
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setNewsPage((p) => Math.max(1, p - 1));
+                      document.getElementById('news-feed-heading')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    disabled={safeNewsPage <= 1}
+                    style={{ fontSize: 12, minHeight: 28, padding: '0 10px', gap: 4 }}
+                  >
+                    <span>← Trước</span>
+                  </button>
+
+                  {Array.from({ length: totalNewsPages }, (_, i) => i + 1).map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      type="button"
+                      onClick={() => {
+                        setNewsPage(pageNum);
+                        document.getElementById('news-feed-heading')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="btn btn-secondary"
+                      style={{
+                        minHeight: 28,
+                        minWidth: 28,
+                        padding: '0 8px',
+                        fontSize: 12,
+                        fontFamily: 'var(--font-mono)',
+                        fontWeight: safeNewsPage === pageNum ? 700 : 500,
+                        background: safeNewsPage === pageNum ? 'var(--accent-primary)' : 'var(--bg-surface)',
+                        color: safeNewsPage === pageNum ? '#FFFFFF' : 'var(--text-primary)',
+                        borderColor: safeNewsPage === pageNum ? 'var(--accent-primary)' : 'var(--border-subtle)',
+                      }}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setNewsPage((p) => Math.min(totalNewsPages, p + 1));
+                      document.getElementById('news-feed-heading')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    disabled={safeNewsPage >= totalNewsPages}
+                    style={{ fontSize: 12, minHeight: 28, padding: '0 10px', gap: 4 }}
+                  >
+                    <span>Sau →</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

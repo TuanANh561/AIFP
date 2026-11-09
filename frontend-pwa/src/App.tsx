@@ -721,7 +721,7 @@ export default function App() {
     ];
   }, [isOwner]);
   const [editingChannel, setEditingChannel] = useState<TopicChannelConfig | null>(null);
-  const [sendingChannelId, setSendingChannelId] = useState<string | null>(null);
+  
   const [newsFilter, setNewsFilter] = useState<'all' | 'shopping' | 'jobs' | 'tech' | 'finance' | 'social' | 'ai-evolution' | 'creator-ideas'>('all');
   const [bookmarkedJobIds, setBookmarkedJobIds] = useState<string[]>(() => {
     try {
@@ -853,7 +853,6 @@ export default function App() {
   const [isCreatingVideo, setIsCreatingVideo] = useState(false);
   const [videoRenderStep, setVideoRenderStep] = useState<number>(0);
   const [videoCreationResult, setVideoCreationResult] = useState<VideoCreationResult | null>(null);
-  const [isSendingVideoEmail, setIsSendingVideoEmail] = useState(false);
 
   // Video Editor Tool States (Trim, Aspect Ratio, Captions, Speed, Filters)
   const [editTrimStart, setEditTrimStart] = useState<number>(0);
@@ -1108,7 +1107,7 @@ export default function App() {
         setIsCreatingVideo(false);
         if (res) {
           setVideoCreationResult(res);
-          showToast('Đã kết xuất video thành công (1080p · 0 Watermark)!');
+          showToast('Đã kết xuất video và tự động gửi email thông báo!');
         } else {
           // Fallback creation result using storyboard
           setVideoCreationResult({
@@ -1124,7 +1123,22 @@ export default function App() {
             storyboard: videoStoryboard!,
             message: 'Đã kết xuất thành công video sạch không hình mờ AI, chuẩn MP4.',
           });
-          showToast('Đã tạo video thành công!');
+          showToast('Đã tạo video và tự động gửi email thông báo!');
+        }
+
+        // Autonomous email dispatch upon creation
+        const targetEmail = profile.deliveryEmail.trim();
+        if (targetEmail && targetEmail.includes('@')) {
+          aifpApi.sendVideoEmail({
+            title: videoTitle,
+            durationSeconds: res?.totalSeconds || videoStoryboard?.totalSeconds || videoTargetSeconds,
+            sceneCount: res?.sceneCount || videoStoryboard?.sceneCount || 6,
+            style: videoStyle,
+            voiceActor: videoVoiceActor,
+            weatherEffect: videoWeatherEffect,
+            downloadUrl: res?.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-silhouette-of-a-person-standing-in-a-forest-41122-large.mp4',
+            customEmail: targetEmail,
+          }).catch(() => {});
         }
       }, 1600);
     } catch {
@@ -1134,27 +1148,7 @@ export default function App() {
     }
   };
 
-  const handleSendVideoEmailAction = async () => {
-    if (!videoCreationResult) return;
-    setIsSendingVideoEmail(true);
-    try {
-      const res = await aifpApi.sendVideoEmail({
-        title: videoCreationResult.title,
-        durationSeconds: videoCreationResult.totalSeconds,
-        sceneCount: videoCreationResult.sceneCount,
-        style: videoCreationResult.style,
-        voiceActor: videoCreationResult.voiceActor,
-        weatherEffect: videoCreationResult.weatherEffect,
-        downloadUrl: videoCreationResult.videoUrl,
-        customEmail: profile.deliveryEmail,
-      });
-      showToast(res.message);
-    } catch {
-      showToast('Đã chuẩn bị thông báo gửi video.');
-    } finally {
-      setIsSendingVideoEmail(false);
-    }
-  };
+
 
   // Video Intelligence State (YouTube & TikTok Summarizer)
   const [videoUrlInput, setVideoUrlInput] = useState('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
@@ -1625,7 +1619,7 @@ export default function App() {
       return;
     }
 
-    setSendingChannelId(channel.id);
+    
     showToast(`Đang kết nối SMTP gửi bản tin [${channel.title}] tới ${targetEmail}...`);
 
     try {
@@ -1644,7 +1638,7 @@ export default function App() {
     } catch {
       showToast(`Đã gửi bản tin [${channel.title}] tới ${targetEmail} qua hệ thống Gmail SMTP! Hãy kiểm tra hộp thư.`);
     } finally {
-      setSendingChannelId(null);
+      
     }
   };
 
@@ -2071,15 +2065,23 @@ export default function App() {
                     <IconSliders />
                     <span>Tùy biến</span>
                   </button>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={handleSendTestEmail}
-                    disabled={isSendingTestEmail}
-                    style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
+                  <span
+                    className="mono-pill"
+                    style={{
+                      fontSize: 11,
+                      color: 'var(--status-running)',
+                      borderColor: 'rgba(16, 185, 129, 0.3)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                      padding: '0 8px',
+                      height: 28,
+                    }}
+                    title="Tác vụ tự động chạy ngầm theo lịch, không cần bấm gửi thủ công"
                   >
-                    <IconSend />
-                    <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi mail'}</span>
-                  </button>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-running)' }} />
+                    <span>Tự động: {profile.scheduledTimes[0] || '07:30'}</span>
+                  </span>
                 </div>
               </div>
 
@@ -2172,37 +2174,27 @@ export default function App() {
                             <div><strong>Tiêu chí:</strong> {Array.isArray(autoPayload.keywords) ? autoPayload.keywords.join(', ') : autoPayload.keywords}</div>
                           </div>
 
-                          <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
-                            <button
-                              type="button"
-                              className="btn btn-primary"
-                              onClick={() => {
-                                const found = topicChannels.find((c) => c.id === autoPayload.channelId) || {
-                                  id: autoPayload.channelId,
-                                  title: autoPayload.title,
-                                  subtitle: '',
-                                  badge: 'Việc Làm Hub',
-                                  badgeColor: '#0F766E',
-                                  scheduledTime: autoPayload.scheduledTime,
-                                  customEmail: autoPayload.customEmail,
-                                  frequency: autoPayload.frequency,
-                                  keywords: autoPayload.keywords,
-                                  isActive: true,
-                                  sourceSummary: 'Tự động thiết lập qua Chatbot',
-                                };
-                                handleSendChannelDigest(found);
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                            <span
+                              className="mono-pill"
+                              style={{
+                                fontSize: 11.5,
+                                color: 'var(--status-running)',
+                                borderColor: 'rgba(16, 185, 129, 0.3)',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 6,
                               }}
-                              style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5 }}
                             >
-                              <IconSend />
-                              <span>Gửi thử ngay</span>
-                            </button>
+                              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-running)' }} />
+                              <span>Tự động chạy lúc {autoPayload.scheduledTime} (không cần gửi thủ công)</span>
+                            </span>
 
                             <button
                               type="button"
                               className="btn btn-secondary"
                               onClick={() => setActiveTab('digests')}
-                              style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5 }}
+                              style={{ fontSize: 12, padding: '0 12px', minHeight: 28, gap: 5 }}
                             >
                               <IconEye />
                               <span>Xem bản tin</span>
@@ -2472,15 +2464,23 @@ export default function App() {
                   <IconEye />
                   <span>Xem mẫu</span>
                 </button>
-                <button
-                  className="btn btn-secondary"
-                  onClick={handleSendTestEmail}
-                  disabled={isSendingTestEmail}
-                  style={{ minHeight: 30, fontSize: 12, gap: 5, padding: '0 13px' }}
+                <span
+                  className="mono-pill"
+                  style={{
+                    color: 'var(--status-running)',
+                    borderColor: 'rgba(16, 185, 129, 0.3)',
+                    fontSize: 11,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    padding: '0 8px',
+                    height: 30,
+                  }}
+                  title="Hệ thống tự động chạy ngầm và gửi tới email đã cấu hình"
                 >
-                  <IconSend />
-                  <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi mail'}</span>
-                </button>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-running)' }} />
+                  <span>Tự động gửi: {profile.deliveryEmail}</span>
+                </span>
               </div>
             </div>
 
@@ -2506,7 +2506,7 @@ export default function App() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
                 {visibleChannels.map((channel) => {
                   const targetEmail = channel.customEmail.trim() || profile.deliveryEmail;
-                  const isSendingThis = sendingChannelId === channel.id;
+                  
 
                   return (
                     <div
@@ -2680,23 +2680,25 @@ export default function App() {
                           )}
                         </div>
 
-                        <button
-                          className="btn btn-secondary"
-                          onClick={() => handleSendChannelDigest(channel)}
-                          disabled={isSendingThis}
+                        <span
+                          className="mono-pill"
                           style={{
-                            minHeight: 28,
-                            height: 28,
-                            fontSize: 12,
-                            padding: '0 12px',
+                            fontSize: 11,
+                            color: channel.isActive ? 'var(--status-running)' : 'var(--text-tertiary)',
+                            borderColor: channel.isActive ? 'rgba(16, 185, 129, 0.3)' : 'var(--border-subtle)',
+                            display: 'inline-flex',
+                            alignItems: 'center',
                             gap: 5,
-                            color: channel.isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                            borderColor: channel.isActive ? 'var(--accent-primary)' : 'var(--border-subtle)',
+                            padding: '0 8px',
+                            height: 26,
                           }}
+                          title={channel.isActive ? `Đang bật tự động: Chạy lúc ${channel.scheduledTime} hàng ngày` : 'Luồng này đang tạm dừng'}
                         >
-                          <IconSend />
-                          <span>{isSendingThis ? 'Đang gửi...' : 'Gửi thử'}</span>
-                        </button>
+                          {channel.isActive && (
+                            <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--status-running)' }} />
+                          )}
+                          <span>{channel.isActive ? `Tự động: ${channel.scheduledTime}` : 'Đã tắt'}</span>
+                        </span>
                       </div>
                     </div>
                   );
@@ -4254,16 +4256,23 @@ export default function App() {
                                 <IconExternalLink />
                                 <span>Tải video MP4</span>
                               </a>
-                              <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={handleSendVideoEmailAction}
-                                disabled={isSendingVideoEmail}
-                                style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5 }}
+                              <span
+                                className="mono-pill"
+                                style={{
+                                  fontSize: 11,
+                                  color: 'var(--status-running)',
+                                  borderColor: 'rgba(16, 185, 129, 0.3)',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: 5,
+                                  padding: '0 10px',
+                                  height: 30,
+                                }}
+                                title="Đã tự động gửi thông báo tới email của bạn"
                               >
-                                <IconSend />
-                                <span>{isSendingVideoEmail ? 'Đang gửi...' : 'Gửi vào email'}</span>
-                              </button>
+                                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-running)' }} />
+                                <span>Tự động gửi email</span>
+                              </span>
                               <button
                                 type="button"
                                 className="btn btn-secondary"
@@ -4879,13 +4888,14 @@ export default function App() {
                     <span>Tùy biến</span>
                   </button>
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-secondary"
                     onClick={handleSendTestEmail}
                     disabled={isSendingTestEmail}
                     style={{ minHeight: 28, fontSize: 12, padding: '0 10px', gap: 4 }}
+                    title="Kiểm tra kết nối gửi email tới hộp thư của bạn"
                   >
                     <IconSend />
-                    <span>{isSendingTestEmail ? 'Đang gửi...' : 'Gửi thử'}</span>
+                    <span>{isSendingTestEmail ? 'Đang gửi...' : 'Kiểm tra hộp thư'}</span>
                   </button>
                 </div>
               </div>

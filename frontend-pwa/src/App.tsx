@@ -913,7 +913,7 @@ export default function App() {
   const VIDEO_PRESETS = [
     {
       id: 'stickman',
-      label: 'Người que kể chuyện (Stickman Director)',
+      label: 'Stickman',
       title: 'Nhật ký anh chàng người que đơn giản',
       style: 'STICKMAN' as const,
       voice: 'DORAEMON' as const,
@@ -923,7 +923,7 @@ export default function App() {
     },
     {
       id: 'lemo_opus',
-      label: 'Lemo-Opuscar Điện ảnh Canvas',
+      label: 'Lemo Canvas',
       title: 'Bản hòa ca hình học và không gian số',
       style: 'LEMO_OPUS' as const,
       voice: 'DOCUMENTARY' as const,
@@ -933,7 +933,7 @@ export default function App() {
     },
     {
       id: 'silhouette',
-      label: 'Bóng đen & Triết học dưới mưa',
+      label: 'Bóng đen',
       title: 'Bóng người dưới mưa & Ý chí',
       style: 'SILHOUETTE' as const,
       voice: 'DOCUMENTARY' as const,
@@ -943,7 +943,7 @@ export default function App() {
     },
     {
       id: 'doraemon',
-      label: 'Kể chuyện Doraemon & Nobita',
+      label: 'Doraemon',
       title: 'Doraemon & Bài học của Nobita',
       style: 'ANIME_2D' as const,
       voice: 'DORAEMON' as const,
@@ -953,7 +953,7 @@ export default function App() {
     },
     {
       id: 'history_map',
-      label: 'Bản đồ lịch sử & Khám phá thế giới',
+      label: 'Bản đồ',
       title: 'Bản đồ những hải trình thế giới',
       style: 'VOXEL_3D' as const,
       voice: 'DOCUMENTARY' as const,
@@ -4703,17 +4703,11 @@ export default function App() {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: 14,
-                  minHeight: 'calc(100vh - 200px)',
                   boxSizing: 'border-box',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Soạn thảo văn bản AI</h3>
-                    <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>
-                      Tự động hoàn thiện văn bản theo chủ đề, lưu trữ CSDL cá nhân
-                    </span>
-                  </div>
+                  <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Soạn thảo văn bản AI</h3>
                   <span className="source-badge-pill">Lưu trữ CSDL</span>
                 </div>
 
@@ -4739,8 +4733,7 @@ export default function App() {
                   placeholder="Nội dung bài viết sẽ hiển thị tại đây..."
                   style={{
                     width: '100%',
-                    flex: 1,
-                    minHeight: 360,
+                    minHeight: 280,
                     padding: '16px 18px',
                     borderRadius: 'var(--radius-sm)',
                     border: '1px solid var(--border-subtle)',
@@ -4753,7 +4746,7 @@ export default function App() {
                   }}
                 />
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 'auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
                   <button
                     type="button"
                     className="btn btn-secondary"
@@ -4761,7 +4754,7 @@ export default function App() {
                       navigator.clipboard.writeText(writingDraft);
                       showToast('Đã sao chép vào khay nhớ tạm.');
                     }}
-                    style={{ gap: 5 }}
+                    style={{ gap: 5, whiteSpace: 'nowrap' }}
                   >
                     <IconFile />
                     <span>Sao chép</span>
@@ -4771,10 +4764,10 @@ export default function App() {
                     className="btn btn-primary"
                     onClick={handleGenerateWritingDraft}
                     disabled={isGeneratingWriting || !writingPrompt.trim()}
-                    style={{ gap: 5 }}
+                    style={{ gap: 5, whiteSpace: 'nowrap' }}
                   >
                     <IconRefresh />
-                    <span>{isGeneratingWriting ? 'Đang soạn thảo...' : 'Soạn thảo theo yêu cầu'}</span>
+                    <span>{isGeneratingWriting ? 'Đang viết...' : 'Soạn thảo'}</span>
                   </button>
                 </div>
               </div>
@@ -4900,8 +4893,7 @@ export default function App() {
                       <IconVideo />
                     </div>
                     <div>
-                      <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Studio Sáng tạo Video AI & Phân tích</h3>
-                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>Tạo video kể chuyện, hoạt hình và tóm tắt nội dung</span>
+                      <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0 }}>Studio Video AI</h3>
                     </div>
                   </div>
                   {/* Mode switcher pills */}
@@ -4959,25 +4951,17 @@ export default function App() {
 
                 {/* MODE 1: CREATE VIDEO STUDIO */}
                 {videoStudioMode === 'create' && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                    {/* Top Capability Pills */}
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                      <span className="mono-pill" style={{ fontSize: 11 }}>1080p Full HD</span>
-                      <span className="mono-pill" style={{ fontSize: 11, color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>0 Watermark AI</span>
-                      <span className="mono-pill" style={{ fontSize: 11 }}>Ken Burns & Parallax</span>
-                      <span className="mono-pill" style={{ fontSize: 11 }}>Auto-Ducking Âm thanh</span>
-                    </div>
-
-                    {/* Presets Row */}
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)' }}>Kịch bản gợi ý:</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    {/* Presets Row (Clean Horizontal Scroll, No Awkward Wrap) */}
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center', overflowX: 'auto', whiteSpace: 'nowrap', paddingBottom: 2 }}>
+                      <span style={{ fontSize: 11.5, color: 'var(--text-tertiary)', flexShrink: 0 }}>Gợi ý:</span>
                       {VIDEO_PRESETS.map((p) => (
                         <button
                           key={p.id}
                           type="button"
                           className="btn btn-secondary"
                           onClick={() => handleApplyVideoPreset(p)}
-                          style={{ fontSize: 11.5, padding: '0 8px', minHeight: 24 }}
+                          style={{ fontSize: 11.5, padding: '0 10px', minHeight: 26, whiteSpace: 'nowrap', flexShrink: 0 }}
                         >
                           {p.label}
                         </button>
@@ -5130,26 +5114,26 @@ export default function App() {
                         </div>
 
                         {/* Action Buttons */}
-                        <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
                           <button
                             type="button"
                             className="btn btn-secondary"
                             onClick={() => handlePlanVideoStoryboard()}
                             disabled={isPlanningVideo || isCreatingVideo}
-                            style={{ fontSize: 12, padding: '0 12px', minHeight: 34, gap: 5 }}
+                            style={{ fontSize: 12, padding: '0 14px', minHeight: 34, gap: 5, whiteSpace: 'nowrap' }}
                           >
                             <IconEye />
-                            <span>{isPlanningVideo ? 'Đang phân cảnh...' : 'Lập phân cảnh'}</span>
+                            <span>{isPlanningVideo ? 'Đang phân cảnh...' : 'Phân cảnh'}</span>
                           </button>
                           <button
                             type="button"
                             className="btn btn-primary"
                             onClick={handleCreateVideoJob}
                             disabled={isCreatingVideo}
-                            style={{ fontSize: 12, padding: '0 16px', minHeight: 34, gap: 6, flex: 1 }}
+                            style={{ fontSize: 12, padding: '0 16px', minHeight: 34, gap: 6, flex: 1, whiteSpace: 'nowrap' }}
                           >
                             <IconPlay />
-                            <span>{isCreatingVideo ? 'Đang kết xuất video...' : 'Tạo video ngay'}</span>
+                            <span>{isCreatingVideo ? 'Đang tạo...' : 'Tạo video'}</span>
                           </button>
                         </div>
                       </div>
@@ -5212,7 +5196,7 @@ export default function App() {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                               <strong style={{ fontSize: 13.5, color: 'var(--text-primary)' }}>{videoCreationResult.title}</strong>
-                              <span className="source-badge-pill" style={{ background: '#10B981', color: '#FFF' }}>0 Watermark</span>
+                              <span className="mono-pill" style={{ fontSize: 11 }}>0 Watermark</span>
                             </div>
                             {/* Video Player with High-Craft Cinematic Poster */}
                             <video
@@ -5246,10 +5230,10 @@ export default function App() {
                                 rel="noreferrer"
                                 download="aura_video.mp4"
                                 className="btn btn-primary"
-                                style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5, textDecoration: 'none' }}
+                                style={{ fontSize: 12, padding: '0 12px', minHeight: 30, gap: 5, textDecoration: 'none', whiteSpace: 'nowrap' }}
                               >
                                 <IconExternalLink />
-                                <span>Tải video MP4</span>
+                                <span>Tải MP4</span>
                               </a>
                               <span
                                 className="mono-pill"
@@ -5262,19 +5246,20 @@ export default function App() {
                                   gap: 5,
                                   padding: '0 10px',
                                   height: 30,
+                                  whiteSpace: 'nowrap',
                                 }}
                                 title="Đã tự động gửi thông báo tới email của bạn"
                               >
                                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--status-running)' }} />
-                                <span>Tự động gửi email</span>
+                                <span>Đã gửi email</span>
                               </span>
                               <button
                                 type="button"
                                 className="btn btn-secondary"
                                 onClick={() => setVideoCreationResult(null)}
-                                style={{ fontSize: 12, padding: '0 10px', minHeight: 30 }}
+                                style={{ fontSize: 12, padding: '0 10px', minHeight: 30, whiteSpace: 'nowrap' }}
                               >
-                                Tạo video khác
+                                Làm mới
                               </button>
                             </div>
                           </div>

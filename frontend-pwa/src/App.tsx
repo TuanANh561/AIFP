@@ -244,7 +244,7 @@ const IconShield = () => (
   </svg>
 );
 
-export const MASTER_OWNER_EMAIL = (import.meta as any).env?.VITE_OWNER_EMAIL || localStorage.getItem('aifp_owner_email') || 'owner@aifp.local';
+export const MASTER_OWNER_ID = '00000000-0000-0000-0000-000000000001';
 
 // ============================================================================
 // DATA TYPES & PRESETS FOR MULTI-AUDIENCE GROUPS
@@ -698,9 +698,7 @@ export default function App() {
   });
 
   // Master Owner Gate: Proprietary research & channels belong exclusively to the Master Owner
-  const isOwner = authSession?.userId === '00000000-0000-0000-0000-000000000001' ||
-    (Boolean(authSession?.email) && authSession?.email?.toLowerCase() === MASTER_OWNER_EMAIL.toLowerCase()) ||
-    (!authSession && profile.deliveryEmail.toLowerCase() === MASTER_OWNER_EMAIL.toLowerCase());
+  const isOwner = authSession?.userId === MASTER_OWNER_ID;
 
   // Filter channels based on ownership: proprietary channels are exclusively for the master owner
   const visibleChannels: TopicChannelConfig[] = useMemo(() => {
@@ -3917,7 +3915,7 @@ export default function App() {
                     Toàn bộ 8 công cụ mã nguồn mở chọn lọc (Stickman Director, Lemo-Opuscar, Lossless-Cut, Remotion...) và báo cáo phân tích tiến hóa AI từ trước đến nay thuộc quyền sở hữu riêng biệt của Quản trị viên (Chủ sở hữu).
                   </p>
                   <span className="mono-pill" style={{ fontSize: 11, color: '#10B981', borderColor: 'rgba(16, 185, 129, 0.3)' }}>
-                    Chỉ hiển thị khi đăng nhập tài khoản: {MASTER_OWNER_EMAIL}
+                    Chỉ dành cho Quản trị viên hệ thống
                   </span>
                   {!authSession && (
                     <button
@@ -3926,7 +3924,7 @@ export default function App() {
                       onClick={() => setShowLoginModal(true)}
                       style={{ marginTop: 6, fontSize: 12.5, minHeight: 32, padding: '0 16px' }}
                     >
-                      Đăng nhập Chủ sở hữu
+                      Đăng nhập Quản trị viên
                     </button>
                   )}
                 </div>

@@ -72,15 +72,45 @@ public class AuthService {
     @Transactional
     public AuthDtos.AuthTokenResponse register(AuthDtos.RegisterRequest req) {
         String normalizedEmail = req.email().trim().toLowerCase(Locale.ROOT);
+        boolean isOwner = normalizedEmail.equalsIgnoreCase(ownerEmail.trim().toLowerCase(Locale.ROOT));
+
+        UserEntity user;
+        String displayName = req.displayName().trim();
+
+        if (isOwner) {
+            // Master Owner: maps to DEFAULT_SYSTEM_USER_ID, preserving historic tasks and system access
+            user = userRepository.findById(TaskInitializerService.DEFAULT_SYSTEM_USER_ID).orElseGet(() -> {
+                UserEntity masterUser = new UserEntity(
+                        TaskInitializerService.DEFAULT_SYSTEM_USER_ID,
+                        normalizedEmail,
+                        passwordEncoder.encode(req.password())
+                );
+                masterUser.setEmailVerified(true);
+                return userRepository.save(masterUser);
+            });
+            user.setEmail(normalizedEmail);
+            user.setPasswordHash(passwordEncoder.encode(req.password()));
+            userRepository.save(user);
+
+            UserProfileEntity profile = profileRepository.findById(user.getId()).orElseGet(() ->
+                    new UserProfileEntity(user.getId(), displayName, normalizedEmail));
+            profile.setDisplayName(displayName);
+            profile.setNotificationEmail(normalizedEmail);
+            profileRepository.save(profile);
+
+            auditService.logEvent(user.getId(), "OWNER_REGISTERED", "INFO", "USER", user.getId().toString(), "{}");
+            return issueTokenPair(user, profile.getDisplayName(), UUID.randomUUID());
+        }
+
         if (userRepository.existsByEmailIgnoreCase(normalizedEmail)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already registered");
         }
 
         UUID userId = UUID.randomUUID();
-        UserEntity user = new UserEntity(userId, normalizedEmail, passwordEncoder.encode(req.password()));
+        user = new UserEntity(userId, normalizedEmail, passwordEncoder.encode(req.password()));
         userRepository.save(user);
 
-        UserProfileEntity profile = new UserProfileEntity(userId, req.displayName().trim(), normalizedEmail);
+        UserProfileEntity profile = new UserProfileEntity(userId, displayName, normalizedEmail);
         profileRepository.save(profile);
 
         auditService.logEvent(userId, "USER_REGISTERED", "INFO", "USER", userId.toString(), "{}");
@@ -90,8 +120,17 @@ public class AuthService {
     @Transactional
     public AuthDtos.AuthTokenResponse login(AuthDtos.LoginRequest req) {
         String normalizedEmail = req.email().trim().toLowerCase(Locale.ROOT);
-        UserEntity user = userRepository.findByEmailIgnoreCase(normalizedEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+        boolean isOwner = normalizedEmail.equalsIgnoreCase(ownerEmail.trim().toLowerCase(Locale.ROOT));
+
+        UserEntity user;
+        if (isOwner) {
+            user = userRepository.findById(TaskInitializerService.DEFAULT_SYSTEM_USER_ID)
+                    .or(() -> userRepository.findByEmailIgnoreCase(normalizedEmail))
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+        } else {
+            user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+        }
 
         if (!passwordEncoder.matches(req.password(), user.getPasswordHash())) {
             auditService.logEvent(user.getId(), "LOGIN_FAILED", "WARN", "USER", user.getId().toString(), "{}");

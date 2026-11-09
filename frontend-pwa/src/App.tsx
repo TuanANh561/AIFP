@@ -1819,8 +1819,9 @@ export default function App() {
 
   useEffect(() => {
     if (!showLoginModal) return;
-    const googleClientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID;
-    if (!googleClientId) return;
+    const googleClientId =
+      (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID ||
+      '914400793250-oakh8ff63jp7onoknbod40e67u12gedb.apps.googleusercontent.com';
 
     let checkInterval: any = null;
     let attempts = 0;
@@ -1842,7 +1843,7 @@ export default function App() {
             btnElem.innerHTML = '';
             (window as any).google.accounts.id.renderButton(btnElem, {
               type: 'standard',
-              theme: 'outline',
+              theme: darkMode ? 'filled_black' : 'outline',
               size: 'large',
               text: 'continue_with',
               shape: 'rectangular',
@@ -1854,7 +1855,7 @@ export default function App() {
           console.error('[Google GSI] renderButton error:', e);
         }
         clearInterval(checkInterval);
-      } else if (attempts > 20) {
+      } else if (attempts > 25) {
         clearInterval(checkInterval);
       }
     };
@@ -1865,7 +1866,7 @@ export default function App() {
     return () => {
       if (checkInterval) clearInterval(checkInterval);
     };
-  }, [showLoginModal]);
+  }, [showLoginModal, darkMode]);
 
   const handleLogout = () => {
     setAuthSession(null);
